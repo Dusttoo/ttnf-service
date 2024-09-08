@@ -40,6 +40,8 @@ stages:
               repository: 'frontend' 
               command: 'buildAndPush'
               Dockerfile: 'frontend/Dockerfile'
+              buildArguments: |
+                REACT_APP_BACKEND_URL=https://api-dev.texastopnotchfrenchies.com/
               tags: |
                 $(Build.BuildId)
 

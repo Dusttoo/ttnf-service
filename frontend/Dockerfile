@@ -1,12 +1,10 @@
 # Stage 1: Build the React app
 FROM node:14-alpine as build
-ARG REACT_APP_INSTRUMENTATION_KEY
 ARG REACT_APP_BACKEND_URL
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm install
 
-RUN echo "REACT_APP_INSTRUMENTATION_KEY=$REACT_APP_INSTRUMENTATION_KEY"
 RUN echo "REACT_APP_BACKEND_URL=$REACT_APP_BACKEND_URL"
 
 COPY . .
