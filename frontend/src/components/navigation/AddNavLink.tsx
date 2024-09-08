@@ -1,0 +1,34 @@
+import React from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState, AppDispatch } from '../../app/store';
+import { addNavLink } from '../../features/navigationSlice';
+import { Page } from '../../types';
+
+const AddNavLink: React.FC = () => {
+    const pages = useSelector((state: RootState) => state.pages.pages);
+    const dispatch: AppDispatch = useDispatch();
+
+    const handleAddLink = (page: Page) => {
+        dispatch(addNavLink({
+            id: page.id.toString(),
+            title: page.title,
+            slug: page.slug,
+            editable: true,
+        }));
+    };
+
+    return (
+        <div>
+            <h2>Add Navigation Link</h2>
+            <ul>
+                {pages.map(page => (
+                    <li key={page.id}>
+                        <button onClick={() => handleAddLink(page)}>{page.title}</button>
+                    </li>
+                ))}
+            </ul>
+        </div>
+    );
+};
+
+export default AddNavLink;

@@ -1,0 +1,23 @@
+import apiClient from './axiosInstance';
+
+import { SearchResponse } from '../types';
+
+export const searchResources = async (
+    query: string,
+    resources: string[],
+    limit: number
+): Promise<SearchResponse[]> => {
+    try {
+        const response = await apiClient.get('/search', {
+            params: {
+                query,
+                resources: resources.join(','),
+                limit,
+            },
+        });
+        return response.data.results;
+    } catch (error) {
+        console.error('Error fetching search results:', error);
+        return [];
+    }
+};

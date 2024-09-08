@@ -1,0 +1,51 @@
+from fastapi import APIRouter, UploadFile, File, HTTPException
+from app.schemas import ImageResponse, VideoResponse, MediaResponse
+from app.services import MediaService
+import logging
+
+logger = logging.getLogger(__name__)
+
+media_router = APIRouter()
+
+
+@media_router.post("/upload", response_model=MediaResponse)
+async def upload_media(file: UploadFile = File(...)):
+    try:
+        # Determine the media type
+        media_type = "video" if file.content_type.startswith("video/") else "image"
+        url, filename = await MediaService.upload_media(file, media_type)
+
+        if media_type == "image":
+            metadata = await MediaService.process_image(file)
+            return ImageResponse(
+                id=filename,
+                url=url,
+                type=media_type,
+                filename=filename,
+                width=metadata["width"],
+                height=metadata["height"],
+            )
+        else:  # Assume it's a video
+            metadata = await MediaService.process_video(file)
+            return VideoResponse(
+                id=filename,
+                url=url,
+                type=media_type,
+                filename=filename,
+                duration=metadata["duration"],
+            )
+
+    except Exception as e:
+        logger.error(f"Error in upload_media: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+
+
+@media_router.get("/{filename}", response_model=MediaResponse)
+def get_media_url(filename: str):
+    try:
+        url = MediaService.get_media_url(filename)
+        print(f'\n\n\nurl: {url}\n\n\n')
+        return MediaResponse(id=filename, url=url, type="unknown", filename=filename)
+    except Exception as e:
+        logger.error(f"Error in get_media_url: {e}", exc_info=True)
+        raise HTTPException(status_code=404, detail="Media not found")

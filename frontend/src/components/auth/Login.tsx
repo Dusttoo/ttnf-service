@@ -1,0 +1,54 @@
+import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { login } from '../../features/authSlice';
+import Input from '../common/Input';
+import Button from '../common/Button';
+import { AppDispatch, RootState } from '../../app/store';
+import { selectAuthError } from '../../features/authSlice';
+import { useNavigate } from 'react-router-dom';
+
+const Login: React.FC = () => {
+    const dispatch: AppDispatch = useDispatch();
+    const navigate = useNavigate();
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+    const { isLoading } = useSelector((state: RootState) => state.loading);
+    const error = useSelector(selectAuthError);
+    console.log("loading: ", isLoading)
+    const handleLogin = async () => {
+        try {
+            await dispatch(login({ username, password })).unwrap();
+            navigate('/admin/dashboard');
+        } catch (err) {
+            console.error('Login failed:', error);
+        }
+    };
+
+    return (
+        <div>
+            <h1>Login</h1>
+            <Input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Username"
+            />
+            <Input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password"
+            />
+            <Button
+                variant="primary"
+                onClick={handleLogin}
+                disabled={isLoading}
+            >
+                {isLoading ? 'Logging in...' : 'Login'}
+            </Button>
+            {error && <div>Error: {error}</div>}
+        </div>
+    );
+};
+
+export default Login;
