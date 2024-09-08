@@ -24,10 +24,9 @@ stages:
 
           - task: AzureWebAppContainer@1
             inputs:
-              azureSubscription: 'ttnfconnect'  
-              appName: 'ttnfapi'
-              containers: |
-                container: 'ttnfregistry.azurecr.io/backend:$(Build.BuildId)'  # Point to your backend image in ACR
+              azureSubscription: 'ttnfconnect' 
+              appName: 'ttnfapi'  
+              containers: 'ttnfregistry.azurecr.io/backend:$(Build.BuildId)'  
 
   - stage: BuildAndDeployFrontend
     jobs:
@@ -47,6 +46,5 @@ stages:
           - task: AzureWebAppContainer@1
             inputs:
               azureSubscription: 'ttnfconnect'  
-              appName: 'ttnfpub'
-              containers: |
-                container: 'ttnfregistry.azurecr.io/frontend:$(Build.BuildId)'  # Point to your frontend image in ACR
+              appName: 'ttnfpub'  
+              containers: 'ttnfregistry.azurecr.io/frontend:$(Build.BuildId)'  
