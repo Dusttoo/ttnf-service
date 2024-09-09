@@ -1,30 +1,26 @@
-version: '3.8'
-
 services:
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    build: ./backend
+    volumes:
+      - ./backend:/app
     ports:
-      - "8000:80"  
-    environment:
-      - PORT=80
-    networks:
-      - app-network
-    depends_on:
-      - frontend
+      - "8000:8000"
+    env_file:
+      - ./backend/.env
 
   frontend:
-    build:
+    build: 
       context: ./frontend
-      dockerfile: Dockerfile
-      args:
-        REACT_APP_BACKEND_URL: http://backend:8000  
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
     ports:
-      - "3000:80" 
-    networks:
-      - app-network
-
-networks:
-  app-network:
-    driver: bridge
+      - "3000:3000"
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+  
+  alembic:
+    build:
+      context: ./backend
+    command: alembic upgrade head
