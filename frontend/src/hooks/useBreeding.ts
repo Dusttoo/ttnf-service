@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { getBreedings, getBreedingById, createBreeding, updateBreeding, deleteBreeding } from '../api/breedingApi';
-import { BreedingCreate, BreedingUpdate } from '../types';
+import { BreedingCreate, BreedingUpdate } from '../api/types/breeding';
 
 export const useBreedings = (page: number, pageSize: number) => {
     return useQuery(['breedings', page, pageSize], () => getBreedings(page, pageSize), {

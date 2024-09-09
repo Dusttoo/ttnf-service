@@ -1,7 +1,7 @@
 import React, { useState, CSSProperties } from 'react';
 import styled from 'styled-components';
 import { useParams } from 'react-router-dom';
-import { DogCreate } from '../../../../types';
+import { DogCreate, Description } from '../../../../api/types/dog';
 import { useLitter, useAddPuppiesToLitter, useUpdateLitter, useDeleteLitter } from '../../../../hooks/useLitter';
 import { useDeleteDog } from '../../../../hooks/useDog';
 import { useBreedingById } from '../../../../hooks/useBreeding';
@@ -10,7 +10,6 @@ import GlobalModal from '../../../common/Modal';
 import DogForm from '../dogs/DogForm';
 import BreedingForm from '../breedings/BreedingForm';
 import { EditButton, DeleteButton } from '../../../common/Buttons';
-import { Description } from '../../../../types';
 
 const Container = styled.div`
   display: flex;

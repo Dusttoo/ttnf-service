@@ -20,11 +20,9 @@ def create_application() -> FastAPI:
 
 app = create_application()
 
-for k,v in settings.dict().items():
-    print(f'{k}: {v}')
-    
 origins = [
     "http://localhost:3000",
+    "http://0.0.0.0:3000/",
     "https://texastopnotchfrenchies.com",
     "https://dev.texastopnotchfrenchies.com",
 ]

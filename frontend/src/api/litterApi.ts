@@ -1,5 +1,5 @@
 import apiClient from './axiosInstance';
-import { LitterCreate, Litter, PuppyCreate, Dog, LitterUpdate } from '../types';
+import { LitterCreate, Litter, PuppyCreate, Dog, LitterUpdate } from '../api/types';
 
 export const createLitter = async (litterData: LitterCreate): Promise<Litter> => {
     const response = await apiClient.post(`/litters/`, litterData);

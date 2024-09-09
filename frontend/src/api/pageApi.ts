@@ -1,5 +1,5 @@
 import apiClient from './axiosInstance';
-import { Page } from '../types';
+import { Page } from '../api/types';
 
 export const getPages = async (): Promise<Page[]> => {
     const response = await apiClient.get<Page[]>('/pages');

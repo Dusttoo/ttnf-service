@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchPageBySlug, updateExistingPage } from '../features/pageSlice';
-import { RootState, AppDispatch } from '../app/store';
+import { fetchPageBySlug, updateExistingPage } from '../store/pageSlice';
+import { RootState, AppDispatch } from '../store';
 
 const usePage = (slug: string | undefined) => {
     const dispatch: AppDispatch = useDispatch();

@@ -1,12 +1,11 @@
 import { createSlice, createAsyncThunk, createSelector } from '@reduxjs/toolkit';
 import * as dogService from '../api/dogApi';
-import { Dog, DogSchema, DogCreate, DogUpdate } from '../types';
-import { SelectedFilters } from '../types';
-import { RootState } from '../app/store';
+import { Dog, DogCreate, DogUpdate, SelectedFilters } from '../api/types/dog';
+import { RootState } from '../store';
 
 interface DogsState {
     items: Dog[];
-    details: Record<number, DogSchema>;
+    details: Record<number, Dog>;
     filters: SelectedFilters;
     pagination: {
         page: number;
@@ -154,7 +153,7 @@ export const { setFilters, setPagination } = dogsSlice.actions;
 export const selectDogById = createSelector(
     (state: RootState) => state.dogs.details,
     (_: RootState, dogId: number) => dogId,
-    (details: Record<number, DogSchema>, dogId: number) => details[dogId]
+    (details: Record<number, Dog>, dogId: number) => details[dogId]
 );
 
 export default dogsSlice.reducer;

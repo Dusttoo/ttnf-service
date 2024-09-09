@@ -30,38 +30,48 @@ def seed_pages(session: Session):
         # Define the initial pages
         pages = [
             Page(
-                title="Landing Page",
+                title="Landing",
                 slug="landing",
                 editable=True,
             ),
             Page(
-                title="About Page",
+                title="About",
                 slug="about",
                 editable=True,
             ),
             Page(
-                title="Males Page",
+                title="Males",
                 slug="males",
                 editable=False,
             ),
             Page(
-                title="Females Page",
+                title="Females",
                 slug="females",
                 editable=False,
             ),
             Page(
-                title="Breeding Page",
+                title="Breeding",
                 slug="breedings",
                 editable=False,
             ),
             Page(
-                title="Litter Page",
+                title="Litter",
                 slug="litters",
                 editable=False,
             ),
             Page(
-                title="Productions Page",
+                title="Productions",
                 slug="productions",
+                editable=False,
+            ),
+            Page(
+                title="Our Services",
+                slug="services",
+                editable=True,
+            ),
+            Page(
+                title="Contact",
+                slug="contact",
                 editable=False,
             ),
         ]

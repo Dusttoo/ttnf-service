@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, CSSProperties } from 'react';
-import { LitterCreate, LitterUpdate } from '../../../../../types';
+import { LitterCreate, LitterUpdate } from '../../../../../api/types/breeding';
 import styled from 'styled-components';
 import Button from '../../../../common/form/Button';
 import FieldFeedback from '../../../../common/form/FieldFeedback';

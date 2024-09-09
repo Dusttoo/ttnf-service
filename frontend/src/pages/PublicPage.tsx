@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { getPageBySlug } from '../api/pageApi';
-import { Page } from '../types';
+import { Page } from '../api/types/page';
 
 interface PublicPageProps {
     slug?: string;
@@ -36,7 +36,7 @@ const PublicPage: React.FC<PublicPageProps> = ({ slug: initialSlug }) => {
 
     return (
         <div>
-            <h1>{page.title}</h1>
+            <h1>{page.name}</h1>
         </div>
     );
 };

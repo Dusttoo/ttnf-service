@@ -1,8 +1,8 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { RootState, AppDispatch } from '../../app/store';
-import { addNavLink } from '../../features/navigationSlice';
-import { Page } from '../../types';
+import { RootState, AppDispatch } from '../../store';
+import { addNavLink } from '../../store/navigationSlice';
+import { Page } from '../../api/types/page';
 
 const AddNavLink: React.FC = () => {
     const pages = useSelector((state: RootState) => state.pages.pages);

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { Dog } from '../../../../types';
-import { SelectedFilters } from '../../../../types';
+import { Dog, SelectedFilters } from '../../../../api/types/dog';
 import FilterComponent from '../../../common/Filter';
 import Pagination from '../../../common/Pagination';
 import GlobalModal from '../../../common/Modal';

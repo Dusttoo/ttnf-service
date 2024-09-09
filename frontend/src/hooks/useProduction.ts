@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { getProductions, getProductionById, createProduction, updateProduction, deleteProduction } from '../api/productionApi';
-import { Production, ProductionCreate, ProductionUpdate } from '../types';
+import { Production, ProductionCreate, ProductionUpdate } from '../api/types/dog';
 
 export const useProductions = (page: number, pageSize: number) => {
     return useQuery(['productions', page, pageSize], () => getProductions(page, pageSize), {

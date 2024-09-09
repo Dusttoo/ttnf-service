@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import DogDropdown from './DogSelection';
-import { FilterProps } from '../../../types';
+import { FilterProps } from '../../../api/types/dog';
 
 interface ParentSelectorProps {
     sireId: number | undefined;

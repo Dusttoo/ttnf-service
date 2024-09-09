@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { getLitterById, createLitter, updateLitter, getAllLitters, deleteLitter, addPuppiesToLitter, getLittersByBreeding } from '../api/litterApi';
-import { Litter, LitterCreate, LitterUpdate, PuppyCreate, DogCreate } from '../types';
+import { Litter, LitterCreate, LitterUpdate, PuppyCreate } from '../api/types/breeding';
+import { DogCreate } from '../api/types/dog'
 
 export const useLitters = (page: number, pageSize: number) => {
     return useQuery(['litters', page, pageSize], async () => {

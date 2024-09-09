@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import * as productionService from '../api/productionApi';
 import { Production, ProductionCreate, ProductionUpdate, ProductionSchema } from '../types';
-import { RootState } from '../app/store';
+import { RootState } from '../store';
 
 interface ProductionsState {
     items: Production[];

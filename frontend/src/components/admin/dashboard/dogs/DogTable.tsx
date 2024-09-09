@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dog } from '../../../../types';
+import { Dog } from '../../../../api/types/dog';
 import { Table, TableBody, TableCell, TableHead, TableRow, TableContainer, TableSortLabel } from '@mui/material';
 
 interface DogTableProps {

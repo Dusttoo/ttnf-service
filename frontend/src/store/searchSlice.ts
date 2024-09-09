@@ -1,6 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { searchResources } from '../api/searchApi';
-import { SearchResponse } from '../types';
 
 interface SearchState {
     results: object[];

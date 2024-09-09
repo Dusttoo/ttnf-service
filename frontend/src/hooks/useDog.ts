@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { getDogById, deleteDog, createDog, updateDog, getDogsFiltered } from '../api/dogApi';
-import { Dog, DogCreate, DogUpdate } from '../types';
-import { SelectedFilters } from '../types';
+import { Dog, DogCreate, DogUpdate, SelectedFilters } from '../api/types/dog';
 
 export const useDog = (dogId: number) => {
     return useQuery<Dog, Error>(['dog', dogId], () => getDogById(dogId));

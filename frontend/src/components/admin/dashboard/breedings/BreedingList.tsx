@@ -4,7 +4,7 @@ import GlobalModal from '../../../common/Modal';
 import BreedingForm from './BreedingForm';
 import MultiStepForm from '../litters/AddLitter/MultiStepForm';
 import Pagination from '../../../common/Pagination';
-import { Breeding, LitterCreate } from '../../../../types';
+import { Breeding, LitterCreate } from '../../../../api/types/breeding';
 import { useBreedings, useDeleteBreeding } from '../../../../hooks/useBreeding';
 import { useQueryClient } from 'react-query';
 import { EditButton, AddButton, DeleteButton } from '../../../common/Buttons';

@@ -44,7 +44,6 @@ async def upload_media(file: UploadFile = File(...)):
 def get_media_url(filename: str):
     try:
         url = MediaService.get_media_url(filename)
-        print(f'\n\n\nurl: {url}\n\n\n')
         return MediaResponse(id=filename, url=url, type="unknown", filename=filename)
     except Exception as e:
         logger.error(f"Error in get_media_url: {e}", exc_info=True)

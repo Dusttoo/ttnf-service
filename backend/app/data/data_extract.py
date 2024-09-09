@@ -34,7 +34,6 @@ def main():
 
     # Optionally, save the data to a JSON file
     with open("wordpress_data.json", "w") as file:
-        print(f'\n\n\nupdating file\n\n\n')
         json.dump(data, file, indent=4)
 
 

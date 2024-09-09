@@ -2,8 +2,8 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchPages, removePage } from '../../../../features/pageSlice';
-import { RootState, AppDispatch } from '../../../../app/store';
+import { fetchPages, removePage } from '../../../../store/pageSlice';
+import { RootState, AppDispatch } from '../../../../store';
 
 const PageListContainer = styled.div`
   padding: 2rem;

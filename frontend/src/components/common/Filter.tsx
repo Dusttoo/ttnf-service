@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { StatusBadge } from './StatusBadge';
-import { Dog } from '../../types';
-import { FilterProps, SelectedFilters, SearchResult } from '../../types';
+import { Dog } from '../../api/types/dog';
+import { SearchResult } from '../../api/types/core';
+import { FilterProps, SelectedFilters } from '../../api/types/dog'
 import SearchBar from './SearchBar';
 import { useFilteredDogs } from '../../hooks/useDog';
 

@@ -4,7 +4,7 @@ import { useLitters, useDeleteLitter, useCreateLitter, useUpdateLitter } from '.
 import Pagination from '../../../common/Pagination';
 import GlobalModal from '../../../common/Modal';
 import LitterForm from './AddLitter/LitterForm';
-import { Litter, LitterCreate, LitterUpdate } from '../../../../types';
+import { Litter, LitterCreate, LitterUpdate } from '../../../../api/types/breeding';
 import { useNavigate } from 'react-router-dom';
 import { EditButton, ViewButton, DeleteButton } from '../../../common/Buttons';
 import { sortByKey } from '../../../../utils/sort';

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useBreedingById, useCreateBreeding, useUpdateBreeding } from '../../../../hooks/useBreeding';
-import { BreedingCreate, BreedingUpdate } from '../../../../types';
+import { BreedingCreate, BreedingUpdate } from '../../../../api/types/breeding';
 import Button from '../../../common/form/Button';
 import FieldFeedback from '../../../common/form/FieldFeedback';
 import DateInput from '../../../common/form/DateInput';

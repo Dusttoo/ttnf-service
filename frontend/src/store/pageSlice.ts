@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { getPages, createPage, deletePage, updatePage, getPageBySlug } from '../api/pageApi';
-import { Page, Block, PageContent } from '../types';
+import { Page } from '../api/types/page';
 
 interface PageState {
     pages: Page[];
@@ -14,27 +14,7 @@ const initialState: PageState = {
     error: null,
 };
 
-// Utility function to parse the content string to PageContent
-const parseContent = (content: string): PageContent => {
-    try {
-        const parsedContent = JSON.parse(content);
-        return parsedContent;
-    } catch (error) {
-        console.error('Failed to parse page content:', error);
-        return { blocks: [] };
-    }
-};
-
-// Utility function to serialize PageContent to a string
-const serializeContent = (content: PageContent): string => {
-    try {
-        return JSON.stringify(content);
-    } catch (error) {
-        console.error('Failed to serialize page content:', error);
-        return '';
-    }
-};
-
+// Async actions to handle API calls
 export const fetchPages = createAsyncThunk('pages/fetchPages', async () => {
     const pages = await getPages();
     return pages;
@@ -50,12 +30,12 @@ export const addPage = createAsyncThunk('pages/addPage', async (pageData: Partia
     return page;
 });
 
-export const updateExistingPage = createAsyncThunk('pages/updateExistingPage', async ({ id, pageData }: { id: number, pageData: Page }) => {
+export const updateExistingPage = createAsyncThunk('pages/updateExistingPage', async ({ id, pageData }: { id: string, pageData: Page }) => {
     await updatePage(id, pageData);
     return { id, pageData };
 });
 
-export const removePage = createAsyncThunk('pages/removePage', async (pageId: number) => {
+export const removePage = createAsyncThunk('pages/removePage', async (pageId: string) => {
     await deletePage(pageId);
     return pageId;
 });
@@ -64,34 +44,29 @@ const pageSlice = createSlice({
     name: 'pages',
     initialState,
     reducers: {
-        addBlockToPage: (state, action) => {
-            const { pageId, block } = action.payload;
+        // Content manipulation actions should work with raw HTML now
+        updatePageContent: (state, action) => {
+            const { pageId, content } = action.payload;
             const page = state.pages.find(p => p.id === pageId);
             if (page) {
-                const content: PageContent = parseContent(page.content);
-                content.blocks.push(block);
-                page.content = serializeContent(content);
+                page.content = content; // Directly updating HTML content
             }
         },
-        updateBlockInPage: (state, action) => {
-            const { pageId, blockId, blockData } = action.payload;
+        addTagToPage: (state, action) => {
+            const { pageId, tag } = action.payload;
             const page = state.pages.find(p => p.id === pageId);
             if (page) {
-                const content: PageContent = parseContent(page.content);
-                const blockIndex = content.blocks.findIndex((b: Block) => b.id === blockId);
-                if (blockIndex >= 0) {
-                    content.blocks[blockIndex] = { ...content.blocks[blockIndex], ...blockData };
-                    page.content = serializeContent(content);
+                if (!page.tags) {
+                    page.tags = [];
                 }
+                page.tags.push(tag);
             }
         },
-        removeBlockFromPage: (state, action) => {
-            const { pageId, blockId } = action.payload;
+        removeTagFromPage: (state, action) => {
+            const { pageId, tag } = action.payload;
             const page = state.pages.find(p => p.id === pageId);
-            if (page) {
-                const content: PageContent = parseContent(page.content);
-                content.blocks = content.blocks.filter((b: Block) => b.id !== blockId);
-                page.content = serializeContent(content);
+            if (page && page.tags) {
+                page.tags = page.tags.filter(t => t !== tag);
             }
         }
     },
@@ -130,6 +105,8 @@ const pageSlice = createSlice({
     },
 });
 
-export const { addBlockToPage, updateBlockInPage, removeBlockFromPage } = pageSlice.actions;
+// Export the actions
+export const { updatePageContent, addTagToPage, removeTagFromPage } = pageSlice.actions;
 
+// Export the reducer
 export default pageSlice.reducer;

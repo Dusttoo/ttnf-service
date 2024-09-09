@@ -1,9 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '../../app/store';
-import { toggleEditMode } from '../../features/editModeSlice';
-import { selectIsAuthenticated } from '../../features/authSlice';
+import { RootState } from '../../store';
+import { toggleEditMode } from '../../store/editModeSlice';
+import { selectIsAuthenticated } from '../../store/authSlice';
 
 const ToolbarContainer = styled.div`
   position: fixed;

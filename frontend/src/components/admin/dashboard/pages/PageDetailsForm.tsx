@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { updateExistingPage } from '../../../../features/pageSlice'
-import { Page } from '../../../../types';
-import { AppDispatch } from '../../../../app/store';
+import { updateExistingPage } from '../../../../store/pageSlice'
+import { Page } from '../../../../api/types/page';
+import { AppDispatch } from '../../../../store';
 
 const FormContainer = styled.div`
   padding: 1rem;

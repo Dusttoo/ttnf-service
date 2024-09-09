@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { login } from '../../features/authSlice';
+import login from '../../store/authSlice';
 import Input from '../common/Input';
 import Button from '../common/Button';
-import { AppDispatch, RootState } from '../../app/store';
-import { selectAuthError } from '../../features/authSlice';
+import { AppDispatch, RootState } from '../../store';
+import { selectAuthError } from '../../store/authSlice';
 import { useNavigate } from 'react-router-dom';
 
 const Login: React.FC = () => {

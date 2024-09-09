@@ -106,7 +106,6 @@ def main():
     productions_data = data[
         "wp/v2/production"
     ]
-    print(f'\n{productions_data[0]["yoast_head"]}\n')
     all_dogs = []
     all_health_infos = []
     all_photos = []

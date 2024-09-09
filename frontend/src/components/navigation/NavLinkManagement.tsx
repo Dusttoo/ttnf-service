@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink } from '../../types';
+import { NavLink } from '../../api/types/navigation';
 
 interface NavLinkManagementProps {
     link: NavLink;

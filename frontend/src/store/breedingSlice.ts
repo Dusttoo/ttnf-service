@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import * as breedingService from '../api/breedingApi';
-import { Breeding, BreedingCreate, BreedingUpdate } from '../types';
-import { RootState } from '../app/store';
+import { Breeding, BreedingCreate, BreedingUpdate } from '../api/types/breeding';
+import { RootState } from '../store';
 
 interface BreedingsState {
     items: Breeding[];

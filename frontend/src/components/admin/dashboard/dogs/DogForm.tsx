@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { DogCreate, DogUpdate, GenderEnum, StatusEnum } from '../../../../types';
+import { GenderEnum, StatusEnum } from '../../../../api/types/core';
+import { DogCreate, DogUpdate } from '../../../../api/types/dog'
 import { uploadImage } from '../../../../api/imageApi';
 import { StatusBadge } from '../../../common/StatusBadge';
 import ImageUpload from '../../../common/ImageUpload';

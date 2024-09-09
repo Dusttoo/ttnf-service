@@ -41,9 +41,7 @@ class PageBase(BaseModel):
     external_data: Optional[Dict[str, Any]] = (
         None  # Represents any external data associated with the page
     )
-    content: List[
-        Dict[str, Any]
-    ]  # List of IContentBlock objects (blocks used in the page)
+    content: str
     author_id: Optional[int] = None
     invalid_block_types: Optional[List[str]] = None
     status: Optional[str] = "draft"  # Could use an enum for PageStatus if needed
@@ -52,7 +50,7 @@ class PageBase(BaseModel):
     created_at: Optional[datetime] = None
     published_at: Optional[datetime] = None
     language: str
-    translations: Optional[List[Translation]] = None
+    translations: Optional[Dict[str, Any]] = None
     updated_at: Optional[datetime] = None
 
 
@@ -69,14 +67,14 @@ class PageUpdate(BaseModel):
     meta: Optional[IMeta] = None
     custom_values: Optional[Dict[str, Any]] = None
     external_data: Optional[Dict[str, Any]] = None
-    content: Optional[List[Dict[str, Any]]] = None
+    content: Optional[str] = None
     author_id: Optional[int] = None
     invalid_block_types: Optional[List[str]] = None
     status: Optional[str] = None
     is_locked: Optional[bool] = None
     tags: Optional[List[str]] = None
     language: Optional[str] = None
-    translations: Optional[List[Translation]] = None
+    translations: Optional[Dict[str, Any]] = None
 
 
 # Full schema for a page, including ID and author details

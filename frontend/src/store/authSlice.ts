@@ -1,7 +1,6 @@
-// authSlice.ts
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { login as loginApi, register as registerApi, logout as logoutApi } from '../api/authApi';
-import { RootState } from '../app/store';
+import { RootState } from '../store';
 
 interface AuthState {
     user: any;

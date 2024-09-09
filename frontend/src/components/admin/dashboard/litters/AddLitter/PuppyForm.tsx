@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
-import { PuppyCreate, GenderEnum, StatusEnum } from '../../../../../types';
+import { PuppyCreate} from '../../../../../api/types/breeding';
+import { GenderEnum, StatusEnum } from '../../../../../api/types/core'
 import ImageUpload from '../../../../common/ImageUpload';
 import { StatusBadge } from '../../../../common/StatusBadge';
 import Button from '../../../../common/form/Button';

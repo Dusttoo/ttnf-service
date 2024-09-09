@@ -20,6 +20,7 @@ from app.core.config import settings
 from sqlalchemy import text
 from scripts.page_data import default_page_data
 import datetime
+import uuid
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -59,19 +60,11 @@ async def seed_data():
                             username="kharper",
                             email="kharper16@gmail.com",
                             phone_number="9037809969",
-                            first_name="Kelsey",
-                            last_name="Harper",
-                            avatar_url="https://via.placeholder.com/150",
-                            company="Harper Breeding Co.",
                         ),
                         User(
                             username="admin",
                             email="dusty.mumphrey@gmail.com",
                             phone_number="4304355503",
-                            first_name="Dusty",
-                            last_name="Mumphrey",
-                            avatar_url="https://via.placeholder.com/150",
-                            company="Admin Co.",
                         ),
                     ]
 
@@ -276,27 +269,218 @@ async def seed_data():
             # Seed Pages
             if not await is_table_seeded(session, Page):
                 try:
-                    for page_data in default_page_data:
-                        new_page = Page(
-                            id=page_data["id"],
-                            type=page_data["type"],
-                            name=page_data["name"],
-                            slug=page_data["slug"],
-                            meta=page_data["meta"],
-                            content=page_data["content"],
-                            status=page_data["status"],
-                            is_locked=page_data["is_locked"],
-                            tags=page_data["tags"],
-                            language=page_data["language"],
-                            created_at=datetime.datetime.fromisoformat(page_data["created_at"]),
-                            published_at=datetime.datetime.fromisoformat(page_data["published_at"]),
-                        )
-                        session.add(new_page)
+                    pages = [
+                        Page(
+                            id=uuid.uuid4(),
+                            type="landing",
+                            name="Landing Page",
+                            slug="landing",
+                            meta={
+                                "description": "Welcome to Texas Top Notch Frenchies, the best place to find French Bulldogs."
+                            },
+                            custom_values={"hero_image": "hero_landing.jpg"},
+                            external_data=None,
+                            content="""
+        <section style='text-align:center; padding: 50px;'>
+            <h1>Welcome to Texas Top Notch Frenchies</h1>
+            <p>Breeding quality, temperament, and beauty into every French Bulldog. Discover our champion bloodlines and exceptional care.</p>
+            <a href="/about" style="background-color:#E76F00; padding: 10px 20px; color: white; text-decoration: none; border-radius: 5px;">Learn More</a>
+        </section>
+        """,
+                            author_id=None,  # You can assign a valid user ID here
+                            invalid_block_types=[],
+                            status="published",
+                            is_locked=False,
+                            tags=["home", "welcome"],
+                            created_at=datetime.datetime.utcnow(),
+                            published_at=datetime.datetime.utcnow(),
+                            language="en",
+                            translations={
+                                "es": {"slug": "inicio", "name": "Página de Inicio"}
+                            },
+                        ),
+                        Page(
+                            id=uuid.uuid4(),
+                            type="about",
+                            name="About Us",
+                            slug="about",
+                            meta={
+                                "description": "Learn more about Texas Top Notch Frenchies."
+                            },
+                            custom_values={"header_image": "about_us.jpg"},
+                            external_data=None,
+                            content="""
+        <section style='padding: 50px;'>
+            <h1>About Us</h1>
+            <p>At Texas Top Notch Frenchies, we are passionate about breeding the finest French Bulldogs with excellent temperaments. Our dogs are raised in a family environment with love and care.</p>
+            <p>With years of experience, we ensure every puppy is healthy and happy. We pride ourselves on ethical breeding practices, prioritizing the health and well-being of every dog.</p>
+        </section>
+        """,
+                            author_id=None,
+                            invalid_block_types=[],
+                            status="published",
+                            is_locked=False,
+                            tags=["about", "team"],
+                            created_at=datetime.datetime.utcnow(),
+                            published_at=datetime.datetime.utcnow(),
+                            language="en",
+                            translations={
+                                "es": {"slug": "acerca-de", "name": "Sobre Nosotros"}
+                            },
+                        ),
+                        Page(
+                            id=uuid.uuid4(),
+                            type="males",
+                            name="Our Males",
+                            slug="males",
+                            meta={
+                                "description": "Meet our champion male French Bulldogs."
+                            },
+                            custom_values={"gallery": "males_gallery"},
+                            external_data=None,
+                            content="""
+        <section style='padding: 50px;'>
+            <h1>Our Males</h1>
+            <p>Meet our stunning male French Bulldogs, each one a prime example of champion bloodlines and excellent health.</p>
+        </section>
+        """,
+                            author_id=None,
+                            invalid_block_types=[],
+                            status="published",
+                            is_locked=False,
+                            tags=["dogs", "males"],
+                            created_at=datetime.datetime.utcnow(),
+                            published_at=datetime.datetime.utcnow(),
+                            language="en",
+                            translations={
+                                "es": {"slug": "machos", "name": "Nuestros Machos"}
+                            },
+                        ),
+                        Page(
+                            id=uuid.uuid4(),
+                            type="females",
+                            name="Our Females",
+                            slug="females",
+                            meta={
+                                "description": "Meet our beautiful female French Bulldogs."
+                            },
+                            custom_values={"gallery": "females_gallery"},
+                            external_data=None,
+                            content="""
+        <section style='padding: 50px;'>
+            <h1>Our Females</h1>
+            <p>These are our beautiful female French Bulldogs, carefully selected for their quality and nurturing temperaments.</p>
+        </section>
+        """,
+                            author_id=None,
+                            invalid_block_types=[],
+                            status="published",
+                            is_locked=False,
+                            tags=["dogs", "females"],
+                            created_at=datetime.datetime.utcnow(),
+                            published_at=datetime.datetime.utcnow(),
+                            language="en",
+                            translations={
+                                "es": {"slug": "hembras", "name": "Nuestras Hembras"}
+                            },
+                        ),
+                        Page(
+                            id=uuid.uuid4(),
+                            type="breedings",
+                            name="Upcoming Breedings",
+                            slug="breedings",
+                            meta={
+                                "description": "Stay updated on our upcoming breedings and future litters."
+                            },
+                            custom_values={"schedule": "breeding_schedule"},
+                            external_data=None,
+                            content="""
+        <section style='padding: 50px;'>
+            <h1>Upcoming Breedings</h1>
+            <p>Stay updated on our upcoming breedings and future litters. We strive to produce the finest French Bulldog puppies.</p>
+        </section>
+        """,
+                            author_id=None,
+                            invalid_block_types=[],
+                            status="published",
+                            is_locked=False,
+                            tags=["breedings", "litters"],
+                            created_at=datetime.datetime.utcnow(),
+                            published_at=datetime.datetime.utcnow(),
+                            language="en",
+                            translations={
+                                "es": {
+                                    "slug": "proximas-criadas",
+                                    "name": "Próximas Crías",
+                                }
+                            },
+                        ),
+                        Page(
+                            id=uuid.uuid4(),
+                            type="services",
+                            name="Our Services",
+                            slug="services",
+                            meta={
+                                "description": "Explore the range of services we offer."
+                            },
+                            custom_values={"service_list": "services_offered"},
+                            external_data=None,
+                            content="""
+        <section style='padding: 50px;'>
+            <h1>Our Services</h1>
+            <p>We offer a range of services, including stud services, puppy consultation, and dog training. We are here to ensure your French Bulldog gets the best care.</p>
+        </section>
+        """,
+                            author_id=None,
+                            invalid_block_types=[],
+                            status="published",
+                            is_locked=False,
+                            tags=["services", "stud"],
+                            created_at=datetime.datetime.utcnow(),
+                            published_at=datetime.datetime.utcnow(),
+                            language="en",
+                            translations={
+                                "es": {
+                                    "slug": "nuestros-servicios",
+                                    "name": "Nuestros Servicios",
+                                }
+                            },
+                        ),
+                        Page(
+                            id=uuid.uuid4(),
+                            type="contact",
+                            name="Contact Us",
+                            slug="contact",
+                            meta={"description": "Get in touch with us for inquiries."},
+                            custom_values={"contact_form": "contact_form_id"},
+                            external_data=None,
+                            content="""
+        <section style='padding: 50px;'>
+            <h1>Contact Us</h1>
+            <p>If you have any questions or inquiries, feel free to reach out to us through our contact form or by phone. We're happy to help!</p>
+            <a href="/contact-form" style="background-color:#E76F00; padding: 10px 20px; color: white; text-decoration: none; border-radius: 5px;">Get in Touch</a>
+        </section>
+        """,
+                            author_id=None,
+                            invalid_block_types=[],
+                            status="published",
+                            is_locked=False,
+                            tags=["contact", "inquiries"],
+                            created_at=datetime.datetime.utcnow(),
+                            published_at=datetime.datetime.utcnow(),
+                            language="en",
+                            translations={
+                                "es": {"slug": "contacto", "name": "Contáctenos"}
+                            },
+                        ),
+                    ]
 
+                    # Add pages to the session
+                    session.add_all(pages)
                     await session.commit()
                     logger.info("Pages seeded successfully.")
-                except Exception as e:
-                    logger.error(f"Error seeding Pages: {e}")
+                except SQLAlchemyError as e:
+                    logger.error("Error seeding pages: %s", e)
                     await session.rollback()
             else:
                 logger.info("Pages table already seeded. Skipping...")

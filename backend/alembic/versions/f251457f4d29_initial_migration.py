@@ -1,8 +1,8 @@
 """initial migration
 
-Revision ID: 8a735a50436a
+Revision ID: f251457f4d29
 Revises: 
-Create Date: 2024-08-16 13:57:50.073485
+Create Date: 2024-09-09 16:49:58.549106
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '8a735a50436a'
+revision: str = 'f251457f4d29'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -55,28 +55,17 @@ def upgrade() -> None:
     sa.UniqueConstraint('slug')
     )
     op.create_index(op.f('ix_nav_links_id'), 'nav_links', ['id'], unique=False)
-    op.create_table('pages',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('title', sa.String(), nullable=False),
-    sa.Column('slug', sa.String(), nullable=False),
-    sa.Column('editable', sa.Boolean(), server_default=sa.text('true'), nullable=False),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-    sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
-    sa.Column('content', sa.JSON(), nullable=False),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_pages_id'), 'pages', ['id'], unique=False)
-    op.create_index(op.f('ix_pages_slug'), 'pages', ['slug'], unique=True)
     op.create_table('users',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('username', sa.String(), nullable=True),
-    sa.Column('email', sa.String(), nullable=True),
+    sa.Column('username', sa.String(), nullable=False),
+    sa.Column('email', sa.String(), nullable=False),
     sa.Column('phone_number', sa.String(), nullable=True),
-    sa.Column('hashed_password', sa.String(), nullable=True),
+    sa.Column('hashed_password', sa.String(), nullable=False),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email'),
     sa.UniqueConstraint('username')
     )
+    op.create_index(op.f('ix_users_id'), 'users', ['id'], unique=False)
     op.create_table('breedings',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('female_dog_id', sa.Integer(), nullable=True),
@@ -99,6 +88,30 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_health_info_id'), 'health_info', ['id'], unique=False)
+    op.create_table('pages',
+    sa.Column('id', sa.UUID(), nullable=False),
+    sa.Column('type', sa.String(), nullable=False),
+    sa.Column('name', sa.String(), nullable=False),
+    sa.Column('slug', sa.String(), nullable=False),
+    sa.Column('meta', sa.JSON(), nullable=True),
+    sa.Column('custom_values', sa.JSON(), nullable=True),
+    sa.Column('external_data', sa.JSON(), nullable=True),
+    sa.Column('content', sa.JSON(), nullable=False),
+    sa.Column('author_id', sa.Integer(), nullable=True),
+    sa.Column('invalid_block_types', sa.JSON(), nullable=True),
+    sa.Column('status', sa.String(), nullable=False),
+    sa.Column('is_locked', sa.Boolean(), nullable=False),
+    sa.Column('tags', sa.JSON(), nullable=True),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.Column('published_at', sa.DateTime(timezone=True), nullable=True),
+    sa.Column('language', sa.String(), nullable=False),
+    sa.Column('translations', sa.JSON(), nullable=True),
+    sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
+    sa.ForeignKeyConstraint(['author_id'], ['users.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_pages_id'), 'pages', ['id'], unique=False)
+    op.create_index(op.f('ix_pages_slug'), 'pages', ['slug'], unique=True)
     op.create_table('photos',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('dog_id', sa.Integer(), nullable=True),
@@ -159,14 +172,15 @@ def downgrade() -> None:
     op.drop_table('productions')
     op.drop_index(op.f('ix_photos_id'), table_name='photos')
     op.drop_table('photos')
+    op.drop_index(op.f('ix_pages_slug'), table_name='pages')
+    op.drop_index(op.f('ix_pages_id'), table_name='pages')
+    op.drop_table('pages')
     op.drop_index(op.f('ix_health_info_id'), table_name='health_info')
     op.drop_table('health_info')
     op.drop_index(op.f('ix_breedings_id'), table_name='breedings')
     op.drop_table('breedings')
+    op.drop_index(op.f('ix_users_id'), table_name='users')
     op.drop_table('users')
-    op.drop_index(op.f('ix_pages_slug'), table_name='pages')
-    op.drop_index(op.f('ix_pages_id'), table_name='pages')
-    op.drop_table('pages')
     op.drop_index(op.f('ix_nav_links_id'), table_name='nav_links')
     op.drop_table('nav_links')
     op.drop_index(op.f('ix_dogs_id'), table_name='dogs')

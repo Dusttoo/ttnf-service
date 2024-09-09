@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
-import { ProductionCreate, ProductionUpdate } from '../../../../types';
+import { ProductionCreate, ProductionUpdate } from '../../../../api/types/dog';
 import { useProduction, useCreateProduction, useUpdateProduction } from '../../../../hooks/useProduction';
 import Button from '../../../common/form/Button';
 import ImageUpload from '../../../common/ImageUpload';

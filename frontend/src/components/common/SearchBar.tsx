@@ -1,7 +1,7 @@
 import React, { useState, ChangeEvent } from 'react';
 import styled from 'styled-components';
 import { searchResources } from '../../api/searchApi';
-import { SearchBarProps, SearchResult, SearchResponse } from '../../types';
+import { SearchBarProps, SearchResult, SearchResponse } from '../../api/types/core';
 import { LinkComponent } from './Link';
 
 const SearchContainer = styled.div`

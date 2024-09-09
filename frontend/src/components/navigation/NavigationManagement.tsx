@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { RootState, AppDispatch } from '../../app/store';
-import { fetchNavLinks, addNavLink, removeNavLink, updateExistingNavLink } from '../../features/navigationSlice';
-import { NavLink } from '../../types';
+import { RootState, AppDispatch } from '../../store';
+import { fetchNavLinks, addNavLink, removeNavLink, updateExistingNavLink } from '../../store/navigationSlice';
+import { NavLink } from '../../api/types/navigation';
 import NavLinkManagement from './NavLinkManagement';
 
 const NavigationManagement: React.FC = () => {

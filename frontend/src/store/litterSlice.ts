@@ -1,7 +1,8 @@
 import { createSlice, createAsyncThunk, createSelector } from '@reduxjs/toolkit';
 import * as litterService from '../api/litterApi';
-import { Litter, LitterCreate, LitterUpdate, PuppyCreate, Dog } from '../types';
-import { RootState } from '../app/store';
+import { PuppyCreate, Dog } from '../api/types/dog';
+import { Litter, LitterCreate, LitterUpdate } from '../api/types/breeding'
+import { RootState } from '../store';
 
 interface LittersState {
     items: Litter[];

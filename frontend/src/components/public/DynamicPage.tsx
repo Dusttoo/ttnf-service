@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { RootState } from '../../app/store';
+import { RootState } from '../../store';
 import { getPageBySlug } from '../../api/pageApi';
-import { Page, Block } from '../../types';
+import { Page, Block } from '../../api/types/page';
 
 interface DynamicPageProps {
     slug?: string;

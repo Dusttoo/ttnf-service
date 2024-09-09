@@ -5,7 +5,9 @@ import { faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import LitterForm from '../AddLitter/LitterForm';
 import PuppyForm from '../AddLitter/PuppyForm';
 import ReviewForm from '../AddLitter/ReviewForm';
-import { LitterCreate, LitterUpdate, PuppyCreate, GenderEnum, StatusEnum } from '../../../../../types';
+import {GenderEnum, StatusEnum } from '../../../../../api/types/core';
+import { LitterCreate, LitterUpdate, PuppyCreate } from '../../../../../api/types/breeding';
+
 import { useLitter, useCreateLitter, useUpdateLitter, useAddPuppiesToLitter } from '../../../../../hooks/useLitter';
 import Button from '../../../../common/form/Button';
 import ProgressIndicator from '../../../../common/form/ProgressIndicator';

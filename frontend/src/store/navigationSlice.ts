@@ -1,7 +1,6 @@
-// src/store/navigationSlice.ts
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { getNavLinks, createNavLink, updateNavLink, deleteNavLink } from '../api/navigationApi';
-import { NavLink } from '../types';
+import { NavLink } from '../api/types/navigation';
 
 interface NavigationState {
     links: NavLink[];

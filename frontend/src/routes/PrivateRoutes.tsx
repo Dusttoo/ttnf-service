@@ -1,7 +1,7 @@
 import React from 'react';
 import { Route, Routes, Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { RootState } from '../app/store';
+import { RootState } from '../store';
 import AdminLayout from '../theme/AdminLayout';
 import DogManager from '../components/admin/dashboard/dogs/DogManager';
 import PageList from '../components/admin/dashboard/pages/PageList';

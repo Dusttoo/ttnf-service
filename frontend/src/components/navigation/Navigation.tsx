@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState, AppDispatch } from '../../app/store';
+import { RootState, AppDispatch } from '../../store';
 import { NavContainer, NavList, NavItem, NavLinkStyled, MobileMenuButton, MobileMenu, DesktopMenu, CloseButton } from './Navigation.styles';
 import { FaBars, FaTimes } from 'react-icons/fa';
 import NavLinkComponent from './NavLinkComponent';
-import { fetchNavLinks } from '../../features/navigationSlice';
+import { fetchNavLinks } from '../../store/navigationSlice';
 
 const Navigation: React.FC = () => {
     const links = useSelector((state: RootState) => state.navigation.links);

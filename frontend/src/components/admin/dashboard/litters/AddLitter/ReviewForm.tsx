@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { LitterCreate, PuppyCreate } from '../../../../../types';
+import { LitterCreate, PuppyCreate } from '../../../../../api/types/breeding';
 
 interface ReviewFormProps {
     litterData: LitterCreate;

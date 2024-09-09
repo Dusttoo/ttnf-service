@@ -34,25 +34,17 @@ class PageService:
         if cached_page:
             try:
                 page_data = json.loads(cached_page)
-                if isinstance(page_data["content"], str):
-                    page_data["content"] = json.loads(
-                        page_data["content"]
-                    )  # Deserialize content
                 return PageSchema(**page_data)
             except (json.JSONDecodeError, TypeError) as e:
                 logger.error(f"Failed to decode cache for page {page_id}: {e}")
-                await redis_client.delete(cache_key)  # Invalidate corrupt cache
+                await redis_client.delete(cache_key)
 
         result = await db.execute(select(Page).filter(Page.id == page_id))
         db_page = result.scalars().first()
         if db_page:
             page_schema = convert_to_page_schema(db_page)
             try:
-                # Cache the page schema with content as JSON string
                 page_data = page_schema.dict()
-                page_data["content"] = json.dumps(
-                    page_data["content"], cls=DateTimeEncoder
-                )
                 await redis_client.set(
                     cache_key, json.dumps(page_data, cls=DateTimeEncoder), ex=3600
                 )  # Cache for 1 hour
@@ -63,9 +55,7 @@ class PageService:
 
         return None
 
-    async def get_page_by_slug(
-        self, db: AsyncSession, slug: str
-    ) -> Optional[PageSchema]:
+    async def get_page_by_slug(self, db: AsyncSession, slug: str) -> Optional[PageSchema]:
         cache_key = f"page:slug:{slug}"
         redis_client = await self.get_redis_client()
 
@@ -73,14 +63,10 @@ class PageService:
         if cached_page:
             try:
                 page_data = json.loads(cached_page)
-                if isinstance(page_data["content"], str):
-                    page_data["content"] = json.loads(
-                        page_data["content"]
-                    )  # Deserialize content
                 return convert_to_page_schema(page_data)
             except (json.JSONDecodeError, TypeError) as e:
                 logger.error(f"Failed to decode cache for page slug {slug}: {e}")
-                await redis_client.delete(cache_key)  # Invalidate corrupt cache
+                await redis_client.delete(cache_key)
 
         result = await db.execute(select(Page).filter(Page.slug == slug))
         db_page = result.scalars().first()
@@ -88,9 +74,6 @@ class PageService:
             page_schema = convert_to_page_schema(db_page)
             try:
                 page_data = page_schema.dict()
-                page_data["content"] = json.dumps(
-                    page_data["content"], cls=DateTimeEncoder
-                )
                 await redis_client.set(
                     cache_key, json.dumps(page_data, cls=DateTimeEncoder), ex=3600
                 )
@@ -98,6 +81,50 @@ class PageService:
                 logger.error(f"Failed to cache page slug {slug}: {e}")
 
             return page_schema
+
+        return None
+
+    async def create_page(self, db: AsyncSession, page: PageCreate) -> PageSchema:
+        db_page = Page(
+            type=page.type,
+            name=page.name,
+            slug=page.slug,
+            content=page.content,  # Now content is HTML string
+            meta=page.meta,
+            custom_values=page.custom_values,
+            external_data=page.external_data,
+            author_id=page.author_id,
+            status=page.status,
+            is_locked=page.is_locked,
+            tags=page.tags,
+            language=page.language,
+            translations=page.translations,
+        )
+        db.add(db_page)
+        await db.commit()
+        await db.refresh(db_page)
+
+        await self.clear_cache()
+
+        return convert_to_page_schema(db_page)
+
+    async def update_page(self, db: AsyncSession, page_id: str, page: PageUpdate) -> Optional[PageSchema]:
+        result = await db.execute(select(Page).filter(Page.id == page_id))
+        db_page = result.scalars().first()
+
+        if db_page:
+            update_data = page.dict(exclude_unset=True)
+            for key, value in update_data.items():
+                setattr(db_page, key, value)
+            await db.commit()
+            await db.refresh(db_page)
+
+            redis_client = await self.get_redis_client()
+            await redis_client.delete(f"page:{page_id}")
+            await redis_client.delete(f"page:slug:{db_page.slug}")
+            await self.clear_cache()
+
+            return convert_to_page_schema(db_page)
 
         return None
 
@@ -138,55 +165,6 @@ class PageService:
 
         return page_schemas
 
-    async def create_page(self, db: AsyncSession, page: PageCreate) -> PageSchema:
-        db_page = Page(
-            title=page.title,
-            slug=page.slug,
-            content=page.content,
-            meta=page.meta,
-            custom_values=page.custom_values,
-            external_data=page.external_data,
-            author_id=page.author_id,
-            status=page.status,
-            is_locked=page.is_locked,
-            tags=page.tags,
-            language=page.language,
-            translations=page.translations,
-        )
-        db.add(db_page)
-        await db.commit()
-        await db.refresh(db_page)
-
-        await self.clear_cache()
-
-        return convert_to_page_schema(db_page)
-
-    async def update_page(
-        self, db: AsyncSession, page_id: str, page: PageUpdate
-    ) -> Optional[PageSchema]:
-        result = await db.execute(select(Page).filter(Page.id == page_id))
-        db_page = result.scalars().first()
-
-        if db_page:
-            update_data = page.dict(exclude_unset=True)
-            for key, value in update_data.items():
-                if key == "content" and isinstance(value, str):
-                    value = json.loads(
-                        value
-                    )  # Deserialize if content is provided as a string
-                setattr(db_page, key, value)
-            await db.commit()
-            await db.refresh(db_page)
-
-            redis_client = await self.get_redis_client()
-            await redis_client.delete(f"page:{page_id}")
-            await redis_client.delete(f"page:slug:{db_page.slug}")
-            await self.clear_cache()
-
-            return convert_to_page_schema(db_page)
-
-        return None
-
     async def delete_page(self, db: AsyncSession, page_id: str) -> Optional[PageSchema]:
         result = await db.execute(select(Page).filter(Page.id == page_id))
         db_page = result.scalars().first()
@@ -203,51 +181,3 @@ class PageService:
             return convert_to_page_schema(db_page)
 
         return None
-    
-    async def create_page_from_rb(self, db: AsyncSession, page_data: dict) -> PageSchema:
-        new_page = PageCreate(
-            title=page_data["title"],
-            slug=page_data["slug"],
-            content=page_data["content"], 
-            meta=page_data.get("meta"),
-            custom_values=page_data.get("custom_values"),
-            external_data=page_data.get("external_data"),
-            author_id=page_data.get("author_id"),
-            status=page_data.get("status", "draft"),
-            is_locked=page_data.get("is_locked", False),
-            tags=page_data.get("tags", []),
-            language=page_data.get("language"),
-            translations=page_data.get("translations", [])
-        )
-        return await self.create_page(db, new_page)
-
-    # Method to handle page updates from React Bricks
-    async def update_page_from_rb(self, db: AsyncSession, page_data: dict) -> PageSchema:
-        slug = page_data["slug"]
-        update_data = PageUpdate(
-            title=page_data["title"],
-            content=page_data["content"],
-            meta=page_data.get("meta"),
-            custom_values=page_data.get("custom_values"),
-            external_data=page_data.get("external_data"),
-            author_id=page_data.get("author_id"),
-            status=page_data.get("status"),
-            is_locked=page_data.get("is_locked"),
-            tags=page_data.get("tags", []),
-            language=page_data.get("language"),
-            translations=page_data.get("translations", [])
-        )
-        db_page = await self.get_page_by_slug(db, slug)
-        if db_page:
-            return await self.update_page(db, db_page.id, update_data)
-        else:
-            raise HTTPException(status_code=404, detail="Page not found")
-
-    # Method to handle page deletion from React Bricks
-    async def delete_page_from_rb(self, db: AsyncSession, page_data: dict):
-        slug = page_data["slug"]
-        db_page = await self.get_page_by_slug(db, slug)
-        if db_page:
-            return await self.delete_page(db, db_page.id)
-        else:
-            raise HTTPException(status_code=404, detail="Page not found")

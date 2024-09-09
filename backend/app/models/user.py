@@ -13,11 +13,6 @@ class User(Base):
     email = Column(String, unique=True, nullable=False)
     phone_number = Column(String, nullable=True)
     hashed_password = Column(String, nullable=False)
-    first_name = Column(String, nullable=False) 
-    last_name = Column(String, nullable=False) 
-    avatar_url = Column(String, nullable=True) 
-    company = Column(String, nullable=True) 
-    role = Column(String, nullable=False, default="user")  
 
     # Establish a relationship with the Page model
     pages = relationship("Page", back_populates="author")

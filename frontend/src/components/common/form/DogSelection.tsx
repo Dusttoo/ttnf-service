@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { SelectedFilters, FilterProps, Dog } from '../../../types';
+import { SelectedFilters, FilterProps, Dog } from '../../../api/types/dog';
 import { useFilteredDogs } from '../../../hooks/useDog';
-import { RootState } from '../../../app/store';
+import { RootState } from '../../../store';
 
 interface DogDropdownProps {
     name: string;
