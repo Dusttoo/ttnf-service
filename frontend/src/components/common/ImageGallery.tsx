@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Modal, Pagination, Carousel } from 'react-bootstrap';
-import { Photo } from '../../types/dogs';
+import { Photo } from '../../api/types/dog';
 
 interface ImageGalleryProps {
     images: Photo[];

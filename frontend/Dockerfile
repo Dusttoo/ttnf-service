@@ -5,8 +5,6 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm install
 
-RUN echo "REACT_APP_BACKEND_URL=$REACT_APP_BACKEND_URL"
-
 COPY . .
 # Build the application
 RUN npm run build

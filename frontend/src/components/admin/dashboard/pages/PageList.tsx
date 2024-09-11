@@ -55,8 +55,6 @@ const PageList: React.FC = () => {
     dispatch(fetchPages());
   }, [dispatch]);
 
-  console.log('loading: ', isLoading)
-
   const handleDelete = async (pageId: string) => {
     if (window.confirm('Are you sure you want to delete this page?')) {
       await dispatch(removePage(pageId));

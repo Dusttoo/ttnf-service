@@ -13,7 +13,6 @@ export const getPageById = async (id: string): Promise<Page> => {
 
 export const getPageBySlug = async (slug: string): Promise<Page> => {
     const response = await apiClient.get<Page>(`/pages/slug/${slug}`);
-    console.log("api page: ", response.data)
     return response.data;
 };
 
