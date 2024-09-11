@@ -28,6 +28,8 @@ const PageEditor: React.FC = () => {
     const [content, setContent] = useState<string>('');
 
     useEffect(() => {
+        console.log("page: ", page)
+
         if (page && page.content) {
             setContent(page.content);
         }

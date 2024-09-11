@@ -43,7 +43,17 @@ class DogService:
                 return json.loads(cached_data)
 
             offset = (page - 1) * page_size
-            query = select(Dog).offset(offset).limit(page_size)
+            query = (
+                select(Dog)
+                .options(
+                    selectinload(Dog.health_infos),
+                    selectinload(Dog.photos),
+                    selectinload(Dog.productions),
+                    selectinload(Dog.children),
+                )
+                .offset(offset)
+                .limit(page_size)
+            )
             result = await db.execute(query)
             dogs = result.scalars().all()
 
@@ -168,7 +178,6 @@ class DogService:
         except Exception as e:
             logger.error(f"Exception in create_dog: {str(e)}", exc_info=True)
             raise HTTPException(status_code=500, detail=f"Internal Server Error: {e}")
-
 
     async def update_dog(
         self, dog_id: int, dog_data: DogUpdate, db: AsyncSession

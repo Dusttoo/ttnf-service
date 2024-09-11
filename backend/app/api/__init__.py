@@ -14,7 +14,6 @@ def setup_routes(app: FastAPI):
         page_router,
         navigation_router
     )
-    from app.api.webhooks.react_bricks import rb_router
 
     app.include_router(auth_router, prefix="/api/v1/auth", tags=["Auth"])
     app.include_router(dog_router, prefix="/api/v1/dogs", tags=["Dogs"])
@@ -28,6 +27,3 @@ def setup_routes(app: FastAPI):
     app.include_router(search_router, prefix="/api/v1/search", tags=["search"])
     app.include_router(page_router, prefix="/api/v1/pages", tags=["Pages"])
     app.include_router(navigation_router, prefix="/api/v1/navigation", tags=["Navigation"])
-    app.include_router(
-        rb_router, prefix="/api/v1/webhooks/react_bricks", tags=["Webhooks"]
-    )
