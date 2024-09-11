@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { StatusBadge } from './StatusBadge';
 import { Dog } from '../../api/types/dog';
-import { SearchResult } from '../../api/types/core';
+import { SearchResult, GenderEnum, StatusEnum } from '../../api/types/core';
 import { FilterProps, SelectedFilters } from '../../api/types/dog'
 import SearchBar from './SearchBar';
 import { useFilteredDogs } from '../../hooks/useDog';
@@ -72,7 +72,7 @@ const FilterComponent: React.FC<FilterProps> = ({
     onSireChange,
     onDamChange,
     onColorChange,
-    gender = '',
+    gender = undefined,
     status = [],
     sire = undefined,
     dam = undefined,
@@ -112,15 +112,15 @@ const FilterComponent: React.FC<FilterProps> = ({
             const newFilters = { ...prevFilters };
 
             if (type === 'gender') {
-                newFilters.gender = value;
-                if (onGenderChange) onGenderChange(value);
+                newFilters.gender = value as GenderEnum;
+                if (onGenderChange) onGenderChange(value as GenderEnum);
             } else {
-                const newStatus = newFilters.status!.includes(value)
+                const newStatus: StatusEnum[] = newFilters.status!.includes(value as StatusEnum)
                     ? newFilters.status!.filter((status) => status !== value)
-                    : [...newFilters.status!, value];
+                    : [...newFilters.status!, value as StatusEnum];
 
-                newFilters.status = newStatus;
-                if (onStatusChange) onStatusChange(newStatus);
+                newFilters.status = newStatus
+                if (onStatusChange) onStatusChange(newStatus); 
             }
 
             return newFilters;
@@ -138,14 +138,14 @@ const FilterComponent: React.FC<FilterProps> = ({
 
     const handleClearAll = () => {
         const clearedFilters: SelectedFilters = {
-            gender: '',
+            gender: undefined,
             status: [],
             sire: undefined,
             dam: undefined,
             color: ''
         };
         setSelectedFilters(clearedFilters);
-        if (onGenderChange) onGenderChange('');
+        if (onGenderChange) onGenderChange(undefined);
         if (onStatusChange) onStatusChange([]);
         if (onSireChange) onSireChange(undefined);
         if (onDamChange) onDamChange(undefined);
@@ -225,7 +225,7 @@ const FilterComponent: React.FC<FilterProps> = ({
                             <Checkbox
                                 type="checkbox"
                                 value="male"
-                                checked={selectedFilters.gender === 'male'}
+                                checked={selectedFilters.gender === GenderEnum.Male}
                                 onChange={(e) => handleCheckboxChange('gender', e.target.checked ? 'male' : '')}
                                 disabled={isGenderDisabled}
                             />
@@ -235,7 +235,7 @@ const FilterComponent: React.FC<FilterProps> = ({
                             <Checkbox
                                 type="checkbox"
                                 value="female"
-                                checked={selectedFilters.gender === 'female'}
+                                checked={selectedFilters.gender === GenderEnum.Female}
                                 onChange={(e) => handleCheckboxChange('gender', e.target.checked ? 'female' : '')}
                                 disabled={isGenderDisabled}
                             />
@@ -250,7 +250,7 @@ const FilterComponent: React.FC<FilterProps> = ({
                             <Checkbox
                                 type="checkbox"
                                 value="available"
-                                checked={selectedFilters.status!.includes('available')}
+                                checked={selectedFilters.status!.includes(StatusEnum.Available)}
                                 onChange={() => handleCheckboxChange('status', 'available')}
                             />
                             <FilterLabel>Available</FilterLabel>
@@ -259,17 +259,17 @@ const FilterComponent: React.FC<FilterProps> = ({
                             <Checkbox
                                 type="checkbox"
                                 value="sold"
-                                checked={selectedFilters.status!.includes('sold')}
+                                checked={selectedFilters.status!.includes(StatusEnum.Sold)}
                                 onChange={() => handleCheckboxChange('status', 'sold')}
                             />
                             <FilterLabel>Sold</FilterLabel>
                         </CheckboxContainer>
-                        {selectedFilters.gender === 'male' && (
+                        {selectedFilters.gender === GenderEnum.Male && (
                             <CheckboxContainer>
                                 <Checkbox
                                     type="checkbox"
                                     value="stud"
-                                    checked={selectedFilters.status!.includes('stud')}
+                                    checked={selectedFilters.status!.includes(StatusEnum.Stud)}
                                     onChange={() => handleCheckboxChange('status', 'stud')}
                                 />
                                 <FilterLabel>Available For Stud</FilterLabel>

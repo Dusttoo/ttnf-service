@@ -165,9 +165,8 @@ const PuppyForm: React.FC<PuppyFormProps> = ({
         setGalleryPhotos(urls);
     };
 
-    const handleStatusChange = (status: StatusEnum) => {
-        const updatedFormState = { ...formState, status };
-        setFormState(updatedFormState);
+    const handleStatusChange = (status: StatusEnum | undefined) => {
+        setFormState((prevState) => ({ ...prevState, status }));
         setShowDropdown(false);
     };
 
@@ -265,7 +264,7 @@ const PuppyForm: React.FC<PuppyFormProps> = ({
                         {formState.status ? (
                             <StatusBadge color="#E76F00">
                                 {formState.status}
-                                <span onClick={(e) => { e.stopPropagation(); setFormState((prevState) => ({ ...prevState, status: '' })); }}>
+                                <span onClick={(e) => { e.stopPropagation(); handleStatusChange(undefined); }}>
                                     &#x2715;
                                 </span>
                             </StatusBadge>

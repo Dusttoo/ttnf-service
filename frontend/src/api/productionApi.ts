@@ -1,5 +1,5 @@
 import apiClient from './axiosInstance';
-import { Production, ProductionCreate, ProductionUpdate } from '../api/types';
+import { Production, ProductionCreate, ProductionUpdate } from '../api/types/dog';
 
 export const getProductions = async (page: number, pageSize: number): Promise<{ items: Production[], totalCount: number }> => {
     const response = await apiClient.get(`/productions/?page=${page}&pageSize=${pageSize}`);

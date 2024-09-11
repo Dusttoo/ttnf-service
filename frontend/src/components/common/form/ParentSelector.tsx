@@ -2,6 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import DogDropdown from './DogSelection';
 import { FilterProps } from '../../../api/types/dog';
+import { GenderEnum } from '../../../api/types/core';
 
 interface ParentSelectorProps {
     sireId: number | undefined;
@@ -28,8 +29,8 @@ const ParentLabel = styled.h3`
 `;
 
 const ParentSelector: React.FC<ParentSelectorProps> = ({ sireId, damId, onSireChange, onDamChange }) => {
-    const sireFilters: FilterProps = { gender: 'male' };
-    const damFilters: FilterProps = { gender: 'female' };
+    const sireFilters: FilterProps = { gender: GenderEnum.Male };
+    const damFilters: FilterProps = { gender: GenderEnum.Female };
 
     return (
         <ParentContainer>

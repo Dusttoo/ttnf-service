@@ -1,5 +1,5 @@
 import apiClient from './axiosInstance';
-import { AuthResponse } from '../api/types';
+import { AuthResponse } from '../api/types/core';
 
 interface LoginData {
     username: string;

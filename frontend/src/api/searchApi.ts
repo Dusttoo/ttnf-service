@@ -1,6 +1,6 @@
 import apiClient from './axiosInstance';
 
-import { SearchResponse } from '../api/types';
+import { SearchResponse } from '../api/types/core';
 
 export const searchResources = async (
     query: string,

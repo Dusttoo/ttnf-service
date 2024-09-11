@@ -2,35 +2,44 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { login as loginApi, register as registerApi, logout as logoutApi } from '../api/authApi';
 import { RootState } from '../store';
 
+// Define AuthState
 interface AuthState {
-    user: any;
+    user: { id: number; username: string; email: string } | null; // Specific user structure
     token: string | null;
     error: string | null | undefined;
 }
 
+// Initial state
 const initialState: AuthState = {
     user: null,
-    token: localStorage.getItem('token') || null, 
+    token: localStorage.getItem('token') || null,
     error: null,
 };
 
 // Thunks
-export const login = createAsyncThunk('auth/login', async (credentials: { username: string; password: string }) => {
-    const response = await loginApi(credentials);
-    localStorage.setItem('token', response.accessToken);  
-    return response;
-});
+export const login = createAsyncThunk(
+    'auth/login',
+    async (credentials: { username: string; password: string }) => {
+        const response = await loginApi(credentials);
+        localStorage.setItem('token', response.accessToken); // Store token in localStorage
+        return response;
+    }
+);
 
-export const register = createAsyncThunk('auth/register', async (userData: { username: string; email: string; password: string }) => {
-    const response = await registerApi(userData);
-    return response;
-});
+export const register = createAsyncThunk(
+    'auth/register',
+    async (userData: { username: string; email: string; password: string }) => {
+        const response = await registerApi(userData);
+        return response;
+    }
+);
 
 export const logout = createAsyncThunk('auth/logout', async () => {
     await logoutApi();
-    localStorage.removeItem('token');  
+    localStorage.removeItem('token'); // Remove token from localStorage
 });
 
+// Auth slice
 const authSlice = createSlice({
     name: 'auth',
     initialState,
@@ -38,7 +47,7 @@ const authSlice = createSlice({
     extraReducers: (builder) => {
         builder
             .addCase(login.pending, (state) => {
-                
+                state.error = null; 
             })
             .addCase(login.fulfilled, (state, action) => {
                 state.token = action.payload.accessToken;
@@ -48,7 +57,7 @@ const authSlice = createSlice({
                 state.error = action.error.message;
             })
             .addCase(register.pending, (state) => {
-                
+                state.error = null; 
             })
             .addCase(register.fulfilled, (state, action) => {
                 state.user = action.payload.user;
@@ -58,7 +67,7 @@ const authSlice = createSlice({
                 state.error = action.error.message;
             })
             .addCase(logout.pending, (state) => {
-                
+                state.error = null; 
             })
             .addCase(logout.fulfilled, (state) => {
                 state.user = null;

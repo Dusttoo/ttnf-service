@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import login from '../../store/authSlice';
+import { login } from '../../store/authSlice';
 import Input from '../common/Input';
 import Button from '../common/Button';
 import { AppDispatch, RootState } from '../../store';
@@ -14,13 +14,13 @@ const Login: React.FC = () => {
     const [password, setPassword] = useState('');
     const { isLoading } = useSelector((state: RootState) => state.loading);
     const error = useSelector(selectAuthError);
-    console.log("loading: ", isLoading)
+
     const handleLogin = async () => {
         try {
             await dispatch(login({ username, password })).unwrap();
             navigate('/admin/dashboard');
         } catch (err) {
-            console.error('Login failed:', error);
+            console.error('Login failed:', (err as Error).message);
         }
     };
 

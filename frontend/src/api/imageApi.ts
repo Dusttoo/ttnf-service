@@ -1,5 +1,5 @@
 import apiClient from './axiosInstance';
-import { ImageResponse } from '../api/types';
+import { ImageResponse } from '../api/types/media';
 
 export const uploadImage = async (file: File): Promise<ImageResponse> => {
     const formData = new FormData();

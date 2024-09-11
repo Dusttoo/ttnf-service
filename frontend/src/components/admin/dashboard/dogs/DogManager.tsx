@@ -7,6 +7,7 @@ import GlobalModal from '../../../common/Modal';
 import DogForm from './DogForm';
 import { useDogs, useDeleteDog } from '../../../../hooks/useDog';
 import { useNavigate } from 'react-router-dom';
+import { GenderEnum, StatusEnum } from '../../../../api/types/core';
 
 const ListWrapper = styled.div`
   display: flex;
@@ -106,10 +107,9 @@ const PaginationWrapper = styled.div`
   margin-top: 2rem;
 `;
 
-const AdminDogList: React.FC<{ defaultGender?: string; owned?: boolean }> = ({ defaultGender, owned }) => {
-    const navigate = useNavigate();
-    const [gender, setGender] = useState<string>(defaultGender || '');
-    const [status, setStatus] = useState<string[]>([]);
+const AdminDogList: React.FC<{ defaultGender?: GenderEnum; owned?: boolean }> = ({ defaultGender, owned }) => {
+    const [gender, setGender] = useState<GenderEnum | undefined>(defaultGender);
+    const [status, setStatus] = useState<StatusEnum[]>([]);
     const [sire, setSire] = useState<Dog | undefined>(undefined);
     const [dam, setDam] = useState<Dog | undefined>(undefined);
     const [isModalOpen, setIsModalOpen] = useState(false);

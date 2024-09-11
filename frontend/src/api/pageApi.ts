@@ -1,12 +1,12 @@
 import apiClient from './axiosInstance';
-import { Page } from '../api/types';
+import { Page } from '../api/types/page';
 
 export const getPages = async (): Promise<Page[]> => {
     const response = await apiClient.get<Page[]>('/pages');
     return response.data;
 };
 
-export const getPageById = async (id: number): Promise<Page> => {
+export const getPageById = async (id: string): Promise<Page> => {
     const response = await apiClient.get<Page>(`/pages/${id}`);
     return response.data;
 };
@@ -22,10 +22,10 @@ export const createPage = async (pageData: Partial<Page>): Promise<Page> => {
     return response.data;
 };
 
-export const updatePage = async (id: number, page: Page): Promise<void> => {
+export const updatePage = async (id: string, page: Page): Promise<void> => {
     await apiClient.put(`/pages/${id}`, page);
 };
 
-export const deletePage = async (id: number): Promise<void> => {
+export const deletePage = async (id: string): Promise<void> => {
     await apiClient.delete(`/pages/${id}`);
 };

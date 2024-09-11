@@ -1,5 +1,5 @@
 import apiClient from './axiosInstance';
-import { NavLink } from '../api/types';
+import { NavLink } from '../api/types/navigation';
 
 export const getNavLinks = async (): Promise<NavLink[]> => {
     const response = await apiClient.get<NavLink[]>('/navigation/links');

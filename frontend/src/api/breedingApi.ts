@@ -1,4 +1,4 @@
-import { Breeding, BreedingCreate, BreedingUpdate } from '../api/types';
+import { Breeding, BreedingCreate, BreedingUpdate } from '../api/types/breeding';
 import apiClient from './axiosInstance';
 
 export const getBreedings = async (page?: number, pageSize?: number) => {

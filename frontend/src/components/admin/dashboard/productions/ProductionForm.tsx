@@ -6,6 +6,7 @@ import { useProduction, useCreateProduction, useUpdateProduction } from '../../.
 import Button from '../../../common/form/Button';
 import ImageUpload from '../../../common/ImageUpload';
 import ParentSelector from '../../../common/form/ParentSelector';
+import { GenderEnum } from '../../../../api/types/core';
 
 const FormContainer = styled.div`
   display: flex;
@@ -56,7 +57,7 @@ const ProductionForm: React.FC<ProductionFormProps> = ({ onClose, productionId }
         name: '',
         dob: '',
         profilePhoto: '',
-        gender: '',
+        gender: undefined,
         owner: '',
         parentMaleId: undefined,
         parentFemaleId: undefined,

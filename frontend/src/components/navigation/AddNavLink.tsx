@@ -11,7 +11,7 @@ const AddNavLink: React.FC = () => {
     const handleAddLink = (page: Page) => {
         dispatch(addNavLink({
             id: page.id.toString(),
-            title: page.title,
+            title: page.name,
             slug: page.slug,
             editable: true,
         }));
@@ -23,7 +23,7 @@ const AddNavLink: React.FC = () => {
             <ul>
                 {pages.map(page => (
                     <li key={page.id}>
-                        <button onClick={() => handleAddLink(page)}>{page.title}</button>
+                        <button onClick={() => handleAddLink(page)}>{page.name}</button>
                     </li>
                 ))}
             </ul>

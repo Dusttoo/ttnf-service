@@ -116,7 +116,7 @@ const DogForm: React.FC<DogFormProps> = ({
         name: '',
         dob: '',
         gender: '' as GenderEnum,
-        status: '' as StatusEnum,
+        status: undefined, // Use undefined instead of an empty string
         color: '',
         description: '',
         profilePhoto: '',
@@ -265,7 +265,7 @@ const DogForm: React.FC<DogFormProps> = ({
                         {formState.status ? (
                             <StatusBadge color="#E76F00">
                                 {formState.status}
-                                <span onClick={(e) => { e.stopPropagation(); setFormState((prevState) => ({ ...prevState, status: '' })); }}>
+                                <span onClick={(e) => { e.stopPropagation(); setFormState((prevState) => ({ ...prevState, status: undefined })); }}>
                                     &#x2715;
                                 </span>
                             </StatusBadge>

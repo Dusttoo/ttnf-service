@@ -57,7 +57,7 @@ const PageList: React.FC = () => {
 
   console.log('loading: ', isLoading)
 
-  const handleDelete = async (pageId: number) => {
+  const handleDelete = async (pageId: string) => {
     if (window.confirm('Are you sure you want to delete this page?')) {
       await dispatch(removePage(pageId));
     }
@@ -73,7 +73,7 @@ const PageList: React.FC = () => {
       <Button onClick={() => navigate('/admin/dashboard/pages/new')}>Create New Page</Button>
       {pages.map((page) => (
         <PageItem key={page.id}>
-          <span>{page.title}</span>
+          <span>{page.name}</span>
           <div>
             <Button onClick={() => navigate(`/admin/dashboard/pages/edit/${page.slug}`)}>Edit</Button>
             <Button onClick={() => handleDelete(page.id)}>Delete</Button>

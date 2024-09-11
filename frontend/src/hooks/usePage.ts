@@ -5,7 +5,7 @@ import { RootState, AppDispatch } from '../store';
 
 const usePage = (slug: string | undefined) => {
     const dispatch: AppDispatch = useDispatch();
-    const page = useSelector((state: RootState) => state.pages.pages.find(p => p.slug === slug));
+    const page = useSelector((state: RootState) => state.pages.pages.find(p => p.id === slug)); // Using ID instead of slug for now
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 

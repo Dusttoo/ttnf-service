@@ -1,5 +1,6 @@
 import apiClient from './axiosInstance';
-import { Dog, DogCreate, DogUpdate, PaginatedResponse } from '../api/types';
+import { PaginatedResponse } from '../api/types/core';
+import { Dog, DogCreate, DogUpdate } from '../api/types/dog'
 
 export const getDogs = async (page = 1, pageSize = 10): Promise<PaginatedResponse<Dog>> => {
     const response = await apiClient.get<PaginatedResponse<Dog>>('/dogs', { params: { page, page_size: pageSize } });
