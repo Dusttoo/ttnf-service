@@ -4,6 +4,7 @@ import { getDogsFiltered } from '../../api/dogApi';
 import { Dog } from '../../api/types/dog';
 import DogTile from './DogTile';
 import FilterComponent from '../common/Filter';
+import Pagination from '../common/Pagination';
 import { GenderEnum, StatusEnum } from '../../api/types/core';
 
 const ListContainer = styled.div`
@@ -15,17 +16,26 @@ const ListContainer = styled.div`
 
 const DogList: React.FC<{ defaultGender?: GenderEnum | undefined, owned?: boolean }> = ({ defaultGender, owned }) => {
     const [dogs, setDogs] = useState<Dog[]>([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
     const [gender, setGender] = useState<GenderEnum | undefined>(defaultGender ?? undefined);
     const [status, setStatus] = useState<string[] | undefined>([]);
+    const [totalItems, setTotalItems] = useState(0); 
 
     useEffect(() => {
         const fetchDogs = async () => {
-            const dogData = await getDogsFiltered({ gender, status, owned });
+            const dogData = await getDogsFiltered({ gender, status, owned }, currentPage, itemsPerPage);
             setDogs(dogData.items);
+            setTotalItems(dogData.total); 
         };
 
         fetchDogs();
-    }, [gender, status, owned]);
+    }, [gender, status, owned, currentPage, itemsPerPage]);
+
+    const handlePageChange = (page: number, newItemsPerPage: number) => {
+        setCurrentPage(page);
+        setItemsPerPage(newItemsPerPage);
+    };
 
     return (
         <>
@@ -41,6 +51,12 @@ const DogList: React.FC<{ defaultGender?: GenderEnum | undefined, owned?: boolea
                     <DogTile key={dog.id} dog={dog} />
                 ))}
             </ListContainer>
+            <Pagination
+                totalItems={totalItems}
+                currentPage={currentPage}
+                itemsPerPage={itemsPerPage}
+                onPageChange={handlePageChange}
+            />
         </>
     );
 };

@@ -11,7 +11,8 @@ import MalesPage from '../pages/dogs/MalesPage';
 import FemalesPage from '../pages/dogs/FemalesPage'; 
 import BreedingsPage from '../pages/dogs/BreedingPage'; 
 import DogDetailPage from '../components/dogs/DogDetail';
-// import ProductionsPage from '../pages/dogs/ProductionsPage'; 
+import ProductionsPage from '../pages/dogs/ProductionsPage'; 
+import LitterPage from '../pages/dogs/LittersPage';
 
 const PublicRoutes = () => {
     const dispatch: AppDispatch = useDispatch();
@@ -26,7 +27,8 @@ const PublicRoutes = () => {
         males: MalesPage,
         females: FemalesPage,
         breedings: BreedingsPage,
-        // productions: ProductionsPage,
+        litters: LitterPage,
+        productions: ProductionsPage,
     };
 
     return (
@@ -38,6 +40,7 @@ const PublicRoutes = () => {
                 <Route path="/dogs/:id" element={<DogDetailPage/>} />
 
                 {pages.map((page) => {
+                    console.log(page)
                     const Component = pageComponentMap[page.slug] || DynamicPage; 
 
                     return (

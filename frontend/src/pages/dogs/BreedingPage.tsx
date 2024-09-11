@@ -4,6 +4,7 @@ import { getBreedings } from '../../api/breedingApi';
 import { Breeding } from '../../api/types/breeding';
 import BreedingCard from '../../components/breedings/BreedingCard';
 import Container from '../../components/common/Container';
+import Pagination from '../../components/common/Pagination';
 
 const BreedingList = styled.div`
   display: flex;
@@ -13,14 +14,23 @@ const BreedingList = styled.div`
 
 const BreedingPage: React.FC = () => {
     const [breedings, setBreedings] = useState<Breeding[]>([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10); 
+    const [totalItems, setTotalItems] = useState(0);
 
     useEffect(() => {
         const fetchBreedings = async () => {
-            const data = await getBreedings();
+            const data = await getBreedings(currentPage, itemsPerPage); 
             setBreedings(data.items);
+            setTotalItems(data.total); 
         };
         fetchBreedings();
-    }, []);
+    }, [currentPage, itemsPerPage]);
+
+    const handlePageChange = (page: number, newItemsPerPage: number) => {
+        setCurrentPage(page);
+        setItemsPerPage(newItemsPerPage);
+    };
 
     return (
         <Container>
@@ -30,6 +40,12 @@ const BreedingPage: React.FC = () => {
                     <BreedingCard key={breeding.id} breeding={breeding} />
                 ))}
             </BreedingList>
+            <Pagination
+                totalItems={totalItems}
+                currentPage={currentPage}
+                itemsPerPage={itemsPerPage}
+                onPageChange={handlePageChange}
+            />
         </Container>
     );
 };
