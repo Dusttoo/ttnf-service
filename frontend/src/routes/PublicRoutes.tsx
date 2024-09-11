@@ -10,6 +10,7 @@ import Login from '../components/auth/Login';
 import MalesPage from '../pages/dogs/MalesPage'; 
 import FemalesPage from '../pages/dogs/FemalesPage'; 
 import BreedingsPage from '../pages/dogs/BreedingPage'; 
+import DogDetailPage from '../components/dogs/DogDetail';
 // import ProductionsPage from '../pages/dogs/ProductionsPage'; 
 
 const PublicRoutes = () => {
@@ -34,6 +35,7 @@ const PublicRoutes = () => {
                 <Route path="/" element={<Navigate to="/home" />} />
                 <Route path="/home" element={<PublicPage slug="landing" />} />
                 <Route path="/login" element={<Login />} />
+                <Route path="/dogs/:id" element={<DogDetailPage/>} />
 
                 {pages.map((page) => {
                     const Component = pageComponentMap[page.slug] || DynamicPage; 
