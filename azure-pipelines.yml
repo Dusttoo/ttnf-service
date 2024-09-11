@@ -44,7 +44,7 @@ stages:
               command: 'buildAndPush'
               Dockerfile: 'frontend/Dockerfile'
               buildArguments: |
-                REACT_APP_BACKEND_URL=https://api-dev.texastopnotchfrenchies.com
+                REACT_APP_BACKEND_URL=$(REACT_APP_BACKEND_URL)
                 REACT_APP_TINYMCE_API_KEY=$(REACT_APP_TINYMCE_API_KEY)
               tags: |
                 $(Build.BuildId)
