@@ -60,7 +60,7 @@ const Header = () => {
 
     return (
         <HeaderContainer>
-            <NavLinkStyled to="/"><Logo src="https://ttnf.blob.core.windows.net/ttnf/logoLight.png" alt="Logo" /></NavLinkStyled>
+            <NavLinkStyled to="/"><Logo src="https://ttnfas.blob.core.windows.net/ttnf/YJIGdZU-1.png" alt="Logo" /></NavLinkStyled>
             <Navigation />
         </HeaderContainer>
     );
