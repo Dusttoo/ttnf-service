@@ -8,6 +8,9 @@ import { Breeding, LitterCreate } from '../../../../api/types/breeding';
 import { useBreedings, useDeleteBreeding } from '../../../../hooks/useBreeding';
 import { useQueryClient } from 'react-query';
 import { EditButton, AddButton, DeleteButton } from '../../../common/Buttons';
+import LoadingSpinner from '../../../common/LoadingSpinner';
+import ErrorComponent from '../../../common/Error';
+import NoResults from '../../../common/NoResults';
 
 const ListWrapper = styled.div`
   display: flex;
@@ -174,9 +177,9 @@ const AdminBreedingList: React.FC = () => {
         <ListWrapper>
             <AddNewBreedingButton onClick={handleAddNewBreeding}>Add New Breeding</AddNewBreedingButton>
             {isLoading ? (
-                <div>Loading...</div>
+                <LoadingSpinner/>
             ) : error ? (
-                <div>Error loading breedings: {(error as Error).message}</div>
+                <ErrorComponent message={`Error loading breedings: ${(error as Error).message}`} />
             ) : (
                 <>
                     {breedingsData && breedingsData.items.length > 0 ? (
@@ -202,7 +205,7 @@ const AdminBreedingList: React.FC = () => {
                             ))}
                         </ListContainer>
                     ) : (
-                        <div>No results found. Please adjust your filters and try again.</div>
+                        <NoResults message='No breedings found.' description='Try adding a new breeding.' />
                     )}
                     <PaginationWrapper>
                         <Pagination

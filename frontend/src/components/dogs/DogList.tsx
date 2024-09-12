@@ -6,6 +6,7 @@ import DogTile from './DogTile';
 import FilterComponent from '../common/Filter';
 import Pagination from '../common/Pagination';
 import { GenderEnum, StatusEnum } from '../../api/types/core';
+import LoadingSpinner from '../common/LoadingSpinner';
 
 const ListContainer = styled.div`
   display: flex;
@@ -36,6 +37,8 @@ const DogList: React.FC<{ defaultGender?: GenderEnum | undefined, owned?: boolea
         setCurrentPage(page);
         setItemsPerPage(newItemsPerPage);
     };
+
+    if (dogs.length === 0) return <LoadingSpinner />
 
     return (
         <>

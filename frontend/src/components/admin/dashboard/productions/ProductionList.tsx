@@ -4,6 +4,7 @@ import { useProductions, useDeleteProduction } from '../../../../hooks/useProduc
 import Pagination from '../../../common/Pagination';
 import GlobalModal from '../../../common/Modal';
 import ProductionForm from './ProductionForm';
+import LoadingSpinner from '../../../common/LoadingSpinner';
 
 const ListWrapper = styled.div`
   display: flex;
@@ -136,7 +137,7 @@ const AdminProductionList: React.FC = () => {
         <ListWrapper>
             <AddNewProductionButton onClick={handleAddNewProduction}>Add New Production</AddNewProductionButton>
             {isLoading ? (
-                <div>Loading...</div>
+                <LoadingSpinner/>
             ) : (
                 <>
                     {data && data?.items.length > 0 ? (

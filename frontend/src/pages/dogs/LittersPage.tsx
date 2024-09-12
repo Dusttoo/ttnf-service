@@ -6,6 +6,8 @@ import LitterCard from '../../components/breedings/LitterCard';
 import Container from '../../components/common/Container';
 import Pagination from '../../components/common/Pagination';
 import NoResults from '../../components/common/NoResults';
+import LoadingSpinner from '../../components/common/LoadingSpinner';
+import ErrorComponent from '../../components/common/Error';
 
 const LitterList = styled.div`
   display: flex;
@@ -26,8 +28,8 @@ const LitterPage: React.FC = () => {
         setItemsPerPage(newItemsPerPage);
     };
 
-    if (isLoading) return <div>Loading...</div>;
-    if (isError) return <div>Error fetching litters</div>;
+    if (isLoading) return <LoadingSpinner/>;
+    if (isError) return <ErrorComponent message='Something went wrong' />;
 
     return (
         <Container>

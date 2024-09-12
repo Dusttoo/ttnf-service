@@ -5,6 +5,7 @@ import { Dog } from '../../api/types/dog';
 import styled from 'styled-components';
 import { StatusBadge } from '../common/StatusBadge';
 import ImageGallery from '../common/ImageGallery';
+import LoadingSpinner from '../common/LoadingSpinner';
 
 const DogDetailContainer = styled.div`
   padding: 2rem;
@@ -59,7 +60,7 @@ const DogDetailPage: React.FC = () => {
         fetchDog();
     }, [id]);
 
-    if (!dog) return <p>Loading...</p>;
+    if (!dog) return <LoadingSpinner/>;
 
     const getStatusColor = (status: string): string => {
         switch (status) {

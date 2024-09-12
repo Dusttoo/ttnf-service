@@ -8,6 +8,8 @@ import ContentArea from './ContentArea';
 import PreviewMode from './PreviewMode';
 import ToggleButton from './ToggleButton';
 import styled from 'styled-components';
+import LoadingSpinner from '../../../../common/LoadingSpinner';
+import ErrorComponent from '../../../../common/Error';
 
 const EditorContainer = styled.div`
   display: flex;
@@ -40,8 +42,8 @@ const PageEditor: React.FC = () => {
         }
     };
 
-    if (loading) return <div>Loading...</div>;
-    if (error) return <div>Error: {error}</div>;
+    if (loading) return <LoadingSpinner/>;
+    if (error) return <ErrorComponent message={error}/>;
 
     return (
         <EditorContainer>

@@ -4,6 +4,8 @@ import styled from 'styled-components';
 import { SelectedFilters, FilterProps, Dog } from '../../../api/types/dog';
 import { useFilteredDogs } from '../../../hooks/useDog';
 import { RootState } from '../../../store';
+import LoadingSpinner from '../LoadingSpinner';
+import ErrorComponent from '../Error';
 
 interface DogDropdownProps {
     name: string;
@@ -51,11 +53,11 @@ const DogDropdown: React.FC<DogDropdownProps> = ({ name, value, onChange, filter
     }, [value, data]);
 
     if (isLoading) {
-        return <p>Loading...</p>;
+        return <LoadingSpinner/>;
     }
 
     if (error) {
-        return <p>Error loading dogs</p>;
+        return <ErrorComponent message={(error as Error).message} />;
     }
 
     const dogs = data?.items || [];

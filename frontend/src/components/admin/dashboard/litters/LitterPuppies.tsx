@@ -10,6 +10,7 @@ import GlobalModal from '../../../common/Modal';
 import DogForm from '../dogs/DogForm';
 import BreedingForm from '../breedings/BreedingForm';
 import { EditButton, DeleteButton } from '../../../common/Buttons';
+import LoadingSpinner from '../../../common/LoadingSpinner';
 
 const Container = styled.div`
   display: flex;
@@ -164,7 +165,7 @@ const LitterPuppyManagement: React.FC = () => {
     };
 
     if (litterLoading) {
-        return <div>Loading...</div>;
+        return <LoadingSpinner />;
     }
 
 

@@ -8,6 +8,7 @@ import DogForm from './DogForm';
 import { useDogs, useDeleteDog } from '../../../../hooks/useDog';
 import { useNavigate } from 'react-router-dom';
 import { GenderEnum, StatusEnum } from '../../../../api/types/core';
+import LoadingSpinner from '../../../common/LoadingSpinner';
 
 const ListWrapper = styled.div`
   display: flex;
@@ -182,7 +183,7 @@ const AdminDogList: React.FC<{ defaultGender?: GenderEnum; owned?: boolean }> = 
             />
             <AddNewDogButton onClick={handleAddNewDog}>Add New Dog</AddNewDogButton>
             {isLoading ? (
-                <div>Loading...</div>
+                <LoadingSpinner/>
             ) : (
                 <>
                     {dogs.length > 0 ? (

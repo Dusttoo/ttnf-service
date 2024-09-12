@@ -7,6 +7,7 @@ import Button from '../../../common/form/Button';
 import FieldFeedback from '../../../common/form/FieldFeedback';
 import DateInput from '../../../common/form/DateInput';
 import ParentSelector from '../../../common/form/ParentSelector';
+import LoadingSpinner from '../../../common/LoadingSpinner';
 
 const FormContainer = styled.div`
   display: flex;
@@ -93,7 +94,7 @@ const BreedingForm: React.FC<{ onClose: () => void; breedingId?: number; }> = ({
         }
     };
 
-    if (isBreedingLoading) return <div>Loading...</div>;
+    if (isBreedingLoading) return <LoadingSpinner/>;
 
     return (
         <FormContainer>

@@ -5,6 +5,7 @@ import { Breeding } from '../../api/types/breeding';
 import BreedingCard from '../../components/breedings/BreedingCard';
 import Container from '../../components/common/Container';
 import Pagination from '../../components/common/Pagination';
+import NoResults from '../../components/common/NoResults';
 
 const BreedingList = styled.div`
   display: flex;
@@ -35,6 +36,8 @@ const BreedingPage: React.FC = () => {
     return (
         <Container>
             <h1>Breedings</h1>
+            {breedings.length > 0 ? 
+            <>
             <BreedingList>
                 {breedings.map((breeding) => (
                     <BreedingCard key={breeding.id} breeding={breeding} />
@@ -46,6 +49,9 @@ const BreedingPage: React.FC = () => {
                 itemsPerPage={itemsPerPage}
                 onPageChange={handlePageChange}
             />
+            </> :
+            <NoResults message={"No breedings at the moment"} description={"Check back soon."} />}
+            
         </Container>
     );
 };

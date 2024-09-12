@@ -8,6 +8,8 @@ import { Litter, LitterCreate, LitterUpdate } from '../../../../api/types/breedi
 import { useNavigate } from 'react-router-dom';
 import { EditButton, ViewButton, DeleteButton } from '../../../common/Buttons';
 import { sortByKey } from '../../../../utils/sort';
+import LoadingSpinner from '../../../common/LoadingSpinner';
+import ErrorComponent from '../../../common/Error';
 
 const ListWrapper = styled.div`
   display: flex;
@@ -191,9 +193,9 @@ const AdminLitterList: React.FC = () => {
         <ListWrapper>
             <AddNewLitterButton onClick={handleAddNewLitter}>Add New Litter</AddNewLitterButton>
             {isLoading ? (
-                <div>Loading...</div>
+                <LoadingSpinner />
             ) : isError ? (
-                <div>Error loading litters.</div>
+                <ErrorComponent message="Error loading litters" /> 
             ) : (
                 <>
                     {data && data.items.length > 0 ? (

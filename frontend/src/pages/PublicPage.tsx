@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { getPageBySlug } from '../api/pageApi';
 import { Page } from '../api/types/page';
 import DOMPurify from 'dompurify';  
+import LoadingSpinner from '../components/common/LoadingSpinner';
 
 interface PublicPageProps {
     slug?: string;
@@ -23,15 +24,13 @@ const PublicPage: React.FC<PublicPageProps> = ({ slug: initialSlug }) => {
         fetchPage();
     }, [slug]);
 
-    if (!page) return <div>Loading...</div>;
+    if (!page) return <LoadingSpinner/>;
 
-    // Sanitize the HTML content to avoid XSS vulnerabilities
     const sanitizedContent = DOMPurify.sanitize(page.content);
 
     return (
         <div>
             <h1>{page.name}</h1>
-            {/* Render the sanitized HTML content */}
             <div dangerouslySetInnerHTML={{ __html: sanitizedContent }} />
         </div>
     );

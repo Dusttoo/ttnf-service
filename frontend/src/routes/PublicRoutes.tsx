@@ -22,7 +22,6 @@ const PublicRoutes = () => {
         dispatch(fetchPages());
     }, [dispatch]);
 
-    // Mapping slugs to specific components
     const pageComponentMap: { [key: string]: React.FC } = {
         males: MalesPage,
         females: FemalesPage,
@@ -40,7 +39,6 @@ const PublicRoutes = () => {
                 <Route path="/dogs/:id" element={<DogDetailPage/>} />
 
                 {pages.map((page) => {
-                    console.log(page)
                     const Component = pageComponentMap[page.slug] || DynamicPage; 
 
                     return (

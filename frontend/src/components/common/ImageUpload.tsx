@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { uploadImage } from '../../api/imageApi';
 import { theme } from '../../theme/theme';
+import ErrorComponent from './Error';
 
 const UploadContainer = styled.div`
   display: flex;
@@ -69,7 +70,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ maxImages, onImagesChange, in
                     const response = await uploadImage(file);
                     uploadedUrls.push(response.url);
                 } catch (error) {
-                    console.error('Error uploading image:', error);
+                    return <ErrorComponent message={(error as Error).message} />
                 }
             }
             const newImageUrls = [...imageUrls, ...uploadedUrls];

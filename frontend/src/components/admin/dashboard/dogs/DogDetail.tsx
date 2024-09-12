@@ -2,6 +2,7 @@ import React from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useDog, useDeleteDog } from '../../../../hooks/useDog';
+import LoadingSpinner from '../../../common/LoadingSpinner';
 
 const DogDetailContainer = styled.div`
     padding: 2rem;
@@ -45,7 +46,7 @@ const DogDetail: React.FC = () => {
         navigate('/admin/dogs');
     };
 
-    if (isLoading) return <p>Loading...</p>;
+    if (isLoading) return <LoadingSpinner />;
 
     if (!dog) return <p>Dog not found</p>;
 

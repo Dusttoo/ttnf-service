@@ -4,6 +4,8 @@ import styled from 'styled-components';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchPages, removePage } from '../../../../store/pageSlice';
 import { RootState, AppDispatch } from '../../../../store';
+import LoadingSpinner from '../../../common/LoadingSpinner';
+import ErrorComponent from '../../../common/Error';
 
 const PageListContainer = styled.div`
   padding: 2rem;
@@ -62,8 +64,10 @@ const PageList: React.FC = () => {
   };
 
   if (isLoading) {
-    return <LoadingContainer>Loading...</LoadingContainer>;
+    return <LoadingContainer><LoadingSpinner/></LoadingContainer>;
   }
+
+  if (error) return <ErrorComponent message={error} />;
 
   return (
     <PageListContainer>

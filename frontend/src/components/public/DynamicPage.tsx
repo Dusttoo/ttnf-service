@@ -6,6 +6,8 @@ import { getPageBySlug, updatePage } from '../../api/pageApi';
 import { Page } from '../../api/types/page';
 import DOMPurify from 'dompurify';
 import ContentArea from '../admin/dashboard/pages/editor/ContentArea'; 
+import LoadingSpinner from '../common/LoadingSpinner';
+import ErrorComponent from '../common/Error';
 
 interface DynamicPageProps {
     slug?: string;
@@ -26,8 +28,8 @@ const DynamicPage: React.FC<DynamicPageProps> = ({ slug: initialSlug }) => {
                 setPage(fetchedPage);
                 setEditContent(fetchedPage.content); 
             } catch (error) {
-                console.error('Error fetching page:', error);
                 setPage(null);
+                <ErrorComponent message={(error as Error).message}/>
             }
         };
 
@@ -40,12 +42,12 @@ const DynamicPage: React.FC<DynamicPageProps> = ({ slug: initialSlug }) => {
                 await updatePage(page.id, { ...page, content: editContent }); 
                 alert('Page updated successfully');
             } catch (error) {
-                console.error('Error updating page:', error);
+                <ErrorComponent message={(error as Error).message}/>
             }
         }
     };
 
-    if (!page) return <div>Loading...</div>;
+    if (!page) return <LoadingSpinner/>;
 
     return (
         <div>

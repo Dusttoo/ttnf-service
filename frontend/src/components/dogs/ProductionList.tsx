@@ -5,6 +5,7 @@ import ProductionTile from './ProductionTile';
 import FilterComponent from '../common/Filter';
 import Pagination from '../common/Pagination';
 import { GenderEnum, StatusEnum } from '../../api/types/core';
+import LoadingSpinner from '../common/LoadingSpinner';
 
 const ListContainer = styled.div`
   display: flex;
@@ -38,7 +39,7 @@ const ProductionList: React.FC<{ defaultGender?: GenderEnum | undefined }> = ({ 
                 isGenderDisabled={!!defaultGender}
             />
             {isLoading ? (
-                <div>Loading...</div>
+                <LoadingSpinner />
             ) : (
                 <>
                     <ListContainer>
