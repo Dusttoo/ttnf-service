@@ -10,7 +10,7 @@ if (process.env.NODE_ENV !== 'development') {
 }
 
 const apiClient = axios.create({
-    baseURL: API_BASE_URL || "https://api-dev.texastopnotchfrenchies.com",
+    baseURL: API_BASE_URL || "https://api-dev.texastopnotchfrenchies.com/api/v1",
     headers: {
         'Content-Type': 'application/json',
     },
