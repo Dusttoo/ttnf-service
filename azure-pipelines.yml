@@ -36,6 +36,8 @@ stages:
       - job: BuildFrontend
         steps:
           - checkout: self
+          - script: echo $(REACT_APP_BACKEND_URL)
+            displayName: 'Verify REACT_APP_BACKEND_URL is set'
 
           - task: Docker@2
             inputs:
