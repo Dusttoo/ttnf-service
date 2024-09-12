@@ -5,6 +5,7 @@ import Pagination from '../../../common/Pagination';
 import GlobalModal from '../../../common/Modal';
 import ProductionForm from './ProductionForm';
 import LoadingSpinner from '../../../common/LoadingSpinner';
+import NoResults from "../../../common/NoResults";
 
 const ListWrapper = styled.div`
   display: flex;
@@ -154,7 +155,7 @@ const AdminProductionList: React.FC = () => {
                             ))}
                         </ListContainer>
                     ) : (
-                        <div>No results found. Please adjust your filters and try again.</div>
+                        <NoResults message={"No productions found."} description={"Try adding a production"} />
                     )}
                     <PaginationWrapper>
                         {data?.totalCount !== undefined && (

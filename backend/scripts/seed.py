@@ -60,11 +60,15 @@ async def seed_data():
                             username="kharper",
                             email="kharper16@gmail.com",
                             phone_number="9037809969",
+                            first_name="Kristen",
+                            last_name="Harper",
                         ),
                         User(
                             username="admin",
                             email="dusty.mumphrey@gmail.com",
                             phone_number="4304355503",
+                            first_name="Dusty",
+                            last_name="Mumphrey",
                         ),
                     ]
 

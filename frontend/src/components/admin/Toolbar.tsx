@@ -2,8 +2,8 @@ import React from 'react';
 import styled from 'styled-components';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../store';
-import { toggleEditMode } from '../../store/editModeSlice';
 import { selectIsAuthenticated } from '../../store/authSlice';
+import { Link } from 'react-router-dom';
 
 const ToolbarContainer = styled.div`
   position: fixed;
@@ -31,20 +31,40 @@ const Button = styled.button`
   }
 `;
 
+const DashboardLink = styled(Link)`
+  color: #fff;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  background: ${(props) => props.theme.colors.primary};
+  border-radius: 4px;
+  margin-left: 1rem;
+
+  &:hover {
+    background: ${(props) => props.theme.colors.secondary};
+  }
+`;
+
+const WelcomeMessage = styled.div`
+  font-size: 1rem;
+  margin-right: auto;
+`;
+
 const AdminToolbar: React.FC = () => {
-  const dispatch = useDispatch();
   const isAuthenticated = useSelector(selectIsAuthenticated);
-  const isEditMode = useSelector((state: RootState) => state.editMode.isEditMode);
+  const currentUser = useSelector((state: RootState) => state.auth.user);
 
   if (!isAuthenticated) return null;
 
   return (
     <ToolbarContainer>
-      <div>Admin Toolbar</div>
+      <WelcomeMessage>
+        {currentUser?.firstName ? `Welcome, ${currentUser.firstName}` : 'Welcome, Admin'}
+      </WelcomeMessage>
+
       {isAuthenticated && (
-        <Button onClick={() => dispatch(toggleEditMode())}>
-          {isEditMode ? 'Exit Edit Mode' : 'Enter Edit Mode'}
-        </Button>
+        <>
+          <DashboardLink to="/admin/dashboard">Dashboard</DashboardLink>
+        </>
       )}
     </ToolbarContainer>
   );

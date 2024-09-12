@@ -1,10 +1,11 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { login as loginApi, register as registerApi, logout as logoutApi } from '../api/authApi';
 import { RootState } from '../store';
+import {User} from '../api/types/core';
 
 // Define AuthState
 interface AuthState {
-    user: { id: number; username: string; email: string } | null; // Specific user structure
+    user: User | null;
     token: string | null;
     error: string | null | undefined;
 }

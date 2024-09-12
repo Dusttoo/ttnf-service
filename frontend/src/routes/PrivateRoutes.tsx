@@ -11,6 +11,7 @@ import AdminBreedingList from '../components/admin/dashboard/breedings/BreedingL
 import AdminLitterList from '../components/admin/dashboard/litters/LitterList';
 import LitterPuppies from '../components/admin/dashboard/litters/LitterPuppies';
 import PageEditor from '../components/admin/dashboard/pages/editor/PageEditor';
+import Landing from "../components/admin/dashboard/Landing";
 
 interface PrivateRouteProps {
     element: React.ReactElement;
@@ -24,6 +25,7 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ element }) => {
 const PrivateRoutes: React.FC = () => (
     <Routes>
         <Route path="/dashboard" element={<PrivateRoute element={<AdminLayout />} />}>
+            <Route path="" element={<Landing/>} />
             <Route path="pages" element={<PageList />} />
             <Route path="pages/edit/:id" element={<PageEditor />} />
             <Route path="dogs" element={<DogManager />} />

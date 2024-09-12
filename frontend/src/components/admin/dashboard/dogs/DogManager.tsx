@@ -9,6 +9,7 @@ import { useDogs, useDeleteDog } from '../../../../hooks/useDog';
 import { useNavigate } from 'react-router-dom';
 import { GenderEnum, StatusEnum } from '../../../../api/types/core';
 import LoadingSpinner from '../../../common/LoadingSpinner';
+import NoResults from "../../../common/NoResults";
 
 const ListWrapper = styled.div`
   display: flex;
@@ -200,7 +201,7 @@ const AdminDogList: React.FC<{ defaultGender?: GenderEnum; owned?: boolean }> = 
                             ))}
                         </ListContainer>
                     ) : (
-                        <div>No results found. Please adjust your filters and try again.</div>
+                        <NoResults message={"No dogs found."} description={"Try adding a dog"} />
                     )}
                     <PaginationWrapper>
                         <Pagination

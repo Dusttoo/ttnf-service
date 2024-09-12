@@ -10,6 +10,7 @@ import { EditButton, ViewButton, DeleteButton } from '../../../common/Buttons';
 import { sortByKey } from '../../../../utils/sort';
 import LoadingSpinner from '../../../common/LoadingSpinner';
 import ErrorComponent from '../../../common/Error';
+import NoResults from "../../../common/NoResults";
 
 const ListWrapper = styled.div`
   display: flex;
@@ -220,7 +221,7 @@ const AdminLitterList: React.FC = () => {
                             ))}
                         </ListContainer>
                     ) : (
-                        <div>No results found. Please adjust your filters and try again.</div>
+                        <NoResults message={"No litters found."} description={"Try adding a litter."} />
                     )}
                     <PaginationWrapper>
                         {data?.totalCount !== undefined && (
