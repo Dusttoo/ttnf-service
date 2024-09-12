@@ -19,26 +19,28 @@ export const NavList = styled.ul`
     margin: 0;
     display: flex;
     flex-direction: column;
-    background-color: ${({ theme }) => theme.colors.primary}; /* Matches the nav background */
+    background-color: ${({ theme }) => theme.colors.primary};
 
     @media (min-width: 768px) {
         flex-direction: row;
         flex-wrap: wrap;
-        justify-content: flex-end;
+        justify-content: space-between;
     }
 `;
 
-export const NavItem = styled.li`
+export const NavItem = styled.li<{ isChild?: boolean }>`
     margin: 0.5rem 0;
     position: relative;
+    overflow: visible;
 
     @media (min-width: 768px) {
         margin: 0.5rem 1rem;
     }
+
     @media (max-width: 768px) {
         padding: 0.5rem 0;
-        border-bottom: 1px solid ${({ theme }) => theme.colors.white}; // Add bottom borders
         font-size: 1rem;
+        border-bottom: ${({ isChild, theme }) => (isChild ? 'none' : `1px solid ${theme.colors.white}`)};
     }
 `;
 
@@ -50,7 +52,7 @@ export const NavLinkStyled = styled.a`
     padding: 0.5rem;
     display: block;
     &:hover {
-        color: ${({ theme }) => theme.colors.accent};
+        color: ${({ theme }) => theme.colors.secondary};
     }
 
     @media (max-width: 768px) {
@@ -115,29 +117,29 @@ export const CloseButton = styled.button`
     margin-bottom: 1rem;
 `;
 
+export const NavItemWrapper = styled.div`
+    position: relative; /* Ensure dropdown is positioned relative to NavItemWrapper */
+    display: inline-block; /* Keep the NavItem and SubNavList together */
+`;
+
 export const SubNavList = styled.ul<{ open: boolean }>`
     display: ${({ open }) => (open ? 'block' : 'none')};
     position: absolute;
     top: 100%;
     left: 0;
-    background-color: ${({ theme }) => theme.colors.secondaryBackground};
+    width: max-content;
+    background-color: ${({ theme }) => theme.colors.primary};
     padding: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     list-style: none;
     z-index: 10;
-    transition: max-height 0.3s ease, opacity 0.3s ease-in-out;
-    visibility: ${({ open }) => (open ? 'visible' : 'hidden')};
-    opacity: ${({ open }) => (open ? '1' : '0')};
-    max-height: ${({ open }) => (open ? '200px' : '0')};
 
     @media (max-width: 768px) {
         position: static;
         padding: 5px;
         border: none;
         box-shadow: none;
-        max-height: ${({ open }) => (open ? 'none' : '0')};
-        padding-left: 15px; // Indent sub-links
-        background-color: ${({ theme }) => theme.colors.accent}; 
+        padding-left: 15px;
     }
 `;
 

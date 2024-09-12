@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '../../store';
-import { NavContainer, NavList, NavItem, NavLinkStyled, MobileMenuButton, MobileMenu, DesktopMenu, CloseButton } from './Navigation.styles';
+import { NavContainer, NavList, MobileMenuButton, MobileMenu, DesktopMenu, CloseButton } from './Navigation.styles';
 import { FaBars, FaTimes } from 'react-icons/fa';
 import NavLinkComponent from './NavLinkComponent';
 import { fetchNavLinks } from '../../store/navigationSlice';

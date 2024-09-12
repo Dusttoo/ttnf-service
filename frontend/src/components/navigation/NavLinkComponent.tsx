@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink } from '../../api/types/navigation';
-import { NavItem, NavLinkStyled, SubNavList, CaretIcon } from './Navigation.styles';
+import { NavItemWrapper, NavItem, NavLinkStyled, SubNavList, CaretIcon } from './Navigation.styles';
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa';  
 
 interface NavLinkProps {
@@ -30,24 +30,26 @@ const NavLinkComponent: React.FC<NavLinkProps> = ({ link }) => {
     };
 
     return (
-        <NavItem onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-            <NavLinkStyled 
-                href={link.subLinks && link.subLinks.length > 0 ? undefined : `/${link.slug}`} 
-                onClick={handleToggleClick} 
-                role={link.subLinks && link.subLinks.length > 0 ? 'button' : undefined} // Make it accessible for buttons
-                aria-haspopup={link.subLinks && link.subLinks.length > 0 ? "true" : undefined}
-            >
-                {link.title}
-                {link.subLinks && link.subLinks.length > 0 && (
-                    <CaretIcon>
-                        {isOpen ? <FaChevronUp /> : <FaChevronDown />}
-                    </CaretIcon>
-                )}
-            </NavLinkStyled>
+        <NavItemWrapper onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+            <NavItem isChild={false}>
+                <NavLinkStyled
+                    href={link.subLinks && link.subLinks.length > 0 ? undefined : `/${link.slug}`}
+                    onClick={handleToggleClick}
+                    role={link.subLinks && link.subLinks.length > 0 ? 'button' : undefined}
+                    aria-haspopup={link.subLinks && link.subLinks.length > 0 ? "true" : undefined}
+                >
+                    {link.title}
+                    {link.subLinks && link.subLinks.length > 0 && (
+                        <CaretIcon>
+                            {isOpen ? <FaChevronUp /> : <FaChevronDown />}
+                        </CaretIcon>
+                    )}
+                </NavLinkStyled>
+            </NavItem>
             {link.subLinks && link.subLinks.length > 0 && (
                 <SubNavList open={isOpen}>
                     {link.subLinks.map(subLink => (
-                        <NavItem key={subLink.id}>
+                        <NavItem key={subLink.id} isChild={true}>
                             <NavLinkStyled href={`/${subLink.slug}`}>
                                 {subLink.title}
                             </NavLinkStyled>
@@ -55,7 +57,7 @@ const NavLinkComponent: React.FC<NavLinkProps> = ({ link }) => {
                     ))}
                 </SubNavList>
             )}
-        </NavItem>
+        </NavItemWrapper>
     );
 };
 
