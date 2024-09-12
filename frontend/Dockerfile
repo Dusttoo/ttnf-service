@@ -1,11 +1,16 @@
 # Stage 1: Build the React app
 FROM node:14-alpine as build
 ARG REACT_APP_BACKEND_URL
+ARG REACT_APP_TINYMCE_API_KEY
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm install
 
 COPY . .
+
+ENV REACT_APP_BACKEND_URL=$REACT_APP_BACKEND_URL
+ENV REACT_APP_TINYMCE_API_KEY=$REACT_APP_TINYMCE_API_KEY
+
 # Build the application
 RUN npm run build
 
