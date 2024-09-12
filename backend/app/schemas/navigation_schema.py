@@ -20,7 +20,7 @@ class NavLinkUpdate(NavLinkBase):
 
 class NavLink(NavLinkBase):
     id: int
-    parent: Optional["NavLink"] = None
+    sub_links: Optional[List["NavLink"]] = []
 
     class Config:
         from_attributes = True  

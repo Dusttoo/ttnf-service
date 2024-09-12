@@ -3,7 +3,7 @@ import { NavLink } from '../../api/types/navigation';
 
 interface NavLinkManagementProps {
     link: NavLink;
-    onRemove: (id: string) => void;
+    onRemove: (id: number) => void;
     onUpdate: (link: NavLink) => void;
 }
 

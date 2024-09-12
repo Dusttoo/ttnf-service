@@ -13,11 +13,11 @@ const NavigationManagement: React.FC = () => {
         dispatch(fetchNavLinks());
     }, [dispatch]);
 
-    const handleAddLink = (newLink: NavLink) => {
+    const handleAddLink = (newLink: Partial<NavLink>) => {
         dispatch(addNavLink(newLink));
     };
 
-    const handleRemoveLink = (id: string) => {
+    const handleRemoveLink = (id: number) => {
         dispatch(removeNavLink(id));
     };
 
@@ -38,7 +38,7 @@ const NavigationManagement: React.FC = () => {
                     />
                 ))}
             </ul>
-            <button onClick={() => handleAddLink({ id: 'new', title: 'New Link', slug: 'new-link', editable: true, position: 0 })}>Add Link</button>
+            <button onClick={() => handleAddLink({ title: 'New Link', slug: 'new-link', editable: true, position: 0 })}>Add Link</button>
         </div>
     );
 };

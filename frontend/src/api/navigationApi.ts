@@ -16,6 +16,6 @@ export const updateNavLink = async (navLink: Partial<NavLink>): Promise<NavLink>
     return response.data;
 };
 
-export const deleteNavLink = async (id: string): Promise<void> => {
+export const deleteNavLink = async (id: number): Promise<void> => {
     await apiClient.delete(`/navigation/links/${id}`);
 };

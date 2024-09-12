@@ -1,5 +1,5 @@
 export interface NavLink {
-    id: string;
+    id: number;
     title: string;
     slug: string;
     editable: boolean;

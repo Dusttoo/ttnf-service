@@ -2,10 +2,10 @@ export const theme = {
     colors: {
         primary: "#E76F00", // Primary Color (Orange)
         secondary: "#2D2D2D", // Secondary Color (Black)
-        accent: "#F9AA33", // Accent Color (Light Orange)
+        accent: "#a84824", // Accent Color (Light Orange)
         neutralBackground: "#FDFDFD", // Neutral Background (Off-White)
         secondaryBackground: "#F0F0F0", // Secondary Background (Light Grey)
-        white: "#FFFFFF", // White
+        white: "#F8F9EE", // White
         black: "#000000", // Black
         error: '#FF4C4C',
     },
@@ -17,7 +17,7 @@ export const theme = {
         button: {
             primary: {
                 background: "#E76F00",
-                color: "#FFFFFF",
+                color: "#F8F9EE",
             },
             secondary: {
                 background: "#F9AA33",
@@ -30,7 +30,7 @@ export const theme = {
         },
         nav: {
             background: "#2D2D2D",
-            color: "#FFFFFF",
+            color: "#F8F9EE",
             hover: "#E76F00",
         },
     },

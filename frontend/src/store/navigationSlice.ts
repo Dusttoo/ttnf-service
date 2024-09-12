@@ -30,7 +30,7 @@ export const updateExistingNavLink = createAsyncThunk('navigation/updateExisting
     return response;
 });
 
-export const removeNavLink = createAsyncThunk('navigation/removeNavLink', async (id: string) => {
+export const removeNavLink = createAsyncThunk('navigation/removeNavLink', async (id: number) => {
     await deleteNavLink(id);
     return id;
 });

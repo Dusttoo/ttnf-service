@@ -10,7 +10,6 @@ const AddNavLink: React.FC = () => {
 
     const handleAddLink = (page: Page) => {
         dispatch(addNavLink({
-            id: page.id.toString(),
             title: page.name,
             slug: page.slug,
             editable: true,

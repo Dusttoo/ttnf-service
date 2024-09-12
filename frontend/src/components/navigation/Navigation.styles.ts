@@ -31,8 +31,7 @@ export const NavList = styled.ul`
 export const NavItem = styled.li`
     margin: 0.5rem 0;
     position: relative;
-    border-radius: 8px; 
-    
+
     @media (min-width: 768px) {
         margin: 0.5rem 1rem;
     }
@@ -123,7 +122,6 @@ export const SubNavList = styled.ul<{ open: boolean }>`
     left: 0;
     background-color: ${({ theme }) => theme.colors.secondaryBackground};
     padding: 10px;
-    border-radius: 5px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     list-style: none;
     z-index: 10;
@@ -134,12 +132,12 @@ export const SubNavList = styled.ul<{ open: boolean }>`
 
     @media (max-width: 768px) {
         position: static;
-        padding: 5px 0;
+        padding: 5px;
         border: none;
         box-shadow: none;
         max-height: ${({ open }) => (open ? 'none' : '0')};
         padding-left: 15px; // Indent sub-links
-        background-color: ${({ theme }) => theme.colors.accent}; // Different color for sub-menu
+        background-color: ${({ theme }) => theme.colors.accent}; 
     }
 `;
 
@@ -154,11 +152,11 @@ export const CaretIcon = styled.span`
 
 export const SubNavLinkStyled = styled(NavLinkStyled)`
     background-color: ${({ theme }) => theme.colors.secondaryBackground}; 
-    color: ${({ theme }) => theme.colors.primary}; /* Orange text for sub-links */
-    border: 2px solid ${({ theme }) => theme.colors.primary}; /* Orange border for sub-links */
+    color: ${({ theme }) => theme.colors.primary}; 
+    border: 2px solid ${({ theme }) => theme.colors.primary}; 
 
     &:hover {
-        background-color: ${({ theme }) => theme.colors.primary}; /* Accent color on hover */
-        color: ${({ theme }) => theme.colors.white}; /* White text on hover */
+        background-color: ${({ theme }) => theme.colors.primary}; 
+        color: ${({ theme }) => theme.colors.white}; 
     }
 `;
