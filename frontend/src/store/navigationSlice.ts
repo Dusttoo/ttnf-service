@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { getNavLinks, createNavLink, updateNavLink, deleteNavLink } from '../api/navigationApi';
 import { NavLink } from '../api/types/navigation';
+import { buildNavTree } from '../utils/buildNavTree';
 
 interface NavigationState {
     links: NavLink[];
@@ -16,7 +17,7 @@ const initialState: NavigationState = {
 
 export const fetchNavLinks = createAsyncThunk('navigation/fetchNavLinks', async () => {
     const response = await getNavLinks();
-    return response;
+    return buildNavTree(response); 
 });
 
 export const addNavLink = createAsyncThunk('navigation/addNavLink', async (navLink: Partial<NavLink>) => {

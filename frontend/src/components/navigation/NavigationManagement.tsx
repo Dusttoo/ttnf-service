@@ -38,7 +38,7 @@ const NavigationManagement: React.FC = () => {
                     />
                 ))}
             </ul>
-            <button onClick={() => handleAddLink({ id: 'new', title: 'New Link', slug: 'new-link', editable: true })}>Add Link</button>
+            <button onClick={() => handleAddLink({ id: 'new', title: 'New Link', slug: 'new-link', editable: true, position: 0 })}>Add Link</button>
         </div>
     );
 };

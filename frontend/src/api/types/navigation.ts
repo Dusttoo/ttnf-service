@@ -3,5 +3,7 @@ export interface NavLink {
     title: string;
     slug: string;
     editable: boolean;
+    parentId?: number;
+    position: number;
     subLinks?: NavLink[];
 }

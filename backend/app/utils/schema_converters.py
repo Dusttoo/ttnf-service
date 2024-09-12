@@ -115,6 +115,7 @@ def convert_to_production_schema(production: Production) -> ProductionSchema:
     )
 
 def convert_to_navigation_schema(navigation: NavLink) -> NavLinkSchema:
+
     return NavLinkSchema(
         id=navigation.id,
         title=navigation.title,
@@ -123,7 +124,6 @@ def convert_to_navigation_schema(navigation: NavLink) -> NavLinkSchema:
         parent_id=navigation.parent_id,
         position=navigation.position,
     )
-
 
 def convert_to_page_schema(page: Union[Page, dict]) -> PageSchema:
     content = page["content"] if isinstance(page, dict) else page.content

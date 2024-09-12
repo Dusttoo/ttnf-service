@@ -7,37 +7,37 @@ from sqlalchemy.orm import selectinload
 from sqlalchemy.exc import SQLAlchemyError
 from fastapi import HTTPException
 from app.models.navigation import NavLink
-from app.schemas import NavLinkCreate, NavLinkUpdate
+from app.schemas import NavLinkCreate, NavLinkUpdate, NavLink as NavLinkSchema
 from app.core.redis import get_redis_client
 from app.utils.schema_converters import convert_to_navigation_schema
 
 logger = logging.getLogger(__name__)
 
-
 class NavigationService:
     async def get_nav_links(
         self, db: AsyncSession, skip: int = 0, limit: int = 100
-    ) -> List[NavLink]:
+    ) -> List[NavLinkSchema]:
         try:
             redis_client = await get_redis_client()
             cache_key = f"nav_links:{skip}:{limit}"
             cached_data = await redis_client.get(cache_key)
 
             if cached_data:
-                return [NavLink(**nav_link) for nav_link in json.loads(cached_data)]
+                return json.loads(cached_data)
 
-            query = select(NavLink).options(selectinload(NavLink.parent)).offset(skip).limit(limit)
+            # Fetch all nav links in flat structure
+            query = select(NavLink).offset(skip).limit(limit)
             result = await db.execute(query)
-
             nav_links = result.scalars().all()
 
+            # Cache the result
             await redis_client.set(
                 cache_key,
                 json.dumps([convert_to_navigation_schema(nav_link).dict() for nav_link in nav_links]),
                 ex=3600,
             )
 
-            return nav_links
+            return [convert_to_navigation_schema(nav_link) for nav_link in nav_links]
         except SQLAlchemyError as e:
             logger.error(f"Error in get_nav_links: {e}", exc_info=True)
             raise HTTPException(status_code=500, detail=f"Internal Server Error: {e}")

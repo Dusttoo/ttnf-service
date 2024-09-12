@@ -20,7 +20,10 @@ class NavLinkUpdate(NavLinkBase):
 
 class NavLink(NavLinkBase):
     id: int
-    # sub_links: Optional[List["NavLink"]] = []
+    parent: Optional["NavLink"] = None
 
     class Config:
-        from_attributes = True
+        from_attributes = True  
+
+
+NavLink.update_forward_refs()
