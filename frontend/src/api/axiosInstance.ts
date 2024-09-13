@@ -7,7 +7,6 @@ import { withTimeout } from '../utils/withTimeout';
 
 let API_BASE_URL = process.env.REACT_APP_BACKEND_URL || '';
 if (process.env.NODE_ENV !== 'development') {
-    console.log("Production app")
     API_BASE_URL = API_BASE_URL.replace(/^http:\/\//i, 'https://');
 }
 
