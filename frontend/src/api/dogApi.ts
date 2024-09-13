@@ -8,7 +8,6 @@ export const getDogs = async (page = 1, pageSize = 10): Promise<PaginatedRespons
 };
 
 export const getDogById = async (id: number): Promise<Dog> => {
-    console.log("api id: ", id)
     const response = await apiClient.get<Dog>(`/dogs/${id}`);
     return response.data;
 };

@@ -50,8 +50,6 @@ const DogDetailPage: React.FC = () => {
     const [dog, setDog] = useState<Dog | null>(null);
     useEffect(() => {
         const fetchDog = async () => {
-            console.log("dog id: ", id)
-
             if (id) {
                 const data = await getDogById(parseInt(id));
                 setDog(data);

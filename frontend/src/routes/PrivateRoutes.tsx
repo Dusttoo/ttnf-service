@@ -12,6 +12,7 @@ import AdminLitterList from '../components/admin/dashboard/litters/LitterList';
 import LitterPuppies from '../components/admin/dashboard/litters/LitterPuppies';
 import PageEditor from '../components/admin/dashboard/pages/editor/PageEditor';
 import Landing from "../components/admin/dashboard/Landing";
+import NotFoundPage from "../pages/404";
 
 interface PrivateRouteProps {
     element: React.ReactElement;
@@ -34,6 +35,7 @@ const PrivateRoutes: React.FC = () => (
             <Route path="breedings" element={<AdminBreedingList />} />
             <Route path="litters" element={<AdminLitterList />} />
             <Route path="litters/:litterId/puppies" element={<LitterPuppies />} />
+            <Route path="*" element={<NotFoundPage />} />
         </Route>
     </Routes>
 );

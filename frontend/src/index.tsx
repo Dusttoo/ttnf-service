@@ -11,7 +11,6 @@ import queryClient from './api/queryClient';
 
 const container = document.getElementById('root');
 const root = ReactDOM.createRoot(container!);
-console.log("api url: ", process.env.REACT_APP_BACKEND_URL)
 
 root.render(
   <React.StrictMode>

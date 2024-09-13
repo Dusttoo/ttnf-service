@@ -3,7 +3,6 @@ import { getDogById, deleteDog, createDog, updateDog, getDogsFiltered } from '..
 import { Dog, DogCreate, DogUpdate, SelectedFilters } from '../api/types/dog';
 
 export const useDog = (dogId: number) => {
-    console.log("useDog: ", dogId)
     return useQuery<Dog, Error>(['dog', dogId], () => getDogById(dogId));
 };
 

@@ -13,6 +13,7 @@ import BreedingsPage from '../pages/dogs/BreedingPage';
 import DogDetailPage from '../components/dogs/DogDetail';
 import ProductionsPage from '../pages/dogs/ProductionsPage'; 
 import LitterPage from '../pages/dogs/LittersPage';
+import NotFoundPage from "../pages/404";
 
 const PublicRoutes = () => {
     const dispatch: AppDispatch = useDispatch();
@@ -49,6 +50,7 @@ const PublicRoutes = () => {
                         />
                     );
                 })}
+                <Route path="*" element={<NotFoundPage />} />
             </Route>
         </Routes>
     );

@@ -36,7 +36,6 @@ const Button = styled.button`
 
 const DogDetail: React.FC = () => {
     const { dogId } = useParams<{ dogId: string }>();
-    console.log(dogId)
     const { data: dog, isLoading } = useDog(Number(dogId));
     const deleteDog = useDeleteDog();
     const navigate = useNavigate();
