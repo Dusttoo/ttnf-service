@@ -13,7 +13,6 @@ const PublicPage: React.FC<PublicPageProps> = ({ slug: initialSlug }) => {
     const { slug: routeSlug } = useParams<{ slug: string }>();
     const slug = initialSlug || routeSlug;
     const [page, setPage] = useState<Page | null>(null);
-    console.log(slug)
     useEffect(() => {
         const fetchPage = async () => {
             if (!slug) return;

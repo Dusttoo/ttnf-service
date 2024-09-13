@@ -45,8 +45,6 @@ const AboutImage = styled.img`
 
 const AboutPage: React.FC<{ slug?: string }> = ({ slug }) => {
     const { page, loading, error } = usePage(slug);
-  console.log(page)
-
 
     if (loading) return <LoadingSpinner />;
     if (error) return <ErrorComponent message={error} />;
