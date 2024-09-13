@@ -14,21 +14,37 @@ import DogDetailPage from '../components/dogs/DogDetail';
 import ProductionsPage from '../pages/dogs/ProductionsPage'; 
 import LitterPage from '../pages/dogs/LittersPage';
 import NotFoundPage from "../pages/404";
+import AboutPage from "../pages/AboutPage";
+import ContactPage from "../pages/ContactPage";
+import LoadingSpinner from '../components/common/LoadingSpinner';
+import ErrorComponent from "../components/common/Error";
 
 const PublicRoutes = () => {
     const dispatch: AppDispatch = useDispatch();
-    const { pages } = useSelector((state: RootState) => state.pages);
+    const { pages, status } = useSelector((state: RootState) => state.pages);
 
     useEffect(() => {
-        dispatch(fetchPages());
-    }, [dispatch]);
+        if (status === 'idle') {
+            dispatch(fetchPages());
+        }
+    }, [dispatch, status]);
 
-    const pageComponentMap: { [key: string]: React.FC } = {
+    if (status === 'loading') {
+        return <LoadingSpinner />;
+    }
+
+    if (status === 'failed') {
+        return <ErrorComponent message={"Something went wrong. Please try again"} />;
+    }
+
+    const pageComponentMap: { [key: string]: React.FC<{ slug?: string }> } = {
         males: MalesPage,
         females: FemalesPage,
         breedings: BreedingsPage,
         litters: LitterPage,
         productions: ProductionsPage,
+        about: AboutPage,
+        contact: ContactPage
     };
 
     return (
@@ -37,19 +53,20 @@ const PublicRoutes = () => {
                 <Route path="/" element={<Navigate to="/home" />} />
                 <Route path="/home" element={<PublicPage slug="landing" />} />
                 <Route path="/login" element={<Login />} />
-                <Route path="/dogs/:id" element={<DogDetailPage/>} />
+                <Route path="/dogs/:id" element={<DogDetailPage />} />
 
                 {pages.map((page) => {
-                    const Component = pageComponentMap[page.slug] || DynamicPage; 
+                    const Component = pageComponentMap[page.slug] || DynamicPage;
 
                     return (
                         <Route
                             key={page.id}
                             path={`/${page.slug}`}
-                            element={<Component />} 
+                            element={<Component slug={page.slug} />}
                         />
                     );
                 })}
+
                 <Route path="*" element={<NotFoundPage />} />
             </Route>
         </Routes>

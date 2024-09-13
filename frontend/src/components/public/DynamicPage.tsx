@@ -18,18 +18,20 @@ const DynamicPage: React.FC<DynamicPageProps> = ({ slug: initialSlug }) => {
     const slug = initialSlug || routeSlug;
     const [page, setPage] = useState<Page | null>(null);
     const [editContent, setEditContent] = useState<string>('');
+    const [error, setError] = useState<string | null>(null);
     const isEditMode = useSelector((state: RootState) => state.editMode.isEditMode);
 
     useEffect(() => {
         const fetchPage = async () => {
             try {
+                setError(null);
                 if (!slug) return;
                 const fetchedPage = await getPageBySlug(slug);
                 setPage(fetchedPage);
                 setEditContent(fetchedPage.content); 
             } catch (error) {
+                setError((error as Error).message || 'Failed to load the page');
                 setPage(null);
-                <ErrorComponent message={(error as Error).message}/>
             }
         };
 
@@ -39,15 +41,22 @@ const DynamicPage: React.FC<DynamicPageProps> = ({ slug: initialSlug }) => {
     const handleSave = async () => {
         if (page) {
             try {
+                setError(null);
                 await updatePage(page.id, { ...page, content: editContent }); 
                 alert('Page updated successfully');
             } catch (error) {
-                <ErrorComponent message={(error as Error).message}/>
+                setError((error as Error).message || 'Failed to save the page');
             }
         }
     };
 
-    if (!page) return <LoadingSpinner/>;
+    if (error) {
+        return <ErrorComponent message={error} />;
+    }
+
+    if (!page) {
+        return <LoadingSpinner />;
+    }
 
     return (
         <div>

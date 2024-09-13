@@ -3,11 +3,14 @@ import camelcaseKeys from 'camelcase-keys';
 import snakecaseKeys from 'snakecase-keys';
 import store from '../store';
 import { startLoading, stopLoading } from '../store/loadingSlice';
+import { withTimeout } from '../utils/withTimeout';
 
 let API_BASE_URL = process.env.REACT_APP_BACKEND_URL || '';
 if (process.env.NODE_ENV !== 'development') {
     API_BASE_URL = API_BASE_URL.replace(/^http:\/\//i, 'https://');
 }
+
+const TIMEOUT = 10000;
 
 const apiClient = axios.create({
     baseURL: API_BASE_URL || "https://api-dev.texastopnotchfrenchies.com/api/v1",
@@ -24,7 +27,6 @@ const getToken = () => {
 apiClient.interceptors.request.use(
     (config) => {
         store.dispatch(startLoading());
-
 
         const token = getToken();
         if (token) {
@@ -53,6 +55,7 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
     (response) => {
         store.dispatch(stopLoading());
+
         if (response.data && typeof response.data === 'object') {
             response.data = camelcaseKeys(response.data, { deep: true });
         }
@@ -61,8 +64,17 @@ apiClient.interceptors.response.use(
     (error) => {
         console.error("API Response Error:", error.response || error.message);
         store.dispatch(stopLoading());
+
+        if (error.code === 'ECONNABORTED') {
+            console.error("Request timed out:", error.message);
+        }
+
         return Promise.reject(error);
     }
 );
+
+export const axiosWithTimeout = (config: any, timeout = TIMEOUT) => {
+    return withTimeout(apiClient(config), timeout);
+};
 
 export default apiClient;

@@ -1,29 +1,29 @@
-import apiClient from './axiosInstance';
-import { PaginatedResponse } from '../api/types/core';
-import { Dog, DogCreate, DogUpdate } from '../api/types/dog'
+import axiosWithTimeout from './axiosInstance';
+import { PaginatedResponse } from './types/core';
+import { Dog, DogCreate, DogUpdate } from './types/dog'
 
 export const getDogs = async (page = 1, pageSize = 10): Promise<PaginatedResponse<Dog>> => {
-    const response = await apiClient.get<PaginatedResponse<Dog>>('/dogs', { params: { page, page_size: pageSize } });
+    const response = await axiosWithTimeout.get<PaginatedResponse<Dog>>('/dogs', { params: { page, page_size: pageSize } });
     return response.data;
 };
 
 export const getDogById = async (id: number): Promise<Dog> => {
-    const response = await apiClient.get<Dog>(`/dogs/${id}`);
+    const response = await axiosWithTimeout.get<Dog>(`/dogs/${id}`);
     return response.data;
 };
 
 export const createDog = async (dogData: DogCreate): Promise<Dog> => {
-    const response = await apiClient.post<Dog>('/dogs', dogData);
+    const response = await axiosWithTimeout.post<Dog>('/dogs', dogData);
     return response.data;
 };
 
 export const updateDog = async (id: number, dogData: DogUpdate): Promise<Dog> => {
-    const response = await apiClient.put<Dog>(`/dogs/${id}`, dogData);
+    const response = await axiosWithTimeout.put<Dog>(`/dogs/${id}`, dogData);
     return response.data;
 };
 
 export const deleteDog = async (id: number): Promise<void> => {
-    await apiClient.delete(`/dogs/${id}`);
+    await axiosWithTimeout.delete(`/dogs/${id}`);
 };
 
 interface FilterParams {
@@ -45,7 +45,7 @@ export const getDogsFiltered = async (filters: FilterParams, page?: number, item
     if (filters.damId) params.append('dam', filters.damId.toString());
     if (page !== undefined) params.append('page', page.toString());
     if (itemsPerPage !== undefined) params.append('page_size', itemsPerPage.toString());
-    const response = await apiClient.get(`/dogs/filtered?${params.toString()}`);
+    const response = await axiosWithTimeout.get(`/dogs/filtered?${params.toString()}`);
     return {
         items: response.data.items,
         total: response.data.totalCount,

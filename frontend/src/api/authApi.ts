@@ -1,4 +1,4 @@
-import apiClient from './axiosInstance';
+import { axiosWithTimeout } from './axiosInstance'; 
 import { AuthResponse } from '../api/types/core';
 
 interface LoginData {
@@ -11,11 +11,17 @@ export const login = async ({ username, password }: LoginData) => {
     formData.append('username', username);
     formData.append('password', password);
 
-    const response = await apiClient.post('/auth/token', formData, {
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
+    const response = await axiosWithTimeout(
+        {
+            method: 'post',
+            url: '/auth/token',
+            data: formData,
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
         },
-    });
+        10000
+    );
 
     if (response.data.accessToken) {
         localStorage.setItem('token', response.data.accessToken);
@@ -26,10 +32,23 @@ export const login = async ({ username, password }: LoginData) => {
 };
 
 export const register = async (userData: { username: string; email: string; password: string }): Promise<AuthResponse> => {
-    const response = await apiClient.post<AuthResponse>('/auth/register', userData);
+    const response = await axiosWithTimeout(
+        {
+            method: 'post',
+            url: '/auth/register',
+            data: userData,
+        },
+        10000
+    );
     return response.data;
 };
 
 export const logout = async (): Promise<void> => {
-    await apiClient.post('/logout');
+    await axiosWithTimeout(
+        {
+            method: 'post',
+            url: '/logout',
+        },
+        10000
+    );
 };

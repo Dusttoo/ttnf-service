@@ -1,11 +1,11 @@
-import apiClient from './axiosInstance';
-import { ImageResponse } from '../api/types/media';
+import axiosWithTimeout from './axiosInstance';
+import { ImageResponse } from './types/media';
 
 export const uploadImage = async (file: File): Promise<ImageResponse> => {
     const formData = new FormData();
     formData.append('file', file);
 
-    const response = await apiClient.post<ImageResponse>('/images/upload', formData, {
+    const response = await axiosWithTimeout.post<ImageResponse>('/images/upload', formData, {
         headers: {
             'Content-Type': 'multipart/form-data',
         },
@@ -14,6 +14,6 @@ export const uploadImage = async (file: File): Promise<ImageResponse> => {
 };
 
 export const getImageUrl = async (filename: string): Promise<ImageResponse> => {
-    const response = await apiClient.get<ImageResponse>(`/images/${filename}`);
+    const response = await axiosWithTimeout.get<ImageResponse>(`/images/${filename}`);
     return response.data;
 };

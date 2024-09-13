@@ -1,5 +1,4 @@
-import apiClient from './axiosInstance';
-
+import axiosWithTimeout from './axiosInstance';
 import { SearchResponse } from '../api/types/core';
 
 export const searchResources = async (
@@ -8,7 +7,7 @@ export const searchResources = async (
     limit: number
 ): Promise<SearchResponse[]> => {
     try {
-        const response = await apiClient.get('/search', {
+        const response = await axiosWithTimeout.get('/search', {
             params: {
                 query,
                 resources: resources.join(','),

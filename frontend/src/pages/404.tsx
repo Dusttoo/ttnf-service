@@ -2,6 +2,8 @@ import React from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import notFoundImage from '../images/404.png'
+import notFoundImaage2 from '../images/4042.png'
+import notFoundImage3 from '../images/3.png'
 
 const Container = styled.div`
   display: flex;
@@ -73,7 +75,7 @@ const NotFoundPage: React.FC = () => {
   return (
     <Container>
       <Heading>404</Heading>
-      <Image src={notFoundImage} alt="404 Illustration" />
+      <Image src={notFoundImaage2} alt="404 Illustration" />
       <Message>Oops! The page you’re looking for doesn’t exist.</Message>
       <HomeButton to="/">Go to Home</HomeButton>
 

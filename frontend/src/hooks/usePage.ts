@@ -8,8 +8,13 @@ const usePage = (slug: string | undefined) => {
     const page = useSelector((state: RootState) => state.pages.pages.find(p => p.slug === slug));
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+
     useEffect(() => {
-        if (!slug) return;
+        if (!slug || page) {
+            setLoading(false);
+            return;
+        }
+
         const fetchPage = async () => {
             setLoading(true);
             try {
@@ -23,7 +28,7 @@ const usePage = (slug: string | undefined) => {
         };
 
         fetchPage();
-    }, [slug, dispatch]);
+    }, [slug, dispatch, page]);
 
     const handleSave = async () => {
         if (page) {
