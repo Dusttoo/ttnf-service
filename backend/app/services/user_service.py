@@ -2,10 +2,21 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from app.models import User
 from app.schemas import UserSchema
-from app.core.database import get_database_session
 
 
 class UserService:
+    async def get_user_by_username(self, username: str, db: AsyncSession):
+        """Fetch a user by username."""
+        query = select(User).filter(User.username == username)
+        result = await db.execute(query)
+        return result.scalars().first()
+
+    async def get_user(self, user_id: int, db: AsyncSession):
+        """Fetch a user by ID."""
+        query = select(User).filter(User.id == user_id)
+        result = await db.execute(query)
+        return result.scalars().first()
+
     async def create_or_update_user(self, user_data: dict, db: AsyncSession):
         """Create or update a user based on the React Bricks data."""
         query = select(User).filter(User.email == user_data["email"])
@@ -31,10 +42,7 @@ class UserService:
                 avatar_url=user_data.get("avatarUrl"),
                 role=user_data.get("role", "user"),
             )
-            # You might need to set a default password or request it later
-            user.set_password(
-                "default_password"
-            )  # Set a default password or generate one
+            user.set_password("default_password")  # Set a default password
 
             db.add(user)
 

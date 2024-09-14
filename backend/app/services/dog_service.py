@@ -21,6 +21,12 @@ from app.utils import DateTimeEncoder
 
 logger = logging.getLogger(__name__)
 
+STATUS_MAPPING = {
+    "retired": StatusEnum.retired,
+    "sold": StatusEnum.sold,
+    "stud": StatusEnum.stud,
+    "available": StatusEnum.available,
+}
 
 class DogService:
     def __init__(self):
@@ -388,11 +394,26 @@ class DogService:
                     selectinload(Dog.productions),
                     selectinload(Dog.children),
                 )
+
                 if filters.get("gender"):
                     query = query.filter(Dog.gender == filters["gender"].lower())
+
                 if filters.get("status"):
-                    statuses = [status.lower() for status in filters["status"]]
-                    query = query.filter(Dog.status.in_(statuses))
+                    statuses = filters["status"]
+                    # Handle the "active" logic: map "active" to dogs that are not retired or sold or have a null status
+                    if "active" in statuses:
+                        query = query.filter(
+                            (Dog.status == None) |  # Include dogs with null status
+                            (~Dog.status.in_([StatusEnum.retired, StatusEnum.sold]))
+                        )
+                        statuses = [status for status in statuses if status != "active"]  # Remove "active" for further filtering
+
+                    # If there are any other statuses after the "active" filter
+                    if statuses:
+                        mapped_statuses = [status.lower() for status in statuses]
+                        query = query.filter(Dog.status.in_(mapped_statuses))
+
+
                 if filters.get("owned"):
                     query = query.filter(
                         Dog.kennel_own == (filters["owned"].lower() == "true")
@@ -413,7 +434,11 @@ class DogService:
                         if filters.get("gender")
                         else True
                     ),
-                    (Dog.status.in_(statuses)) if filters.get("status") else True,
+                    (
+                        Dog.status.in_(mapped_statuses)
+                        if filters.get("status") and statuses
+                        else True
+                    ),
                     (
                         (Dog.kennel_own == (filters["owned"].lower() == "true"))
                         if filters.get("owned")
@@ -446,6 +471,7 @@ class DogService:
                 "items": [DogSchema(**dog_data) for dog_data in dogs_data["items"]],
                 "total_count": dogs_data["total_count"],
             }
+
         except SQLAlchemyError as e:
             logger.error(f"Error in get_dogs_filtered: {e}", exc_info=True)
             raise HTTPException(status_code=500, detail=f"Internal Server Error: {e}")

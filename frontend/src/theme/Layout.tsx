@@ -4,6 +4,7 @@ import Header from '../components/common/Header';
 import Footer from '../components/common/Footer';
 import AdminToolbar from '../components/admin/Toolbar';
 import { Outlet } from 'react-router-dom';
+import ErrorBoundary from "../components/common/ErrorBoundary";
 
 const PageContainer = styled.div`
   display: flex;
@@ -25,7 +26,9 @@ const Layout: React.FC = () => {
             <AdminToolbar />
             <Header />
             <ContentContainer>
+                <ErrorBoundary>
                 <Outlet />
+                </ErrorBoundary>
             </ContentContainer>
             <Footer />
         </PageContainer>

@@ -1,7 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
 import Sidebar from '../components/admin/dashboard/AdminSidebar';
-import { Outlet } from 'react-router-dom';
+import {Outlet} from 'react-router-dom';
+import ErrorBoundary from "../components/common/ErrorBoundary";
 
 const LayoutContainer = styled.div`
   display: flex;
@@ -17,9 +18,11 @@ const MainContent = styled.div`
 const AdminLayout: React.FC = () => {
     return (
         <LayoutContainer>
-            <Sidebar />
+            <Sidebar/>
             <MainContent>
-                <Outlet />
+                <ErrorBoundary>
+                    <Outlet/>
+                </ErrorBoundary>
             </MainContent>
         </LayoutContainer>
     );

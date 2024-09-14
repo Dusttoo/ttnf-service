@@ -8,3 +8,4 @@ from app.api.routes.image_routes import media_router
 from app.api.routes.search_routes import search_router
 from app.api.routes.page_routes import page_router
 from app.api.routes.navigation_routes import navigation_router
+from app.api.routes.utils import utils_router

@@ -58,9 +58,11 @@ const DynamicPage: React.FC<DynamicPageProps> = ({ slug: initialSlug }) => {
         return <LoadingSpinner />;
     }
 
+    const showTitle = page.custom_values?.show_title !== false;
+
     return (
         <div>
-            <h1>{page.name}</h1>
+            {showTitle && <h1>{page.name}</h1>}
             {isEditMode ? (
                 <div>
                     <ContentArea content={editContent} setContent={setEditContent} /> 

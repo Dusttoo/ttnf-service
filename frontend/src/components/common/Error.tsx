@@ -14,10 +14,11 @@ const fadeIn = keyframes`
 const ErrorContainer = styled.div`
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: start;
   align-items: center;
   height: 100vh;
   text-align: center;
+  padding-top: 3rem;
   background-color: ${({ theme }) => theme.colors.neutralBackground};
   animation: ${fadeIn} 0.5s ease-in-out;
 `;

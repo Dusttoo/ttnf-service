@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { updateExistingPage } from '../../../../store/pageSlice'
+import { updateExistingPage } from '../../../../store/pageSlice';
 import { Page } from '../../../../api/types/page';
 import { AppDispatch } from '../../../../store';
 
@@ -21,6 +21,12 @@ const Input = styled.input`
   border-radius: 4px;
 `;
 
+const CheckboxContainer = styled.div`
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+`;
+
 const Button = styled.button`
   background-color: ${(props) => props.theme.ui.button.primary.background};
   color: ${(props) => props.theme.ui.button.primary.color};
@@ -36,30 +42,42 @@ const Button = styled.button`
 interface PageDetailsFormProps {
     initialTitle?: string;
     initialSlug?: string;
+    initialShowTitle?: boolean;
     page?: Page;
-    onSubmit?: (title: string, slug: string) => void;
+    onSubmit?: (title: string, slug: string, showTitle: boolean) => void;
 }
 
-const PageDetailsForm: React.FC<PageDetailsFormProps> = ({ initialTitle = '', initialSlug = '', page, onSubmit }) => {
+const PageDetailsForm: React.FC<PageDetailsFormProps> = ({ initialTitle = '', initialSlug = '', initialShowTitle = true, page, onSubmit }) => {
     const [title, setTitle] = useState(initialTitle);
     const [slug, setSlug] = useState(initialSlug);
+    const [showTitle, setShowTitle] = useState(initialShowTitle);
 
     const dispatch: AppDispatch = useDispatch();
     const navigate = useNavigate();
 
     useEffect(() => {
         setTitle(initialTitle);
-        setSlug
-
-            (initialSlug);
-    }, [initialTitle, initialSlug]);
+        setSlug(initialSlug);
+        setShowTitle(initialShowTitle);
+    }, [initialTitle, initialSlug, initialShowTitle]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (onSubmit) {
-            onSubmit(title, slug);
+            onSubmit(title, slug, showTitle);
         } else if (page) {
-            dispatch(updateExistingPage({ id: page.id, pageData: { ...page, name: title, slug } }));
+            dispatch(updateExistingPage({
+                id: page.id,
+                pageData: {
+                    ...page,
+                    name: title,
+                    slug,
+                    custom_values: {
+                        ...page.custom_values,
+                        show_title: showTitle,
+                    }
+                }
+            }));
             navigate('/admin/pages');
         }
     };
@@ -83,6 +101,14 @@ const PageDetailsForm: React.FC<PageDetailsFormProps> = ({ initialTitle = '', in
                     pattern="^[a-z0-9]+(?:-[a-z0-9]+)*$"
                     title="Slug should contain only lowercase letters, numbers, and hyphens."
                 />
+                <CheckboxContainer>
+                    <input
+                        type="checkbox"
+                        checked={showTitle}
+                        onChange={(e) => setShowTitle(e.target.checked)}
+                    />
+                    <label>Show Page Title</label>
+                </CheckboxContainer>
                 <Button type="submit">Save</Button>
             </form>
         </FormContainer>

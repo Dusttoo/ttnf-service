@@ -12,6 +12,7 @@ interface DogsState {
         pageSize: number;
         totalCount: number;
     };
+    loading: boolean;
     error: string | null | undefined;
 }
 
@@ -24,6 +25,7 @@ const initialState: DogsState = {
         pageSize: 10,
         totalCount: 0,
     },
+    loading: false,
     error: null,
 };
 
