@@ -113,12 +113,16 @@ class DogService:
 
     async def create_dog(self, dog_data: DogCreate, db: AsyncSession) -> DogSchema:
         try:
+            status = StatusEnum(dog_data.status.lower())
+            if status not in [StatusEnum.retired, StatusEnum.sold]:
+                status = StatusEnum.active
+
             new_dog = Dog(
                 name=dog_data.name,
                 dob=dog_data.dob,
                 gender=GenderEnum(dog_data.gender),
                 color=dog_data.color,
-                status=StatusEnum(dog_data.status),
+                status=status,
                 profile_photo=dog_data.profile_photo,
                 is_production=dog_data.is_production,
                 parent_male_id=dog_data.parent_male_id,
@@ -204,9 +208,16 @@ class DogService:
                 logger.info(f"Updating dog with ID: {dog_id}")
 
                 for var, value in dog_data.dict(exclude_unset=True).items():
-                    if var in ["gender", "status"] and isinstance(value, str):
+                    if var == 'gender' and isinstance(value, str):
                         value = GenderEnum(value) if var == "gender" else StatusEnum(value)
-                    setattr(dog, var, value)
+                    elif var == 'status':
+                        new_status = StatusEnum(value)
+                        if new_status in [StatusEnum.retired, StatusEnum.sold]:
+                            setattr(dog, "status", new_status)
+                        else:
+                            setattr(dog, "status", StatusEnum.active)
+                    else:
+                        setattr(dog, var, value)
 
                 logger.info(f"Updated main attributes for dog ID: {dog_id}")
                 await db.commit()
@@ -398,21 +409,17 @@ class DogService:
                 if filters.get("gender"):
                     query = query.filter(Dog.gender == filters["gender"].lower())
 
-                if filters.get("status"):
-                    statuses = filters["status"]
-                    # Handle the "active" logic: map "active" to dogs that are not retired or sold or have a null status
-                    if "active" in statuses:
-                        query = query.filter(
-                            (Dog.status == None) |  # Include dogs with null status
-                            (~Dog.status.in_([StatusEnum.retired, StatusEnum.sold]))
-                        )
-                        statuses = [status for status in statuses if status != "active"]  # Remove "active" for further filtering
-
-                    # If there are any other statuses after the "active" filter
-                    if statuses:
-                        mapped_statuses = [status.lower() for status in statuses]
-                        query = query.filter(Dog.status.in_(mapped_statuses))
-
+                    mapped_statuses = []
+                    if filters.get("status"):
+                        statuses = [status.lower() for status in filters["status"]]
+                        if "active" in statuses:
+                            query = query.filter(
+                                (Dog.status == None) | (~Dog.status.in_([StatusEnum.retired, StatusEnum.sold]))
+                            )
+                            statuses = [status for status in statuses if status != "active"]
+                        if statuses:
+                            mapped_statuses = statuses
+                            query = query.filter(Dog.status.in_(mapped_statuses))
 
                 if filters.get("owned"):
                     query = query.filter(

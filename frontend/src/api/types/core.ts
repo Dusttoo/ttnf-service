@@ -43,5 +43,6 @@ export enum StatusEnum {
     Available = 'Available',
     Sold = 'Sold',
     Stud = 'Stud',
-    Retired = 'Retired'
+    Retired = 'Retired',
+    Active = 'Active'
 }

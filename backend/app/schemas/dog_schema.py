@@ -17,6 +17,7 @@ class StatusEnum(str, Enum):
     sold = "Sold"
     stud = "Available For Stud"
     retired = "Retired"
+    active = "Active"
 
 
 class HealthInfoBase(BaseModel):

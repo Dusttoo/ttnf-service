@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { useDogs } from '../../hooks/dogHooks'; // Import your React Query hook
+import { useDogs } from '../../hooks/useDog';
 import DogTile from './DogTile';
 import Pagination from '../common/Pagination';
 import LoadingSpinner from '../common/LoadingSpinner';
-import { GenderEnum,  } from '../../api/types/core';
-import {SelectedFilters} from '../../api/types/dog';
+import { GenderEnum, StatusEnum } from '../../api/types/core';
+import {SelectedFilters, Dog} from '../../api/types/dog';
 import FilterComponent from '../common/Filter';
 
 // Styled containers
@@ -63,7 +63,7 @@ const DogList: React.FC<{ defaultGender?: GenderEnum | undefined, owned?: boolea
 
     // Fetch dogs based on tab selection and filters
     const { data: dogsData, isLoading } = useDogs(
-        { ...filters, status: selectedTab === 'active' ? ['active'] : ['retired'], owned },
+        { ...filters, status: selectedTab === 'active' ? [StatusEnum.Active] : [StatusEnum.Retired], owned, gender: defaultGender },
         currentPage,
         itemsPerPage
     );
@@ -73,9 +73,9 @@ const DogList: React.FC<{ defaultGender?: GenderEnum | undefined, owned?: boolea
         setItemsPerPage(newItemsPerPage);
     };
 
-    const handleGenderChange = (gender: GenderEnum) => {
+    const handleGenderChange = (gender?: GenderEnum) => {
         setFilters((prevFilters) => ({ ...prevFilters, gender }));
-    };
+      };
 
     if (isLoading) return <LoadingSpinner />;
 
@@ -98,7 +98,7 @@ const DogList: React.FC<{ defaultGender?: GenderEnum | undefined, owned?: boolea
             <Section>
                 <SectionTitle>{selectedTab === 'active' ? 'Active Dogs' : 'Retired Dogs'}</SectionTitle>
                 <ListContainer>
-                    {dogsData?.items.map((dog) => (
+                    {dogsData?.items.map((dog: Dog) => (
                         <DogTile key={dog.id} dog={dog} />
                     ))}
                 </ListContainer>
