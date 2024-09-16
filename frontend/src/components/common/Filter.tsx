@@ -1,324 +1,253 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
-import { StatusBadge } from './StatusBadge';
 import { Dog } from '../../api/types/dog';
-import { SearchResult, GenderEnum, StatusEnum } from '../../api/types/core';
-import { FilterProps, SelectedFilters } from '../../api/types/dog'
-import SearchBar from './SearchBar';
+import { GenderEnum, StatusEnum } from '../../api/types/core'; // Import GenderEnum
+import { FilterProps, SelectedFilters } from '../../api/types/dog';
 import { useFilteredDogs } from '../../hooks/useDog';
+import Dropdown from './form/Dropdown';
 
 const FilterContainer = styled.div`
   position: relative;
-  display: inline-block;
+  display: flex;
   margin: 1rem;
+  width: 100%;
+  @media (max-width: 768px) {
+    justify-content: center;
+  }
 `;
 
 const DropdownButton = styled.button`
   background-color: white;
   border: 1px solid ${(props) => props.theme.colors.primary};
-  border-radius: 4px;
-  padding: 0.5rem;
+  border-radius: 8px;
+  padding: 0.8rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: space-between;
   width: 250px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 `;
 
 const DropdownContent = styled.div<{ show: boolean }>`
   display: ${(props) => (props.show ? 'block' : 'none')};
   position: absolute;
   background-color: white;
-  border-radius: 4px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
   z-index: 1;
-  width: 250px;
+  width: 100%;
+`;
+
+const Section = styled.div`
+  margin-bottom: 2rem;
+`;
+
+const SectionTitle = styled.h3`
+  font-size: 16px;
+  font-weight: 600;
+  color: ${(props) => props.theme.colors.primary};
+  margin-bottom: 1rem;
 `;
 
 const FilterLabel = styled.label`
-  margin-bottom: 0.5rem;
+  font-size: 14px;
+  color: ${(props) => props.theme.colors.text};
 `;
 
 const CheckboxContainer = styled.div`
   display: flex;
   align-items: center;
-  margin-bottom: 0.5rem;
+  margin-bottom: 1rem;
 `;
 
 const Checkbox = styled.input`
-  margin-right: 0.5rem;
+  margin-right: 1rem;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
   accent-color: ${(props) => props.theme.colors.primary};
 `;
 
-const Dropdown = styled.select`
-  width: 100%;
-  padding: 0.5rem;
+const ClearAll = styled.button`
+  background-color: transparent;
+  color: ${(props) => props.theme.colors.error};
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
   margin-bottom: 1rem;
-  border: 1px solid ${(props) => props.theme.colors.primary};
-  border-radius: 4px;
+  text-align: right;
 `;
 
-const ClearAll = styled.span`
+const ApplyButton = styled.button`
+  width: 100%;
+  padding: 1rem;
+  background-color: ${(props) => props.theme.colors.primary};
+  color: ${(props) => props.theme.colors.white};
+  font-weight: 600;
+  border-radius: 8px;
   cursor: pointer;
-  color: ${(props) => props.theme.colors.primary};
-  margin-left: auto;
-  margin-bottom: 0.5rem;
+  text-align: center;
 `;
 
 const FilterComponent: React.FC<FilterProps> = ({
-    onGenderChange,
-    onStatusChange,
-    onSireChange,
-    onDamChange,
-    onColorChange,
-    gender = undefined,
-    status = [],
-    sire = undefined,
-    dam = undefined,
-    color = '',
-    isGenderDisabled = false,
-    isColorDisabled = true,
-    isDamDisabled = true,
-    isSireDisabled = true
+  onGenderChange,
+  onStatusChange,
+  onSireChange,
+  onDamChange,
+  onColorChange,
+  status = [],
+  sire = undefined,
+  dam = undefined,
+  color = '',
+  isGenderDisabled = false,
+  isColorDisabled = true,
+  isDamDisabled = true,
+  isSireDisabled = true
 }) => {
-    const [showDropdown, setShowDropdown] = useState(false);
-    const [selectedFilters, setSelectedFilters] = useState<SelectedFilters>({
-        gender,
-        status,
-        sire,
-        dam,
-        color,
-    });
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [selectedFilters, setSelectedFilters] = useState<SelectedFilters>({
+    status,
+    sire,
+    dam,
+    color,
+  });
 
-    const { data: dogsData } = useFilteredDogs({ owned: true });
-    const dogs = dogsData?.items || [];
-    const dropdownRef = useRef<HTMLDivElement>(null);
+  const { data: dogsData } = useFilteredDogs({ owned: true });
+  const dogs = dogsData?.items || [];
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-                setShowDropdown(false);
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, [dropdownRef]);
-
-    const handleCheckboxChange = (type: string, value: string) => {
-        setSelectedFilters((prevFilters) => {
-            const newFilters = { ...prevFilters };
-
-            if (type === 'gender') {
-                newFilters.gender = value as GenderEnum;
-                if (onGenderChange) onGenderChange(value as GenderEnum);
-            } else {
-                const newStatus: StatusEnum[] = newFilters.status!.includes(value as StatusEnum)
-                    ? newFilters.status!.filter((status) => status !== value)
-                    : [...newFilters.status!, value as StatusEnum];
-
-                newFilters.status = newStatus
-                if (onStatusChange) onStatusChange(newStatus); 
-            }
-
-            return newFilters;
-        });
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
     };
-
-    const handleBadgeRemove = (statusToRemove: string) => {
-        setSelectedFilters((prevFilters) => {
-            const newFilters = { ...prevFilters };
-            newFilters.status = newFilters.status!.filter((status) => status !== statusToRemove);
-            if (onStatusChange) onStatusChange([...newFilters.status!]);
-            return newFilters;
-        });
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
     };
+  }, [dropdownRef]);
 
-    const handleClearAll = () => {
-        const clearedFilters: SelectedFilters = {
-            gender: undefined,
-            status: [],
-            sire: undefined,
-            dam: undefined,
-            color: ''
-        };
-        setSelectedFilters(clearedFilters);
-        if (onGenderChange) onGenderChange(undefined);
-        if (onStatusChange) onStatusChange([]);
-        if (onSireChange) onSireChange(undefined);
-        if (onDamChange) onDamChange(undefined);
-        if (onColorChange) onColorChange('');
-    };
+  const handleCheckboxChange = (value: StatusEnum) => {
+    const newStatus: StatusEnum[] = selectedFilters.status!.includes(value)
+      ? selectedFilters.status!.filter((status) => status !== value)
+      : [...selectedFilters.status!, value];
+    setSelectedFilters((prevFilters) => ({ ...prevFilters, status: newStatus }));
+    onStatusChange && onStatusChange(newStatus);
+  };
 
-    const handleDropdownChange = (e: React.ChangeEvent<HTMLSelectElement>, type: 'sire' | 'dam') => {
-        const selectedDog = dogs.find((dog: Dog) => dog.id === parseInt(e.target.value));
-        if (selectedDog) {
-            if (type === 'sire') {
-                setSelectedFilters(prevFilters => ({ ...prevFilters, sire: selectedDog }));
-                if (onSireChange) onSireChange(selectedDog);
-            } else {
-                setSelectedFilters(prevFilters => ({ ...prevFilters, dam: selectedDog }));
-                if (onDamChange) onDamChange(selectedDog);
-            }
-            setShowDropdown(false);
-        }
-    };
+  const handleClearAll = () => {
+    setSelectedFilters({ status: [], sire: undefined, dam: undefined, color: '' });
+    onStatusChange && onStatusChange([]);
+    onSireChange && onSireChange(undefined);
+    onDamChange && onDamChange(undefined);
+    onColorChange && onColorChange('');
+  };
 
-    const handleResultSelect = (result: SearchResult) => {
-        console.log('Selected result:', result);
-    };
+  const handleDropdownChange = (e: React.ChangeEvent<HTMLSelectElement>, type: 'sire' | 'dam') => {
+    const selectedDogId = parseInt(e.target.value, 10);
+    if (type === 'sire') {
+      onSireChange && onSireChange(dogs.find((dog) => dog.id === selectedDogId));
+    } else if (type === 'dam') {
+      onDamChange && onDamChange(dogs.find((dog) => dog.id === selectedDogId));
+    }
+  };
 
-    const activeFiltersCount = selectedFilters.status!.length + (selectedFilters.sire ? 1 : 0) + (selectedFilters.dam ? 1 : 0);
-    return (
-        <FilterContainer ref={dropdownRef}>
-            <DropdownButton onClick={() => setShowDropdown(!showDropdown)}>
-                {selectedFilters.status!.length > 0 && selectedFilters.status!.map((status) => (
-                    <StatusBadge key={status} color="#E76F00">
-                        {status}
-                        <span onClick={() => handleBadgeRemove(status)}>&#x2715;</span>
-                    </StatusBadge>
-                ))}
-                {selectedFilters.sire && (
-                    <StatusBadge color="#E76F00">
-                        Sire Selected
-                        <span onClick={() => {
-                            setSelectedFilters((prevFilters) => ({ ...prevFilters, sire: undefined }));
-                            if (onSireChange) onSireChange(undefined);
-                        }}>
-                            &#x2715;
-                        </span>
-                    </StatusBadge>
-                )}
-                {selectedFilters.dam && (
-                    <StatusBadge color="#E76F00">
-                        Dam Selected
-                        <span onClick={() => {
-                            setSelectedFilters((prevFilters) => ({ ...prevFilters, dam: undefined }));
-                            if (onDamChange) onDamChange(undefined);
-                        }}>
-                            &#x2715;
-                        </span>
-                    </StatusBadge>
-                )}
-                {activeFiltersCount > 0 ? (
-                    <StatusBadge color="#E76F00">{activeFiltersCount}</StatusBadge>
-                ) : (
-                    'Filters'
-                )}
-                <span>&#9660;</span>
-            </DropdownButton>
-            <DropdownContent show={showDropdown}>
-                <SearchBar
-                    resources={['dogs', 'productions', 'breedings', 'litters']}
-                    limit={5}
-                    onResultSelect={handleResultSelect}
-                />
-                <ClearAll onClick={handleClearAll}>Clear All</ClearAll>
-                {!isGenderDisabled && (
-                    <>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <FilterLabel>Gender:</FilterLabel>
-                        </div>
-                        <CheckboxContainer>
-                            <Checkbox
-                                type="checkbox"
-                                value="male"
-                                checked={selectedFilters.gender === GenderEnum.Male}
-                                onChange={(e) => handleCheckboxChange('gender', e.target.checked ? 'male' : '')}
-                                disabled={isGenderDisabled}
-                            />
-                            <FilterLabel>Male</FilterLabel>
-                        </CheckboxContainer>
-                        <CheckboxContainer>
-                            <Checkbox
-                                type="checkbox"
-                                value="female"
-                                checked={selectedFilters.gender === GenderEnum.Female}
-                                onChange={(e) => handleCheckboxChange('gender', e.target.checked ? 'female' : '')}
-                                disabled={isGenderDisabled}
-                            />
-                            <FilterLabel>Female</FilterLabel>
-                        </CheckboxContainer>
-                    </>
-                )}
-                {onStatusChange && (
-                    <>
-                        <FilterLabel>Status:</FilterLabel>
-                        <CheckboxContainer>
-                            <Checkbox
-                                type="checkbox"
-                                value="available"
-                                checked={selectedFilters.status!.includes(StatusEnum.Available)}
-                                onChange={() => handleCheckboxChange('status', 'available')}
-                            />
-                            <FilterLabel>Available</FilterLabel>
-                        </CheckboxContainer>
-                        <CheckboxContainer>
-                            <Checkbox
-                                type="checkbox"
-                                value="sold"
-                                checked={selectedFilters.status!.includes(StatusEnum.Sold)}
-                                onChange={() => handleCheckboxChange('status', 'sold')}
-                            />
-                            <FilterLabel>Sold</FilterLabel>
-                        </CheckboxContainer>
-                        {selectedFilters.gender === GenderEnum.Male && (
-                            <CheckboxContainer>
-                                <Checkbox
-                                    type="checkbox"
-                                    value="stud"
-                                    checked={selectedFilters.status!.includes(StatusEnum.Stud)}
-                                    onChange={() => handleCheckboxChange('status', 'stud')}
-                                />
-                                <FilterLabel>Available For Stud</FilterLabel>
-                            </CheckboxContainer>
-                        )}
-                    </>
-                )}
-                {!isSireDisabled && onSireChange && (
-                    <>
-                        <FilterLabel>Sire:</FilterLabel>
-                        <Dropdown
-                            onChange={(e) => handleDropdownChange(e, 'sire')}
-                            value={selectedFilters.sire?.id ?? ''}
-                        >
-                            <option value="">Select Sire</option>
-                            {dogs.filter((dog: Dog) => dog.gender.toLowerCase() === 'male').map((dog: Dog) => (
-                                <option key={dog.id} value={dog.id}>{dog.name}</option>
-                            ))}
-                        </Dropdown>
-                    </>
-                )}
+  const handleApplyFilters = () => {
+    setShowDropdown(false); // Close the dropdown
+    // Add any additional logic to handle the filters, if needed
+  };
 
-                {!isDamDisabled && onDamChange && (
-                    <>
-                        <FilterLabel>Dam:</FilterLabel>
-                        <Dropdown
-                            onChange={(e) => handleDropdownChange(e, 'dam')}
-                            value={selectedFilters.dam?.id ?? ''}
-                        >
-                            <option value="">Select Dam</option>
-                            {dogs.filter((dog: Dog) => dog.gender.toLowerCase() === 'female').map((dog: Dog) => (
-                                <option key={dog.id} value={dog.id}>{dog.name}</option>
-                            ))}
-                        </Dropdown>
-                    </>
-                )}
-                {!isColorDisabled && onColorChange && (
-                    <>
-                        <FilterLabel>Color:</FilterLabel>
-                        <Dropdown onChange={(e) => onColorChange(e.target.value)} value={selectedFilters.color}>
-                            <option value="">Select Color</option>
-                            <option value="color1">Color 1</option>
-                            <option value="color2">Color 2</option>
-                        </Dropdown>
-                    </>
-                )}
-            </DropdownContent>
-        </FilterContainer>
-    );
+  return (
+    <FilterContainer ref={dropdownRef}>
+      <DropdownButton onClick={() => setShowDropdown(!showDropdown)}>
+        Filters <span>&#9660;</span>
+      </DropdownButton>
+
+      <DropdownContent show={showDropdown}>
+        {/* Status Section */}
+        <Section>
+          <SectionTitle>Status</SectionTitle>
+          {Object.values(StatusEnum).map((statusOption) => (
+            <CheckboxContainer key={statusOption}>
+              <Checkbox
+                type="checkbox"
+                value={statusOption}
+                checked={selectedFilters.status!.includes(statusOption)}
+                onChange={() => handleCheckboxChange(statusOption)}
+              />
+              <FilterLabel>{statusOption}</FilterLabel>
+            </CheckboxContainer>
+          ))}
+        </Section>
+
+        {/* Conditionally render Gender section */}
+        {!isGenderDisabled && (
+          <Section>
+            <SectionTitle>Gender</SectionTitle>
+            <CheckboxContainer>
+              <Checkbox
+                type="checkbox"
+                checked={selectedFilters.gender === GenderEnum.Male}
+                onChange={() => onGenderChange && onGenderChange(GenderEnum.Male)}
+              />
+              <FilterLabel>Male</FilterLabel>
+            </CheckboxContainer>
+            <CheckboxContainer>
+              <Checkbox
+                type="checkbox"
+                checked={selectedFilters.gender === GenderEnum.Female}
+                onChange={() => onGenderChange && onGenderChange(GenderEnum.Female)}
+              />
+              <FilterLabel>Female</FilterLabel>
+            </CheckboxContainer>
+          </Section>
+        )}
+
+        {/* Conditionally render Sire section */}
+        {!isSireDisabled && (
+          <Section>
+            <SectionTitle>Sire</SectionTitle>
+            <Dropdown
+              name="sire"
+              options={dogs.filter((dog) => dog.gender.toLowerCase() === 'male').map((dog) => dog.name)}
+              value={selectedFilters.sire?.id.toString() || ''}
+              onChange={(e) => handleDropdownChange(e, 'sire')}
+            />
+          </Section>
+        )}
+
+        {/* Conditionally render Dam section */}
+        {!isDamDisabled && (
+          <Section>
+            <SectionTitle>Dam</SectionTitle>
+            <Dropdown
+              name="dam"
+              options={dogs.filter((dog) => dog.gender.toLowerCase() === 'female').map((dog) => dog.name)}
+              value={selectedFilters.dam?.id.toString() || ''}
+              onChange={(e) => handleDropdownChange(e, 'dam')}
+            />
+          </Section>
+        )}
+
+        {/* Conditionally render Color section */}
+        {!isColorDisabled && (
+          <Section>
+            <SectionTitle>Color</SectionTitle>
+            <select onChange={(e) => onColorChange && onColorChange(e.target.value)} value={selectedFilters.color}>
+              <option value="">Select Color</option>
+              {/* Populate with color options */}
+            </select>
+          </Section>
+        )}
+
+        <ClearAll onClick={handleClearAll}>Clear All</ClearAll>
+        <ApplyButton onClick={handleApplyFilters}>Apply Filters</ApplyButton>
+      </DropdownContent>
+    </FilterContainer>
+  );
 };
 
 export default FilterComponent;

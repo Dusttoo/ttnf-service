@@ -15,8 +15,11 @@ const Tile = styled.div`
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  max-height: 50vh;
-  max-width: 80vw;
+  max-width: 700px;  /* Constrain maximum width */
+  width: 100%;
+  max-height: 350px;  /* Constrain maximum height */
+  height: auto;
+
   &:hover {
     transform: scale(1.05);
   }
@@ -24,22 +27,33 @@ const Tile = styled.div`
   @media (max-width: 768px) {
     flex-direction: column;
     align-items: stretch;
+    max-height: none;  /* Let it expand vertically on smaller screens */
+    height: auto;
   }
 `;
 
 const ImageContainer = styled.div`
-  flex: 1;
-  height: auto;
   width: 100%;
-  overflow: hidden;
+  height: 0;
+  padding-top: 56.25%; /* This maintains a 16:9 aspect ratio (you can adjust for other ratios) */
   position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+
+  @media (max-width: 768px) {
+    padding-top: 75%; /* For mobile screens, adjust aspect ratio to be taller if needed */
+  }
 `;
 
 const Image = styled.img`
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: center;
+  object-fit: cover; /* Ensures the image covers the entire container while maintaining its aspect ratio */
+  object-position: center; /* Centers the image to ensure the dog is in focus */
+  border-radius: 8px;
 `;
 
 const Info = styled.div`
@@ -49,6 +63,8 @@ const Info = styled.div`
   flex-direction: column;
   justify-content: space-between;
   position: relative;
+  overflow: hidden;  /* Prevent content from overflowing */
+  text-overflow: ellipsis;
 
   @media (max-width: 768px) {
     padding: 0.5rem;
@@ -58,12 +74,19 @@ const Info = styled.div`
 const Name = styled.h3`
   color: ${(props) => props.theme.colors.primary};
   margin: 0.5rem 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Ensure long names are truncated with ellipsis */
 `;
 
 const Detail = styled.p`
   margin: 0.25rem 0;
   color: ${(props) => props.theme.colors.text};
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis; /* Apply ellipsis to long content */
 `;
+
 
 const StatusContainer = styled.div`
   display: flex;
@@ -92,7 +115,7 @@ const Description = styled(Detail)`
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
-  -webkit-line-clamp: 3; /* Number of lines to show */
+  -webkit-line-clamp: 3; /* Limit to 3 lines */
   -webkit-box-orient: vertical;
 `;
 

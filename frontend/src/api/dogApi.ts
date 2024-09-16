@@ -35,6 +35,7 @@ interface FilterParams {
 }
 
 export const getDogsFiltered = async (filters: FilterParams, page?: number, itemsPerPage?: number) => {
+    console.log("filters: ", filters)
     const params = new URLSearchParams();
     if (filters.gender) params.append('gender', filters.gender);
     if (filters.status && filters.status.length > 0) {
@@ -45,6 +46,7 @@ export const getDogsFiltered = async (filters: FilterParams, page?: number, item
     if (filters.damId) params.append('dam', filters.damId.toString());
     if (page !== undefined) params.append('page', page.toString());
     if (itemsPerPage !== undefined) params.append('page_size', itemsPerPage.toString());
+    console.log(params.toString())
     const response = await axiosWithTimeout.get(`/dogs/filtered?${params.toString()}`);
     return {
         items: response.data.items,

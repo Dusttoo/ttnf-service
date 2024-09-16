@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from typing import List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi.responses import JSONResponse
 from app.core.database import get_database_session
 from app.schemas import (
     DogCreate,

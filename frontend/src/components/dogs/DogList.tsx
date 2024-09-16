@@ -5,7 +5,7 @@ import DogTile from './DogTile';
 import Pagination from '../common/Pagination';
 import LoadingSpinner from '../common/LoadingSpinner';
 import { GenderEnum, StatusEnum } from '../../api/types/core';
-import {SelectedFilters, Dog} from '../../api/types/dog';
+import { SelectedFilters, Dog } from '../../api/types/dog';
 import FilterComponent from '../common/Filter';
 
 // Styled containers
@@ -14,6 +14,23 @@ const ListContainer = styled.div`
   flex-wrap: wrap;
   justify-content: center;
   padding: 2rem;
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+    flex-direction: column;
+    align-items: center;
+  }
+`;
+
+const ListHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  padding: 0 2rem;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: center;
+  }
 `;
 
 const Section = styled.div`
@@ -22,6 +39,11 @@ const Section = styled.div`
   background-color: ${({ theme }) => theme.colors.secondaryBackground};
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+    margin-top: 1rem;
+  }
 `;
 
 const SectionTitle = styled.h2`
@@ -29,6 +51,11 @@ const SectionTitle = styled.h2`
   font-family: ${({ theme }) => theme.fonts.primary};
   margin-bottom: 1.5rem;
   text-align: center;
+
+  @media (max-width: 768px) {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+  }
 `;
 
 // Styled components for tab navigation
@@ -36,8 +63,15 @@ const TabContainer = styled.div`
   display: flex;
   justify-content: center;
   margin-bottom: 2rem;
-`;
 
+  @media (max-width: 768px) {
+    justify-content: flex-start;
+    margin-bottom: 1rem;
+    overflow-x: auto;
+      flex-wrap: wrap;
+
+  }
+`;
 const TabButton = styled.button<{ active?: boolean }>`
   padding: 10px 20px;
   font-size: 16px;
@@ -53,64 +87,111 @@ const TabButton = styled.button<{ active?: boolean }>`
   &:hover {
     background-color: ${({ theme }) => theme.colors.primaryLight};
   }
+
+  @media (max-width: 768px) {
+    padding: 8px 16px;
+    margin: 5px;
+    white-space: nowrap;
+  }
 `;
 
 const DogList: React.FC<{ defaultGender?: GenderEnum | undefined, owned?: boolean }> = ({ defaultGender, owned }) => {
-    const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage, setItemsPerPage] = useState(10);
-    const [selectedTab, setSelectedTab] = useState<'active' | 'retired'>('active');
-    const [filters, setFilters] = useState<SelectedFilters>({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [selectedTab, setSelectedTab] = useState<'active' | 'retired'>('active');
 
-    // Fetch dogs based on tab selection and filters
-    const { data: dogsData, isLoading } = useDogs(
-        { ...filters, status: selectedTab === 'active' ? [StatusEnum.Active] : [StatusEnum.Retired], owned, gender: defaultGender },
-        currentPage,
-        itemsPerPage
-    );
+  const [filters, setFilters] = useState<SelectedFilters>({
+    status: [], // User-selected status filters (without Active or Retired)
+    color: '',
+    sire: undefined,
+    dam: undefined,
+  });
 
-    const handlePageChange = (page: number, newItemsPerPage: number) => {
-        setCurrentPage(page);
-        setItemsPerPage(newItemsPerPage);
-    };
+  // Compute the effective status based on the tab and user-selected statuses
+  const effectiveStatus = selectedTab === 'active'
+    ? [...(filters.status ?? []).filter((status) => status !== StatusEnum.Retired), StatusEnum.Active]
+    : [...(filters.status ?? []).filter((status) => status !== StatusEnum.Active), StatusEnum.Retired];
 
-    const handleGenderChange = (gender?: GenderEnum) => {
-        setFilters((prevFilters) => ({ ...prevFilters, gender }));
-      };
+  // Fetch dogs based on the effective status and other filters
+  const { data: dogsData, isLoading } = useDogs(
+    {
+      ...filters,
+      status: effectiveStatus, // Use the computed effective status here
+      owned,
+      gender: defaultGender,
+    },
+    currentPage,
+    itemsPerPage
+  );
 
-    if (isLoading) return <LoadingSpinner />;
+  const handlePageChange = (page: number, newItemsPerPage: number) => {
+    setCurrentPage(page);
+    setItemsPerPage(newItemsPerPage);
+  };
 
-    return (
-        <>
-            {/* Filter and Tabs */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 2rem' }}>
-                <FilterComponent onGenderChange={handleGenderChange} gender={defaultGender} />
-                <TabContainer>
-                    <TabButton active={selectedTab === 'active'} onClick={() => setSelectedTab('active')}>
-                        Active Dogs
-                    </TabButton>
-                    <TabButton active={selectedTab === 'retired'} onClick={() => setSelectedTab('retired')}>
-                        Retired Dogs
-                    </TabButton>
-                </TabContainer>
-            </div>
+  // Handlers for each filter type
+  const handleStatusChange = (status: StatusEnum[]) => {
+    setFilters((prevFilters) => ({ ...prevFilters, status }));
+  };
 
-            {/* Dog List */}
-            <Section>
-                <SectionTitle>{selectedTab === 'active' ? 'Active Dogs' : 'Retired Dogs'}</SectionTitle>
-                <ListContainer>
-                    {dogsData?.items.map((dog: Dog) => (
-                        <DogTile key={dog.id} dog={dog} />
-                    ))}
-                </ListContainer>
-                <Pagination
-                    totalItems={dogsData?.total || 0}
-                    currentPage={currentPage}
-                    itemsPerPage={itemsPerPage}
-                    onPageChange={handlePageChange}
-                />
-            </Section>
-        </>
-    );
+  const handleColorChange = (color: string) => {
+    setFilters((prevFilters) => ({ ...prevFilters, color }));
+  };
+
+  const handleSireChange = (sire?: Dog) => {
+    setFilters((prevFilters) => ({ ...prevFilters, sire }));
+  };
+
+  const handleDamChange = (dam?: Dog) => {
+    setFilters((prevFilters) => ({ ...prevFilters, dam }));
+  };
+
+  if (isLoading) return <LoadingSpinner />;
+
+  return (
+    <>
+      <ListHeader>
+        <FilterComponent
+          onGenderChange={() => {}}
+          isGenderDisabled={true}
+          isSireDisabled={false}
+          isDamDisabled={false}
+          onStatusChange={handleStatusChange}
+//          onColorChange={handleColorChange}
+          onSireChange={handleSireChange}
+          onDamChange={handleDamChange}
+          status={filters.status}
+//          color={filters.color}
+          sire={filters.sire}
+          dam={filters.dam}
+        />
+        <TabContainer>
+          <TabButton active={selectedTab === 'active'} onClick={() => setSelectedTab('active')}>
+            Active Dogs
+          </TabButton>
+          <TabButton active={selectedTab === 'retired'} onClick={() => setSelectedTab('retired')}>
+            Retired Dogs
+          </TabButton>
+        </TabContainer>
+      </ListHeader>
+
+      <Section>
+        <SectionTitle>{selectedTab === 'active' ? 'Active Dogs' : 'Retired Dogs'}</SectionTitle>
+        <ListContainer>
+          {dogsData?.items.map((dog: Dog) => (
+            <DogTile key={dog.id} dog={dog} />
+          ))}
+        </ListContainer>
+        <Pagination
+          totalItems={dogsData?.total || 0}
+          currentPage={currentPage}
+          itemsPerPage={itemsPerPage}
+          onPageChange={handlePageChange}
+        />
+      </Section>
+    </>
+  );
 };
 
 export default DogList;
+
