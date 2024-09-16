@@ -149,9 +149,9 @@ const FilterComponent: React.FC<FilterProps> = ({
   const handleDropdownChange = (e: React.ChangeEvent<HTMLSelectElement>, type: 'sire' | 'dam') => {
     const selectedDogId = parseInt(e.target.value, 10);
     if (type === 'sire') {
-      onSireChange && onSireChange(dogs.find((dog) => dog.id === selectedDogId));
+      onSireChange && onSireChange(dogs.find((dog: Dog) => dog.id === selectedDogId));
     } else if (type === 'dam') {
-      onDamChange && onDamChange(dogs.find((dog) => dog.id === selectedDogId));
+      onDamChange && onDamChange(dogs.find((dog: Dog) => dog.id === selectedDogId));
     }
   };
 
@@ -212,7 +212,7 @@ const FilterComponent: React.FC<FilterProps> = ({
             <SectionTitle>Sire</SectionTitle>
             <Dropdown
               name="sire"
-              options={dogs.filter((dog) => dog.gender.toLowerCase() === 'male').map((dog) => dog.name)}
+              options={dogs.filter((dog: Dog) => dog.gender.toLowerCase() === 'male').map((dog: Dog) => dog.name)}
               value={selectedFilters.sire?.id.toString() || ''}
               onChange={(e) => handleDropdownChange(e, 'sire')}
             />
@@ -225,7 +225,7 @@ const FilterComponent: React.FC<FilterProps> = ({
             <SectionTitle>Dam</SectionTitle>
             <Dropdown
               name="dam"
-              options={dogs.filter((dog) => dog.gender.toLowerCase() === 'female').map((dog) => dog.name)}
+              options={dogs.filter((dog: Dog) => dog.gender.toLowerCase() === 'female').map((dog: Dog) => dog.name)}
               value={selectedFilters.dam?.id.toString() || ''}
               onChange={(e) => handleDropdownChange(e, 'dam')}
             />
