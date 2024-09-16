@@ -1,8 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom'
 import { Dog } from '../../api/types/dog';
 import { StatusBadge } from '../common/StatusBadge';
+import { LinkComponent } from '../common/Link'
 
 const Tile = styled.div`
   background-color: ${(props) => props.theme.colors.secondaryBackground};
@@ -12,22 +13,21 @@ const Tile = styled.div`
   margin: 1rem;
   transition: transform 0.2s;
   display: flex;
-  flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  max-width: 700px;  /* Constrain maximum width */
+  max-width: 700px;
   width: 100%;
-  max-height: 350px;  /* Constrain maximum height */
   height: auto;
+  flex-direction: column;
+
 
   &:hover {
     transform: scale(1.05);
   }
 
   @media (max-width: 768px) {
-    flex-direction: column;
     align-items: stretch;
-    max-height: none;  /* Let it expand vertically on smaller screens */
+    max-height: none;
     height: auto;
   }
 `;
@@ -38,7 +38,7 @@ const ImageContainer = styled.div`
   padding-top: 56.25%; /* This maintains a 16:9 aspect ratio (you can adjust for other ratios) */
   position: relative;
   overflow: hidden;
-  border-radius: 8px;
+  border-radius: 8px 8px 0 0;
 
   @media (max-width: 768px) {
     padding-top: 75%; /* For mobile screens, adjust aspect ratio to be taller if needed */
@@ -51,9 +51,9 @@ const Image = styled.img`
   left: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover; /* Ensures the image covers the entire container while maintaining its aspect ratio */
-  object-position: center; /* Centers the image to ensure the dog is in focus */
-  border-radius: 8px;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 8px 8px 0 0;
 `;
 
 const Info = styled.div`
@@ -63,8 +63,10 @@ const Info = styled.div`
   flex-direction: column;
   justify-content: space-between;
   position: relative;
-  overflow: hidden;  /* Prevent content from overflowing */
+  overflow: hidden;
   text-overflow: ellipsis;
+  width: 95%;
+
 
   @media (max-width: 768px) {
     padding: 0.5rem;
@@ -76,7 +78,7 @@ const Name = styled.h3`
   margin: 0.5rem 0;
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis; /* Ensure long names are truncated with ellipsis */
+  text-overflow: ellipsis;
 `;
 
 const Detail = styled.p`
@@ -84,16 +86,8 @@ const Detail = styled.p`
   color: ${(props) => props.theme.colors.text};
   overflow: hidden;
   white-space: nowrap;
-  text-overflow: ellipsis; /* Apply ellipsis to long content */
-`;
-
-
-const StatusContainer = styled.div`
-  display: flex;
-  padding-top: 5px;
-  justify-content: flex-end;
-  gap: 0.5rem;
-  flex-wrap: wrap;
+  text-overflow: ellipsis;
+  width: 95%;
 `;
 
 const ViewProfileLink = styled(Link)`
@@ -111,11 +105,20 @@ const ViewProfileLink = styled(Link)`
   }
 `;
 
+const StatusContainer = styled.div`
+  display: flex;
+  padding-top: 5px;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+`;
+
 const Description = styled(Detail)`
   overflow: hidden;
+  text-wrap: pretty;
   text-overflow: ellipsis;
   display: -webkit-box;
-  -webkit-line-clamp: 3; /* Limit to 3 lines */
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
 `;
 
@@ -138,23 +141,23 @@ const DogTile: React.FC<{ dog: Dog }> = ({ dog }) => {
   return (
     <Tile>
       <ImageContainer>
-        <Link to={`/dogs/${dog.id}`}>
+        <LinkComponent to={`/dogs/${dog.id}`}>
           <Image src={dog.profilePhoto} alt={dog.name} />
-        </Link>
+        </LinkComponent>
       </ImageContainer>
       <Info>
         <div>
           <Name>{dog.name}</Name>
-          <Detail>DOB: {dog.dob}</Detail>
-          <Detail>Color: {dog.color}</Detail>
+          {dog.dob && <Detail>DOB: {dog.dob}</Detail>}
+          {dog.color && <Detail>Color: {dog.color}</Detail>}
           {dog.studFee && <Detail>Stud Fee: ${dog.studFee}</Detail>}
           {dog.saleFee && <Detail>Sale Fee: ${dog.saleFee}</Detail>}
-          {dog.description && <Description>Description: {dog.description}</Description>}
+          {dog.description && <Description>{dog.description}</Description>}
           {dog.pedigreeLink && (
             <Detail>
-              <a href={dog.pedigreeLink} target="_blank" rel="noopener noreferrer">
+              <LinkComponent to={dog.pedigreeLink} target="_blank" rel="noopener noreferrer">
                 Pedigree Link
-              </a>
+              </LinkComponent>
             </Detail>
           )}
           <ViewProfileLink to={`/dogs/${dog.id}`}>View Profile</ViewProfileLink>

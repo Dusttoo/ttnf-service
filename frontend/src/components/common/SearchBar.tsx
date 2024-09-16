@@ -72,7 +72,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ resources, limit = 5, onResultSel
                 <ResultsContainer>
                     {results.map((result, index) => (
                         <ResultItem key={index} onClick={() => onResultSelect(result.data)}>
-                            <LinkComponent href={`/${result.type}/${result.data.id}`}>{result.data.name}</LinkComponent>
+                            <LinkComponent to={`/${result.type}/${result.data.id}`}>{result.data.name}</LinkComponent>
                         </ResultItem>
                     ))}
                     <ViewAllLink onClick={handleViewAll}>View All Results</ViewAllLink>
