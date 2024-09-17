@@ -58,7 +58,7 @@ const DynamicPage: React.FC<DynamicPageProps> = ({ slug: initialSlug }) => {
         return <LoadingSpinner />;
     }
 
-    const showTitle = page.custom_values?.show_title !== false;
+    const showTitle = page.customValues?.showTitle !== false;
 
     return (
         <div>

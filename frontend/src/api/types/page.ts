@@ -4,19 +4,19 @@ export interface Page {
     name: string;
     slug: string;
     meta?: IMeta;
-    custom_values?: { [key: string]: any }; 
-    external_data?: { [key: string]: any }; 
+    customValues?: { [key: string]: any };
+    externaData?: { [key: string]: any };
     content: string;
-    author_id?: number;
-    invalid_block_types?: string[]; 
+    authorId?: number;
+    invalidBlockTypes?: string[];
     status: string; 
-    is_locked: boolean;
+    isLocked: boolean;
     tags?: string[];
-    created_at?: Date;
-    published_at?: Date;
+    createdAt?: Date;
+    publishedAt?: Date;
     language: string;
     translations?: Translation[];
-    updated_at?: Date;
+    updatedAt?: Date;
     settings?: PageSettings; 
 }
 

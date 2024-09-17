@@ -8,6 +8,8 @@ from app.core.auth import get_current_user
 from app.utils import convert_to_litter_schema
 from app.schemas import PaginatedResponse
 import logging
+from app.core.settings import update_global_updated_at
+
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +34,7 @@ async def populate_litter(
     breeding_id: int,
     litter: LitterCreate,
     db: AsyncSession = Depends(get_database_session),
+    update_timestamp: None = Depends(update_global_updated_at)
 ):
     try:
         return await litter_svc.populate_litter(db, breeding_id, litter)
@@ -45,6 +48,7 @@ async def add_puppies_to_litter(
     litter_id: int,
     puppies: List[PuppyCreate],
     db: AsyncSession = Depends(get_database_session),
+    update_timestamp: None = Depends(update_global_updated_at)
 ):
     try:
         return await litter_svc.add_puppies_to_litter(db, litter_id, puppies)
@@ -74,6 +78,7 @@ async def create_litter(
     litter_data: LitterCreate,
     db: AsyncSession = Depends(get_database_session),
     current_user: UserSchema = Depends(get_current_user),
+    update_timestamp: None = Depends(update_global_updated_at)
 ):
     try:
         litter = await litter_svc.create_litter(litter_data, db)
@@ -89,6 +94,7 @@ async def update_litter(
     litter_data: LitterUpdate,
     db: AsyncSession = Depends(get_database_session),
     current_user: UserSchema = Depends(get_current_user),
+    update_timestamp: None = Depends(update_global_updated_at)
 ):
     try:
         litter = await litter_svc.update_litter(litter_id, litter_data, db)
@@ -107,6 +113,7 @@ async def delete_litter(
     litter_id: int,
     db: AsyncSession = Depends(get_database_session),
     current_user: UserSchema = Depends(get_current_user),
+    update_timestamp: None = Depends(update_global_updated_at)
 ):
     try:
         result = await litter_svc.delete_litter(litter_id, db)

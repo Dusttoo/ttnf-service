@@ -7,6 +7,8 @@ from app.services import ProductionService
 from app.core.auth import get_current_user
 from app.schemas import PaginatedResponse
 import logging
+from app.core.settings import update_global_updated_at
+
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +41,7 @@ async def create_production(
     production_data: ProductionCreate,
     db: AsyncSession = Depends(get_database_session),
     current_user: UserSchema = Depends(get_current_user),
+    update_timestamp: None = Depends(update_global_updated_at)
 ):
     try:
         production = await production_svc.create_production(production_data, db)
@@ -56,6 +59,7 @@ async def update_production(
     production_data: ProductionUpdate,
     db: AsyncSession = Depends(get_database_session),
     current_user: UserSchema = Depends(get_current_user),
+    update_timestamp: None = Depends(update_global_updated_at)
 ):
     if not current_user:
         raise HTTPException(
@@ -75,6 +79,7 @@ async def delete_production(
     production_id: int,
     db: AsyncSession = Depends(get_database_session),
     current_user: UserSchema = Depends(get_current_user),
+    update_timestamp: None = Depends(update_global_updated_at)
 ):
     if not current_user:
         raise HTTPException(

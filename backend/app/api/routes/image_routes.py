@@ -1,7 +1,9 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
 from app.schemas import ImageResponse, VideoResponse, MediaResponse
 from app.services import MediaService
 import logging
+from app.core.settings import update_global_updated_at
+
 
 logger = logging.getLogger(__name__)
 
@@ -9,7 +11,10 @@ media_router = APIRouter()
 
 
 @media_router.post("/upload", response_model=MediaResponse)
-async def upload_media(file: UploadFile = File(...)):
+async def upload_media(
+        file: UploadFile = File(...),
+        update_timestamp: None = Depends(update_global_updated_at)
+):
     try:
         # Determine the media type
         media_type = "video" if file.content_type.startswith("video/") else "image"

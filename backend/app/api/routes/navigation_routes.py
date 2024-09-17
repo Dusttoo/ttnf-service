@@ -2,8 +2,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 from app.services import NavigationService
-from app.schemas import NavLink, NavLinkCreate, NavLinkUpdate
+from app.schemas import NavLink, NavLinkCreate, NavLinkUpdate, UserSchema
 from app.core.database import get_database_session
+from app.core.settings import update_global_updated_at
+from app.core.auth import get_current_user
+
 
 navigation_router = APIRouter()
 navigation_svc = NavigationService()
@@ -25,19 +28,30 @@ async def read_nav_link(nav_link_id: int, db: Session = Depends( get_database_se
 
 @navigation_router.post("/links", response_model=NavLink)
 async def create_nav_link(
-    nav_link: NavLinkCreate, db: Session = Depends( get_database_session)
+    nav_link: NavLinkCreate,
+    db: Session = Depends( get_database_session),
+    current_user: UserSchema = Depends(get_current_user),
+    update_timestamp: None = Depends(update_global_updated_at)
 ):
     return await navigation_svc.create_nav_link(db, nav_link=nav_link)
 
 
 @navigation_router.put("/links", response_model=NavLink)
 async def update_nav_link(
-    nav_link: NavLinkUpdate, db: Session = Depends( get_database_session)
+    nav_link: NavLinkUpdate,
+    db: Session = Depends( get_database_session),
+    current_user: UserSchema = Depends(get_current_user),
+    update_timestamp: None = Depends(update_global_updated_at)
 ):
     return await navigation_svc.update_nav_link(db, nav_link=nav_link)
 
 
 @navigation_router.delete("/links/{nav_link_id}")
-async def delete_nav_link(nav_link_id: int, db: Session = Depends( get_database_session)):
+async def delete_nav_link(
+    nav_link_id: int,
+    db: Session = Depends( get_database_session),
+    current_user: UserSchema = Depends(get_current_user),
+    update_timestamp: None = Depends(update_global_updated_at)
+):
     await navigation_svc.delete_nav_link(db, nav_link_id=nav_link_id)
     return {"message": "NavLink deleted successfully"}

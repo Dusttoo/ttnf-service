@@ -18,6 +18,7 @@ import AboutPage from "../pages/AboutPage";
 import ContactPage from "../pages/ContactPage";
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import ErrorComponent from "../components/common/Error";
+import HomePage from '../pages/HomePage';
 
 const PublicRoutes = () => {
     const dispatch: AppDispatch = useDispatch();
@@ -44,19 +45,22 @@ const PublicRoutes = () => {
         litters: LitterPage,
         productions: ProductionsPage,
         about: AboutPage,
-        contact: ContactPage
+        contact: ContactPage,
     };
 
     return (
         <Routes>
             <Route path="/" element={<Layout />}>
-                <Route path="/" element={<Navigate to="/home" />} />
-                <Route path="/home" element={<PublicPage slug="landing" />} />
+                <Route path="/landing" element={<HomePage />} />
+                <Route path="/home" element={<Navigate to="/landing" />} />
+                <Route path="/" element={<Navigate to="/landing" />} />
+
                 <Route path="/login" element={<Login />} />
                 <Route path="/dogs/:id" element={<DogDetailPage />} />
 
                 {pages.map((page) => {
                     const Component = pageComponentMap[page.slug] || DynamicPage;
+                    console.log(page.slug)
 
                     return (
                         <Route

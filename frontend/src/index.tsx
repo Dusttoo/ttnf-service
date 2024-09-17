@@ -8,6 +8,8 @@ import { theme } from './theme/theme';
 import { GlobalStyle } from './styles/GlobalStyle';
 import { QueryClientProvider } from 'react-query';
 import queryClient from './api/queryClient';
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';
 
 const container = document.getElementById('root');
 const root = ReactDOM.createRoot(container!);

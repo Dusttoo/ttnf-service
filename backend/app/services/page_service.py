@@ -9,6 +9,7 @@ from app.schemas import PageCreate, PageUpdate, Page as PageSchema
 from app.utils.schema_converters import convert_to_page_schema
 from app.core.redis import get_redis_client, delete_pattern
 from app.utils import DateTimeEncoder
+from uuid import UUID
 
 logger = logging.getLogger(__name__)
 

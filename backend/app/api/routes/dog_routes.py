@@ -14,6 +14,8 @@ from app.schemas import (
 from app.services import DogService
 from app.core.auth import get_current_user
 import logging
+from app.core.settings import update_global_updated_at
+
 
 logger = logging.getLogger(__name__)
 
@@ -67,6 +69,7 @@ async def create_dog(
     dog_data: DogCreate,
     db: AsyncSession = Depends(get_database_session),
     current_user: UserSchema = Depends(get_current_user),
+    update_timestamp: None = Depends(update_global_updated_at)
 ):
     try:
         dog = await dog_svc.create_dog(dog_data, db)
@@ -98,6 +101,7 @@ async def update_dog(
     dog_data: DogUpdate,
     db: AsyncSession = Depends(get_database_session),
     current_user: UserSchema = Depends(get_current_user),
+    update_timestamp: None = Depends(update_global_updated_at)
 ):
     try:
         dog = await dog_svc.update_dog(dog_id, dog_data, db)
@@ -115,6 +119,7 @@ async def delete_dog(
     dog_id: int,
     db: AsyncSession = Depends(get_database_session),
     current_user: UserSchema = Depends(get_current_user),
+    update_timestamp: None = Depends(update_global_updated_at)
 ):
     try:
         result = await dog_svc.delete_dog(dog_id, db)
@@ -133,6 +138,7 @@ async def handle_production(
     production_data: ProductionCreate,
     db: AsyncSession = Depends(get_database_session),
     current_user: UserSchema = Depends(get_current_user),
+    update_timestamp: None = Depends(update_global_updated_at)
 ):
     try:
         production = await dog_svc.add_production_to_dog(dog_id, production_data, db)

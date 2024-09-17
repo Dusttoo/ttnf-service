@@ -4,6 +4,8 @@ from typing import List
 from app.services import search_resources
 from app.schemas import SearchResponse
 from app.core.database import get_database_session
+from app.core.settings import update_global_updated_at
+
 
 search_router = APIRouter()
 

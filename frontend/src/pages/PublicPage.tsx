@@ -27,7 +27,7 @@ const PublicPage: React.FC<PublicPageProps> = ({ slug: initialSlug }) => {
     if (!page) return <LoadingSpinner />;
 
     const sanitizedContent = DOMPurify.sanitize(page.content);
-    const showTitle = page.custom_values?.show_title !== false;
+    const showTitle = page.customValues?.showTitle !== false;
 
     return (
         <div>

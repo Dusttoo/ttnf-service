@@ -1,9 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
-from app.schemas import Page, PageCreate, PageUpdate
+from uuid import UUID
+from app.schemas import Page, PageCreate, PageUpdate, UserSchema
 from app.core.database import get_database_session
 from app.services.page_service import PageService
+from app.core.settings import update_global_updated_at
+from app.core.auth import get_current_user
+
 
 page_router = APIRouter()
 page_service = PageService()
@@ -18,7 +22,7 @@ async def read_pages(
 
 @page_router.get("/{page_id}", response_model=Page)
 async def get_page_by_id(
-    page_id: int, db: AsyncSession = Depends(get_database_session)
+    page_id: UUID, db: AsyncSession = Depends(get_database_session)
 ):
     db_page = await page_service.get_page(db, page_id)
     if not db_page:
@@ -38,7 +42,10 @@ async def read_page_by_slug(
 
 @page_router.post("/", response_model=Page)
 async def create_new_page(
-    page: PageCreate, db: AsyncSession = Depends(get_database_session)
+    page: PageCreate,
+    db: AsyncSession = Depends(get_database_session),
+    current_user: UserSchema = Depends(get_current_user),
+    update_timestamp: None = Depends(update_global_updated_at)
 ):
     created_page = await page_service.create_page(db, page)
     return created_page
@@ -46,7 +53,10 @@ async def create_new_page(
 
 @page_router.put("/{page_id}", response_model=Page)
 async def update_existing_page(
-    page_id: int, page: PageUpdate, db: AsyncSession = Depends(get_database_session)
+    page_id: UUID, page: PageUpdate,
+    db: AsyncSession = Depends(get_database_session),
+    current_user: UserSchema = Depends(get_current_user),
+    update_timestamp: None = Depends(update_global_updated_at)
 ):
     db_page = await page_service.update_page(db, page_id, page)
     if not db_page:
@@ -56,7 +66,10 @@ async def update_existing_page(
 
 @page_router.delete("/{page_id}", response_model=Page)
 async def delete_existing_page(
-    page_id: int, db: AsyncSession = Depends(get_database_session)
+    page_id: UUID,
+    db: AsyncSession = Depends(get_database_session),
+    current_user: UserSchema = Depends(get_current_user),
+    update_timestamp: None = Depends(update_global_updated_at)
 ):
     db_page = await page_service.delete_page(db, page_id)
     if not db_page:

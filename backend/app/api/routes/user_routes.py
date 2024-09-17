@@ -10,6 +10,8 @@ from app.schemas import (
 from app.services import UserService
 from app.models import User
 from app.utils import NotFoundError
+from app.core.settings import update_global_updated_at
+
 
 user_router = APIRouter()
 user_service = UserService()
@@ -22,7 +24,9 @@ async def read_users(db: Session = Depends(get_database_session)):
 
 @user_router.post("/", response_model=TokenSchema)
 async def create_a_user(
-    user_create: UserCreateSchema, db: Session = Depends(get_database_session)
+    user_create: UserCreateSchema,
+    db: Session = Depends(get_database_session),
+    update_timestamp: None = Depends(update_global_updated_at)
 ):
     try:
         user = await user_service.create_user(user_create, db)

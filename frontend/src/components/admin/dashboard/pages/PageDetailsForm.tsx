@@ -72,8 +72,8 @@ const PageDetailsForm: React.FC<PageDetailsFormProps> = ({ initialTitle = '', in
                     ...page,
                     name: title,
                     slug,
-                    custom_values: {
-                        ...page.custom_values,
+                    customValues: {
+                        ...page.customValues,
                         show_title: showTitle,
                     }
                 }
