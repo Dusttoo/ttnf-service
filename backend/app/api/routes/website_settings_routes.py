@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 from datetime import datetime
-from typing import Optional
 from app.core.database import get_database_session
 from app.models import WebsiteSettings
 from app.schemas import WebsiteSettingsSchema, UpdateWebsiteSettingsSchema
@@ -9,18 +9,23 @@ from app.schemas import WebsiteSettingsSchema, UpdateWebsiteSettingsSchema
 settings_router = APIRouter()
 
 @settings_router.get("/", response_model=WebsiteSettingsSchema)
-def get_website_settings(db: Session = Depends(get_database_session)):
-    settings = db.query(WebsiteSettings).first()
+async def get_website_settings(db: AsyncSession = Depends(get_database_session)):
+    result = await db.execute(select(WebsiteSettings))
+    settings = result.scalars().first()
+
     if not settings:
         raise HTTPException(status_code=404, detail="Website settings not found.")
+
     return settings
 
 @settings_router.put("/", response_model=WebsiteSettingsSchema)
-def update_website_settings(
+async def update_website_settings(
     update_data: UpdateWebsiteSettingsSchema,
-    db: Session = Depends(get_database_session)
+    db: AsyncSession = Depends(get_database_session)
 ):
-    settings = db.query(WebsiteSettings).first()
+    result = await db.execute(select(WebsiteSettings))
+    settings = result.scalars().first()
+
     if not settings:
         raise HTTPException(status_code=404, detail="Website settings not found.")
 
@@ -31,17 +36,20 @@ def update_website_settings(
 
     settings.updated_at = datetime.utcnow()
 
-    db.commit()
-    db.refresh(settings)
+    await db.commit()
+    await db.refresh(settings)
     return settings
 
 @settings_router.put("/update-timestamp", response_model=WebsiteSettingsSchema)
-def update_timestamp_manually(db: Session = Depends(get_database_session)):
-    settings = db.query(WebsiteSettings).first()
+async def update_timestamp_manually(db: AsyncSession = Depends(get_database_session)):
+    result = await db.execute(select(WebsiteSettings))
+    settings = result.scalars().first()
+
     if not settings:
         raise HTTPException(status_code=404, detail="Website settings not found.")
 
     settings.updated_at = datetime.utcnow()
-    db.commit()
-    db.refresh(settings)
+
+    await db.commit()
+    await db.refresh(settings)
     return settings

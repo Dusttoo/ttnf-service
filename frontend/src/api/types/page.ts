@@ -1,3 +1,4 @@
+import {Announcement, CarouselImage} from './core'
 export interface Page {
     id: string;
     type: string;
@@ -5,10 +6,9 @@ export interface Page {
     slug: string;
     meta?: IMeta;
     customValues?: { [key: string]: any };
-    externaData?: { [key: string]: any };
+    externalData?: { [key: string]: any };
     content: string;
     authorId?: number;
-    invalidBlockTypes?: string[];
     status: string; 
     isLocked: boolean;
     tags?: string[];
@@ -17,7 +17,9 @@ export interface Page {
     language: string;
     translations?: Translation[];
     updatedAt?: Date;
-    settings?: PageSettings; 
+    settings?: PageSettings;
+    announcements?: Announcement[];
+    carousel?: CarouselImage[];
 }
 
 export interface PageSettings {

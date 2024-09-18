@@ -10,14 +10,15 @@ from app.schemas import (
     NavLink as NavLinkSchema,
     Author,
     IMeta,
-    Translation
+    Translation,
+    Announcement as AnnouncementSchema
 )
-from app.models import Dog, Litter, Breeding, Production, NavLink
-from app.models.page import Page
+from app.models import Dog, Litter, Breeding, Production, NavLink, Announcement, Page
 import json
 from typing import Union, Dict, Any
 import logging
 from uuid import UUID
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -145,46 +146,50 @@ def convert_to_page_schema(page: Union[Page, dict]) -> PageSchema:
     if translations and isinstance(translations, list):
         translations = [Translation(**translation) for translation in translations]
 
+    # Convert SQLAlchemy Announcement models to Pydantic AnnouncementSchema or handle dict
+    announcements = page["announcements"] if isinstance(page, dict) else page.announcements
+    if announcements and isinstance(announcements, list):
+        announcements = [
+            AnnouncementSchema(
+                id=announcement.get("id") if isinstance(announcement, dict) else announcement.id,
+                title=announcement.get("title") if isinstance(announcement, dict) else announcement.title,
+                date=announcement.get("date").isoformat() if isinstance(announcement.get("date"), datetime) else announcement.get("date") if isinstance(announcement, dict) else (announcement.date.isoformat() if isinstance(announcement.date, datetime) else announcement.date),
+                message=announcement.get("message") if isinstance(announcement, dict) else announcement.message,
+                category=announcement.get("category") if isinstance(announcement, dict) else announcement.category
+            )
+            for announcement in announcements
+        ]
+
+    # Handle carousel content if available
+    carousel = page["carousel"] if isinstance(page, dict) else page.carousel
+    if carousel and isinstance(carousel, list):
+        carousel = [
+            {
+                "src": item.get("src"),
+                "alt": item.get("alt")
+            }
+            for item in carousel
+        ]
+
     return PageSchema(
-        id=(
-            str(page["id"]) if isinstance(page, dict) else str(page.id)
-        ),  # Convert UUID to string
+        id=str(page["id"]) if isinstance(page, dict) else str(page.id),
         type=page["type"] if isinstance(page, dict) else page.type,
         name=page["name"] if isinstance(page, dict) else page.name,
         slug=page["slug"] if isinstance(page, dict) else page.slug,
         meta=meta,
-        custom_values=(
-            page["custom_values"] if isinstance(page, dict) else page.custom_values
-        ),
-        external_data=(
-            page["external_data"] if isinstance(page, dict) else page.external_data
-        ),
+        custom_values=page["custom_values"] if isinstance(page, dict) else page.custom_values,
+        external_data=page["external_data"] if isinstance(page, dict) else page.external_data,
         content=content,
         author_id=page["author_id"] if isinstance(page, dict) else page.author_id,
         author=author,
-        invalid_block_types=(
-            page["invalid_block_types"]
-            if isinstance(page, dict)
-            else page.invalid_block_types
-        ),
         status=page["status"] if isinstance(page, dict) else page.status,
         is_locked=page["is_locked"] if isinstance(page, dict) else page.is_locked,
         tags=page["tags"] if isinstance(page, dict) else page.tags,
-        created_at=(
-            page["created_at"]
-            if isinstance(page, dict)
-            else page.created_at.isoformat() if page.created_at else None
-        ),
-        published_at=(
-            page["published_at"]
-            if isinstance(page, dict)
-            else page.published_at.isoformat() if page.published_at else None
-        ),
+        created_at=page["created_at"] if isinstance(page, dict) else (page.created_at.isoformat() if page.created_at else None),
+        published_at=page["published_at"] if isinstance(page, dict) else (page.published_at.isoformat() if page.published_at else None),
         language=page["language"] if isinstance(page, dict) else page.language,
         translations=translations,
-        updated_at=(
-            page["updated_at"]
-            if isinstance(page, dict)
-            else page.updated_at.isoformat() if page.updated_at else None
-        ),
+        updated_at=page["updated_at"] if isinstance(page, dict) else (page.updated_at.isoformat() if page.updated_at else None),
+        announcements=announcements,
+        carousel=carousel  # Include the carousel data
     )

@@ -1,19 +1,44 @@
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import BaseModel, HttpUrl
 from typing import Optional, List, Dict, Any
 from datetime import datetime
+from enum import Enum
 
 
-# Meta information about the page
+class CarouselImage(BaseModel):
+    src: str
+    alt: str
+
+    class Config:
+        from_attributes = True
+
+
+class AnnouncementType(str, Enum):
+    LITTER = 'litter'
+    BREEDING = 'breeding'
+    STUD = 'stud'
+    ANNOUNCEMENT = 'announcement'
+    SERVICE = 'service'
+    INFO = 'info'
+
+
+class Announcement(BaseModel):
+    id: int
+    title: str
+    date: str
+    message: str
+    category: Optional[AnnouncementType] = AnnouncementType.ANNOUNCEMENT
+
+    class Config:
+        from_attributes = True
+
+
 class IMeta(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
     language: Optional[str] = None
-    featuredImage: Optional[str] = (
-        None 
-    )
+    featuredImage: Optional[str] = None
 
 
-# Information about the author of the page
 class Author(BaseModel):
     id: int
     email: str
@@ -23,43 +48,37 @@ class Author(BaseModel):
     company: Optional[str] = None
 
 
-# Information about the translations of the page
 class Translation(BaseModel):
-    language: str
+    name: str
     slug: str
+    language: str
 
 
-# Base schema for a page
 class PageBase(BaseModel):
     type: str
     name: str
     slug: str
     meta: Optional[IMeta] = None
-    custom_values: Optional[Dict[str, Any]] = (
-        None  # Represents any custom data associated with the page
-    )
-    external_data: Optional[Dict[str, Any]] = (
-        None  # Represents any external data associated with the page
-    )
+    custom_values: Optional[Dict[str, Any]] = None
+    external_data: Optional[Dict[str, Any]] = None
     content: str
     author_id: Optional[int] = None
-    invalid_block_types: Optional[List[str]] = None
-    status: Optional[str] = "draft"  # Could use an enum for PageStatus if needed
+    status: Optional[str] = "draft"
     is_locked: Optional[bool] = False
     tags: Optional[List[str]] = None
+    announcements: Optional[List[Announcement]] = None
     created_at: Optional[datetime] = None
     published_at: Optional[datetime] = None
     language: str
-    translations: Optional[Dict[str, Any]] = None
+    translations: Optional[List[Translation]] = None
     updated_at: Optional[datetime] = None
+    carousel: Optional[List[CarouselImage]] = None  # Adding the carousel images here
 
 
-# Schema for creating a page
 class PageCreate(PageBase):
     pass
 
 
-# Schema for updating a page
 class PageUpdate(BaseModel):
     type: Optional[str] = None
     name: Optional[str] = None
@@ -69,18 +88,18 @@ class PageUpdate(BaseModel):
     external_data: Optional[Dict[str, Any]] = None
     content: Optional[str] = None
     author_id: Optional[int] = None
-    invalid_block_types: Optional[List[str]] = None
     status: Optional[str] = None
     is_locked: Optional[bool] = None
     tags: Optional[List[str]] = None
+    announcements: Optional[List[Announcement]] = None
     language: Optional[str] = None
-    translations: Optional[Dict[str, Any]] = None
+    translations: Optional[List[Translation]] = None
+    carousel: Optional[List[CarouselImage]] = None  # Carousel support in update
 
 
-# Full schema for a page, including ID and author details
 class Page(PageBase):
     id: str
-    author: Optional[Author] = None  # Full author information
+    author: Optional[Author] = None
 
     class Config:
         from_attributes = True

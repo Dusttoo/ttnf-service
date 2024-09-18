@@ -35,6 +35,7 @@ async def read_page_by_slug(
     slug: str, db: AsyncSession = Depends(get_database_session)
 ):
     db_page = await page_service.get_page_by_slug(db, slug)
+    print(f'\n\n{db_page.announcements}\n\n')
     if not db_page:
         raise HTTPException(status_code=404, detail="Page not found")
     return db_page

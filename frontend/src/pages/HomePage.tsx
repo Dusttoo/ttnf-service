@@ -4,9 +4,13 @@ import HomePageHeader from '../components/landing/Header';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { getPageBySlug } from '../api/pageApi';
 import { Page } from '../api/types/page';
+import { fetchWebsiteSettings } from '../api/utilsApi';
 import DOMPurify from 'dompurify';
-import ImageCarousel from '../components/common/ImageCarousel'
-import AnnouncementSection from '../components/common/Announcement'
+import ImageCarousel from '../components/common/ImageCarousel';
+import AnnouncementSection from '../components/common/Announcement';
+import { ImageCarouselSettings, WebsiteSettings } from '../api/types/core';
+import ErrorComponent from "../components/common/Error";
+
 
 const HomePageContainer = styled.div`
   display: flex;
@@ -33,63 +37,52 @@ const Footer = styled.footer`
 
 const HomePage: React.FC = () => {
     const [page, setPage] = useState<Page | null>(null);
+    const [settings, setSettings] = useState<WebsiteSettings | null>(null);
+    const [loading, setLoading] = useState<boolean>(true);
 
     useEffect(() => {
-        const fetchPage = async () => {
-            const fetchedPage = await getPageBySlug('landing');
-            setPage(fetchedPage);
+        const fetchData = async () => {
+            try {
+                console.log('fetching')
+                const [fetchedPage, fetchedSettings] = await Promise.all([
+                    getPageBySlug('landing'),
+                    fetchWebsiteSettings()
+                ]);
+                console.log(fetchedPage, fetchedSettings)
+                setPage(fetchedPage);
+                setSettings(fetchedSettings);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            } finally {
+                setLoading(false);
+            }
         };
-        fetchPage();
+        fetchData();
     }, []);
 
-    if (!page) return <LoadingSpinner />;
+    if (loading) return <LoadingSpinner />;
+    if (!page) return <ErrorComponent message={"Content not found"} />
+    if (!settings) return <ErrorComponent message={"Error loading settings"} />
 
     const sanitizedContent = DOMPurify.sanitize(page.content);
 
-    const memes = [
-        {
-          id: 1,
-          src: 'https://i0.wp.com/texastopnotchfrenchies.com/wp-content/uploads/2022/12/G0yapF7-1.jpeg?w=1073&ssl=1',
-          alt: 'Meme 1',
-        },
-        {
-          id: 2,
-          src: 'https://i0.wp.com/texastopnotchfrenchies.com/wp-content/uploads/2022/12/320277169_920956245566116_7512405805898762110_n.jpeg?ssl=1',
-          alt: 'Meme 2',
-        }
-      ];
+    const carouselImages = page.carousel || [];
+    const announcements = page.announcements || [];
 
-    const announcements = [
-      {
-        id: 1,
-        title: 'New Litter Available!',
-        date: '2024-09-10',
-        message: 'We are excited to announce a new litter of French Bulldogs! Contact us for more information.',
-      },
-      {
-        id: 2,
-        title: 'Upcoming Planned Breeding',
-        date: '2024-08-30',
-        message: 'We have an upcoming planned breeding in October. Stay tuned for details!',
-      },
-      {
-        id: 3,
-        title: 'New Stud Service Available',
-        date: '2024-08-15',
-        message: 'Our male, Thunder Cat, is now available for stud services! Contact us for more details.',
-      },
-    ];
+    const carouselSettings: ImageCarouselSettings = {
+        autoplaySpeed: 8000,
+    };
 
     return (
         <HomePageContainer>
             <HomePageHeader
                 title={page.name}
-                lastUpdated={page.updatedAt}
+                lastUpdated={settings.updatedAt}
                 introduction={page.customValues?.introductionText || "Welcome to Texas Top Notch Frenchies!"}
             />
 
-            <AnnouncementSection title="Latest Announcements" announcements={announcements} />
-            <ImageCarousel images={memes} />
+            {announcements && <AnnouncementSection title="Latest Announcements" announcements={announcements} />}
+            {carouselImages && <ImageCarousel images={carouselImages} width={"50%"} settings={carouselSettings} />}
 
             <AboutSection dangerouslySetInnerHTML={{ __html: sanitizedContent }} />
         </HomePageContainer>

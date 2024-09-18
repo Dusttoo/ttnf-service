@@ -38,17 +38,19 @@ const SocialMediaIcon = styled.a`
 
 interface HomePageHeaderProps {
   title: string;
-  lastUpdated: Date | undefined;
+  lastUpdated: string | undefined;
   introduction: string;
 }
 
 const HomePageHeader: React.FC<HomePageHeaderProps> = ({ title, lastUpdated, introduction }) => {
   const formattedDate = lastUpdated
-    ? new Date(lastUpdated).toLocaleDateString(undefined, {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      })
+    ? new Date(lastUpdated).toString() !== 'Invalid Date'
+      ? new Date(lastUpdated).toLocaleDateString(undefined, {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        })
+      : 'Invalid Date'
     : 'N/A';
 
   return (

@@ -5,6 +5,7 @@ from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from app.models import Page
+from sqlalchemy.orm import selectinload
 from app.schemas import PageCreate, PageUpdate, Page as PageSchema
 from app.utils.schema_converters import convert_to_page_schema
 from app.core.redis import get_redis_client, delete_pattern
@@ -12,7 +13,6 @@ from app.utils import DateTimeEncoder
 from uuid import UUID
 
 logger = logging.getLogger(__name__)
-
 
 class PageService:
     def __init__(self):
@@ -35,20 +35,20 @@ class PageService:
         if cached_page:
             try:
                 page_data = json.loads(cached_page)
-                return PageSchema(**page_data)
+                return convert_to_page_schema(page_data)
             except (json.JSONDecodeError, TypeError) as e:
                 logger.error(f"Failed to decode cache for page {page_id}: {e}")
                 await redis_client.delete(cache_key)
 
-        result = await db.execute(select(Page).filter(Page.id == page_id))
+        result = await db.execute(select(Page).options(selectinload(Page.announcements)).filter(Page.id == page_id))
         db_page = result.scalars().first()
         if db_page:
             page_schema = convert_to_page_schema(db_page)
             try:
-                page_data = page_schema.dict()
+                page_data = page_schema.dict()  # Convert Pydantic model to dict
                 await redis_client.set(
-                    cache_key, json.dumps(page_data, cls=DateTimeEncoder), ex=3600
-                )  # Cache for 1 hour
+                    cache_key, json.dumps(page_data, cls=DateTimeEncoder), ex=3600  
+                )
             except Exception as e:
                 logger.error(f"Failed to cache page {page_id}: {e}")
 
@@ -68,8 +68,11 @@ class PageService:
             except (json.JSONDecodeError, TypeError) as e:
                 logger.error(f"Failed to decode cache for page slug {slug}: {e}")
                 await redis_client.delete(cache_key)
-
-        result = await db.execute(select(Page).filter(Page.slug == slug))
+        result = await db.execute(
+            select(Page)
+            .options(selectinload(Page.announcements))
+            .filter(Page.slug == slug)
+        )
         db_page = result.scalars().first()
         if db_page:
             page_schema = convert_to_page_schema(db_page)
@@ -90,7 +93,7 @@ class PageService:
             type=page.type,
             name=page.name,
             slug=page.slug,
-            content=page.content,  # Now content is HTML string
+            content=page.content,
             meta=page.meta,
             custom_values=page.custom_values,
             external_data=page.external_data,
@@ -100,6 +103,7 @@ class PageService:
             tags=page.tags,
             language=page.language,
             translations=page.translations,
+            announcements=page.announcements
         )
         db.add(db_page)
         await db.commit()
@@ -110,7 +114,7 @@ class PageService:
         return convert_to_page_schema(db_page)
 
     async def update_page(self, db: AsyncSession, page_id: str, page: PageUpdate) -> Optional[PageSchema]:
-        result = await db.execute(select(Page).filter(Page.id == page_id))
+        result = await db.execute(select(Page).options(selectinload(Page.announcements)).filter(Page.id == page_id))
         db_page = result.scalars().first()
 
         if db_page:
@@ -149,7 +153,7 @@ class PageService:
                 logger.error(f"Failed to decode cached pages for key {cache_key}: {e}")
                 await redis_client.delete(cache_key)  # Invalidate corrupt cache
 
-        result = await db.execute(select(Page).offset(skip).limit(limit))
+        result = await db.execute(select(Page).options(selectinload(Page.announcements)).offset(skip).limit(limit))
         db_pages = result.scalars().all()
         page_schemas = [convert_to_page_schema(page) for page in db_pages]
         try:
@@ -167,7 +171,7 @@ class PageService:
         return page_schemas
 
     async def delete_page(self, db: AsyncSession, page_id: str) -> Optional[PageSchema]:
-        result = await db.execute(select(Page).filter(Page.id == page_id))
+        result = await db.execute(select(Page).options(selectinload(Page.announcements)).filter(Page.id == page_id))
         db_page = result.scalars().first()
 
         if db_page:

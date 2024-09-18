@@ -34,6 +34,41 @@ export interface SearchBarProps {
     onResultSelect: (result: SearchResult) => void;
 }
 
+export interface Announcement {
+  id: number;
+  title: string;
+  date: string;
+  message: string;
+  category?: AnnouncementCategory;
+}
+
+export interface AnnouncementProps {
+  announcements: Announcement[];
+  title: string;
+}
+
+export interface ImageCarouselSettings {
+  dots?: boolean;
+  infinite?: boolean;
+  speed?: number;
+  slidesToShow?: number;
+  slidesToScroll?: number;
+  autoplay?: boolean;
+  autoplaySpeed?: number;
+}
+
+export interface CarouselImage {
+    id: number;
+    src: string;
+    alt: string;
+}
+
+export interface WebsiteSettings {
+    title: string;
+    description: string;
+    updatedAt: string;
+  }
+
 export enum GenderEnum {
     Male = 'Male',
     Female = 'Female'
@@ -45,4 +80,13 @@ export enum StatusEnum {
     Stud = 'Stud',
     Retired = 'Retired',
     Active = 'Active'
+}
+
+export enum AnnouncementCategory {
+  LITTER = 'litter',
+  BREEDING = 'breeding',
+  STUD = 'stud',
+  ANNOUNCEMENT = 'announcement',
+  SERVICE = 'service',
+  INFO = 'info',
 }
