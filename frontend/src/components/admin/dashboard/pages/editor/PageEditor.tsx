@@ -28,22 +28,31 @@ const PageEditor: React.FC = () => {
     const dispatch = useDispatch();
     const [isEditMode, setIsEditMode] = useState(true);
     const [content, setContent] = useState<string>('');
+    const [seoSettings, setSEOSettings] = useState(page?.settings?.seo || {});
+    const [layoutSettings, setLayoutSettings] = useState(page?.settings?.layout || {});
 
     useEffect(() => {
         if (page && page.content) {
             setContent(page.content);
+            setSEOSettings(page.settings?.seo || {});
+            setLayoutSettings(page.settings?.layout || {});
         }
     }, [page]);
 
     const handleSaveContent = () => {
         if (page) {
-            dispatch(updatePageContent({ pageId: page.id, content }));
+            dispatch(updatePageContent({
+                pageId: page.id,
+                content,
+                seoSettings,
+                layoutSettings
+            }));
             handleSave();
         }
     };
 
-    if (loading) return <LoadingSpinner/>;
-    if (error) return <ErrorComponent message={error}/>;
+    if (loading) return <LoadingSpinner />;
+    if (error) return <ErrorComponent message={error} />;
 
     return (
         <EditorContainer>
@@ -63,7 +72,12 @@ const PageEditor: React.FC = () => {
                     </button>
                 )}
             </ContentContainer>
-            <Sidebar />
+            <Sidebar
+                seoSettings={seoSettings}
+                setSEOSettings={setSEOSettings}
+                layoutSettings={layoutSettings}
+                setLayoutSettings={setLayoutSettings}
+            />
         </EditorContainer>
     );
 };
