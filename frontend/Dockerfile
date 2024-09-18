@@ -1,5 +1,5 @@
 # Stage 1: Build the React app
-FROM node:14-alpine as build
+FROM node:22-alpine as build
 ARG REACT_APP_BACKEND_URL
 ARG REACT_APP_TINYMCE_API_KEY
 WORKDIR /app

@@ -10,6 +10,7 @@ import ToggleButton from './ToggleButton';
 import styled from 'styled-components';
 import LoadingSpinner from '../../../../common/LoadingSpinner';
 import ErrorComponent from '../../../../common/Error';
+import HeroEdit from './HeroEditor'
 
 const EditorContainer = styled.div`
   display: flex;
@@ -62,7 +63,10 @@ const PageEditor: React.FC = () => {
                     onToggle={() => setIsEditMode((prevMode) => !prevMode)}
                 />
                 {isEditMode ? (
-                    <ContentArea content={content} setContent={setContent} />
+                        <>
+                            <ContentArea content={content} setContent={setContent} />
+
+                        </>
                 ) : (
                     <PreviewMode content={content} />
                 )}
