@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFacebook, faInstagram, faTwitter } from '@fortawesome/free-brands-svg-icons';
 
 const HeaderContainer = styled.header`
-  text-align: center;
+  text-align: left;
   margin-bottom: 2rem;
 `;
 
@@ -21,7 +21,7 @@ const Introduction = styled.p`
 
 const SocialMedia = styled.div`
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 1rem;
   margin-top: 2rem;
 `;
@@ -55,9 +55,9 @@ const HomePageHeader: React.FC<HomePageHeaderProps> = ({ title, lastUpdated, int
 
   return (
     <HeaderContainer>
-      <h1>{title}</h1>
+      {/*<h1>{title}</h1>*/}
       <LastUpdated>Last Updated: {formattedDate}</LastUpdated>
-      <Introduction>{introduction}</Introduction>
+      {/*<Introduction>{introduction}</Introduction>*/}
 
       <SocialMedia>
         <SocialMediaIcon href="https://facebook.com" target="_blank" rel="noopener noreferrer">

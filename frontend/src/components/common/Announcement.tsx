@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronDown, faChevronUp, faPaw, faBullhorn, faDog, faBasketShopping, faCircleInfo } from '@fortawesome/free-solid-svg-icons';
 import { AnnouncementCategory, Announcement, AnnouncementProps } from '../../api/types/core';
+import {formatDate} from '../../utils/dates'
 
 const AnnouncementContainer = styled.div`
   background: linear-gradient(135deg, ${(props) => props.theme.colors.secondaryBackground} 0%, ${(props) => props.theme.colors.primaryLight} 100%);
@@ -84,7 +85,6 @@ const AnnouncementIcon = styled(FontAwesomeIcon)`
   color: ${(props) => props.theme.colors.primary};
 `;
 
-
 const AnnouncementSection: React.FC<AnnouncementProps> = ({ announcements, title }) => {
   const [isVisible, setIsVisible] = useState(true);
 
@@ -125,7 +125,7 @@ const AnnouncementSection: React.FC<AnnouncementProps> = ({ announcements, title
                   <AnnouncementIcon icon={getIcon(announcement.category)} />
                   <strong>{announcement.title}</strong>
                 </div>
-                <DateText>{announcement.date}</DateText>
+                <DateText>{formatDate(announcement.date)}</DateText>
               </AnnouncementDetails>
               <AnnouncementMessage>{announcement.message}</AnnouncementMessage>
             </AnnouncementItem>

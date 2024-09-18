@@ -126,41 +126,51 @@ def convert_to_navigation_schema(navigation: NavLink) -> NavLinkSchema:
         position=navigation.position,
     )
 
+from typing import Union
+from datetime import datetime
+import json
+
 def convert_to_page_schema(page: Union[Page, dict]) -> PageSchema:
+    # Content handling
     content = page["content"] if isinstance(page, dict) else page.content
     if isinstance(content, str):
         try:
-            content = json.loads(content)
+            content = json.loads(content)  # Try parsing if it's a JSON string
         except json.JSONDecodeError:
-            pass
+            pass  # Keep it as a string if it's not JSON
 
+    # Meta handling (optional)
     meta = page["meta"] if isinstance(page, dict) else page.meta
     if meta and isinstance(meta, dict):
-        meta = IMeta(**meta)
+        meta = IMeta(**meta)  # Convert to IMeta Pydantic model
 
+    # Author handling (optional)
     author = page["author"] if isinstance(page, dict) else page.author
     if author and isinstance(author, dict):
         author = Author(**author)
 
+    # Translations handling (optional)
     translations = page["translations"] if isinstance(page, dict) else page.translations
     if translations and isinstance(translations, list):
         translations = [Translation(**translation) for translation in translations]
 
-    # Convert SQLAlchemy Announcement models to Pydantic AnnouncementSchema or handle dict
+    # Announcements handling (optional)
     announcements = page["announcements"] if isinstance(page, dict) else page.announcements
     if announcements and isinstance(announcements, list):
         announcements = [
             AnnouncementSchema(
                 id=announcement.get("id") if isinstance(announcement, dict) else announcement.id,
                 title=announcement.get("title") if isinstance(announcement, dict) else announcement.title,
-                date=announcement.get("date").isoformat() if isinstance(announcement.get("date"), datetime) else announcement.get("date") if isinstance(announcement, dict) else (announcement.date.isoformat() if isinstance(announcement.date, datetime) else announcement.date),
+                # Date Handling: Ensure date is in ISO format
+                date=announcement["date"] if isinstance(announcement, dict)
+                else (announcement.date.isoformat() if isinstance(announcement.date, datetime) else announcement.date),
                 message=announcement.get("message") if isinstance(announcement, dict) else announcement.message,
                 category=announcement.get("category") if isinstance(announcement, dict) else announcement.category
             )
             for announcement in announcements
         ]
 
-    # Handle carousel content if available
+    # Carousel handling (optional)
     carousel = page["carousel"] if isinstance(page, dict) else page.carousel
     if carousel and isinstance(carousel, list):
         carousel = [
@@ -168,9 +178,10 @@ def convert_to_page_schema(page: Union[Page, dict]) -> PageSchema:
                 "src": item.get("src"),
                 "alt": item.get("alt")
             }
-            for item in carousel
+            for item in carousel if item.get("src")  # Ensure `src` exists
         ]
 
+    # Build and return PageSchema
     return PageSchema(
         id=str(page["id"]) if isinstance(page, dict) else str(page.id),
         type=page["type"] if isinstance(page, dict) else page.type,

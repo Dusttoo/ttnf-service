@@ -5,7 +5,7 @@ import styled from 'styled-components';
 const CarouselContainer = styled.div<{ width?: string; height?: string }>`
   width: ${(props) => props.width || '80%'};
   margin: 2rem auto;
-  height: ${(props) => props.height || 'auto'};
+  height: ${(props) => props.height || '500px'}; /* Set a fixed height */
 
   .slick-prev, .slick-next {
     z-index: 1;
@@ -16,10 +16,21 @@ const CarouselContainer = styled.div<{ width?: string; height?: string }>`
   }
 `;
 
-const CarouselImage = styled.img<{ height?: string }>`
+// Ensures the image is centered both horizontally and vertically
+const CarouselSlide = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 100%;
-  height: ${(props) => props.height || 'auto'};
-  object-fit: cover;
+  height: 100%;
+  overflow: hidden; /* Ensures no overflow if image is too large */
+`;
+
+const CarouselImage = styled.img<{ height?: string }>`
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain; /* Ensures the whole image is visible */
+  object-position: center;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 `;
@@ -48,9 +59,9 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ images, settings, width, 
     <CarouselContainer width={width} height={height}>
       <Slider {...carouselSettings}>
         {images.map((image) => (
-          <div key={image.id}>
+          <CarouselSlide key={image.id}>
             <CarouselImage src={image.src} alt={image.alt} height={height} />
-          </div>
+          </CarouselSlide>
         ))}
       </Slider>
     </CarouselContainer>
