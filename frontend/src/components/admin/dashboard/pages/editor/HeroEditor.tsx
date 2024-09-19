@@ -48,26 +48,24 @@ const HeroEdit: React.FC<HeroEditProps> = ({ page, onSaveHero }) => {
 
   useEffect(() => {
     if (page.customValues?.heroContent) {
-      setHeroContent(page.customValues.heroContent); // Load existing hero content from the page
+      setHeroContent(page.customValues.heroContent);
     }
   }, [page]);
 
-  // Handle saving the entire hero section including carousel
   const handleSaveHero = () => {
     onSaveHero({
-      title: heroContent.title,
-      description: heroContent.description,
-      ctaText: heroContent.ctaText,
-      introductionText: heroContent.introductionText,
+      ...heroContent,
       carouselImages: heroContent.carouselImages,
     });
   };
 
-  // Handle saving the carousel images from the CarouselEdit component
-  const handleSaveCarousel = (
+  const handleUpdateCarousel = (
     updatedCarouselImages: HeroContent['carouselImages']
   ) => {
-    setHeroContent({ ...heroContent, carouselImages: updatedCarouselImages });
+    setHeroContent((prevState) => ({
+      ...prevState,
+      carouselImages: updatedCarouselImages,
+    }));
   };
 
   return (
@@ -103,15 +101,6 @@ const HeroEdit: React.FC<HeroEditProps> = ({ page, onSaveHero }) => {
         placeholder="Enter CTA text"
       />
 
-      <label>Introduction Text</label>
-      <TextArea
-        value={heroContent.introductionText}
-        onChange={(e) =>
-          setHeroContent({ ...heroContent, introductionText: e.target.value })
-        }
-        placeholder="Enter introduction text"
-      />
-
       <label>Hero Carousel</label>
       <ImageCarousel
         images={heroContent.carouselImages}
@@ -119,8 +108,11 @@ const HeroEdit: React.FC<HeroEditProps> = ({ page, onSaveHero }) => {
         settings={{ autoplay: true }}
       />
 
-      {/* Pass handleSaveCarousel to CarouselEdit */}
-      <CarouselEdit page={page} onSaveCarousel={handleSaveCarousel} />
+      <CarouselEdit
+        page={page}
+        onSaveCarousel={handleUpdateCarousel}
+        isInsideParent
+      />
 
       <CTAButton variant="primary" onClick={handleSaveHero}>
         Save Hero Section

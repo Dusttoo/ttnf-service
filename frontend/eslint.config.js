@@ -12,7 +12,6 @@ export default [
   },
   {
     rules: {
-      // Rules from eslint:recommended
       ...eslintConfigPrettier.rules,
       'no-unused-vars': 'warn',
       'no-console': 'warn',

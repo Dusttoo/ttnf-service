@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useDropzone } from 'react-dropzone';
 import { CarouselImage as CarouselImageType } from '../../../../../api/types/core';
-import { DeleteButton } from '../../../../common/Buttons';
 import { Page } from '../../../../../api/types/page';
 
 import {
@@ -13,6 +12,7 @@ import {
   DroppableProvided,
 } from 'react-beautiful-dnd';
 
+// Styling for Carousel Edit Area
 const CarouselEditContainer = styled.div`
   padding: 1rem;
   background-color: ${(props) => props.theme.colors.secondaryBackground};
@@ -21,34 +21,27 @@ const CarouselEditContainer = styled.div`
 `;
 
 const CarouselImagesContainer = styled.div`
-  display: flex;
-  gap: 1.5rem;
-  overflow-x: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1rem;
   padding: 2rem;
   border-radius: 8px;
-  flex-wrap: wrap;
-
-  /* Hide scrollbars */
-  &::-webkit-scrollbar {
-    display: none;
-  }
-  -ms-overflow-style: none;
-  scrollbar-width: none;
 `;
 
 const ImagePreview = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1rem;
+  position: relative;
+  background-color: #fff;
   border: 1px solid ${(props) => props.theme.colors.border};
   border-radius: 8px;
+  padding: 1rem;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  background-color: #fff;
   transition: transform 0.2s;
   flex-shrink: 0;
   max-width: 150px;
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 
   &:hover {
     transform: translateY(-5px);
@@ -57,38 +50,45 @@ const ImagePreview = styled.div`
 `;
 
 const ImageThumbnail = styled.img`
-  width: 120px;
-  height: 120px;
+  width: 100%;
+  height: auto;
   object-fit: cover;
   border-radius: 8px;
   margin-bottom: 0.5rem;
 `;
 
-const ImageText = styled.span`
+const ImageText = styled.input`
+  width: calc(100% - 16px);
+  padding: 0.5rem;
   font-size: 0.875rem;
   color: ${(props) => props.theme.colors.text};
+  border: 1px solid ${(props) => props.theme.colors.border};
+  border-radius: 4px;
+  margin-top: 0.5rem;
   text-align: center;
-  margin-bottom: 0.5rem;
-  word-wrap: break-word;
+
+  &:focus {
+    outline: none;
+    border-color: ${(props) => props.theme.colors.primary};
+  }
 `;
 
-//const DeleteButton = styled.button`
-//  background-color: ${(props) => props.theme.colors.error};
-//  border: none;
-//  color: white;
-//  padding: 0.25rem 0.75rem;
-//  border-radius: 50%;
-//  cursor: pointer;
-//  transition: background-color 0.2s;
-//
-//  &:hover {
-//    background-color: ${(props) => props.theme.colors.errorDark};
-//  }
-//
-//  &::before {
-//    content: '✖'; /* You can use an icon library for better icons */
-//  }
-//`;
+const DeleteButton = styled.button`
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.8);
+  }
+`;
 
 const UploadArea = styled.div`
   padding: 2rem;
@@ -111,14 +111,17 @@ const SaveButton = styled.button`
     background-color: ${(props) => props.theme.colors.primaryDark};
   }
 `;
+
 interface CarouselEditProps {
   page: Page;
   onSaveCarousel: (updatedCarouselImages: CarouselImageType[]) => void;
+  isInsideParent?: boolean; // Optional prop to detect if inside a parent component
 }
 
 const CarouselEdit: React.FC<CarouselEditProps> = ({
   page,
   onSaveCarousel,
+  isInsideParent = false,
 }) => {
   const [carouselImages, setCarouselImages] = useState<CarouselImageType[]>([]);
 
@@ -171,7 +174,7 @@ const CarouselEdit: React.FC<CarouselEditProps> = ({
   };
 
   const handleSave = () => {
-    onSaveCarousel(carouselImages); // Pass the updated carousel images
+    onSaveCarousel(carouselImages);
   };
 
   return (
@@ -206,10 +209,22 @@ const CarouselEdit: React.FC<CarouselEditProps> = ({
                       {...provided.dragHandleProps}
                     >
                       <ImageThumbnail src={image.src} alt={image.alt} />
-                      <span>{image.alt}</span>
-                      <DeleteButton
-                        onClick={() => handleRemoveImage(image.id)}
+                      <ImageText
+                        type="text"
+                        value={image.alt}
+                        onChange={(e) =>
+                          setCarouselImages((prev) =>
+                            prev.map((img, idx) =>
+                              idx === index
+                                ? { ...img, alt: e.target.value }
+                                : img
+                            )
+                          )
+                        }
                       />
+                      <DeleteButton onClick={() => handleRemoveImage(image.id)}>
+                        &times;
+                      </DeleteButton>
                     </ImagePreview>
                   )}
                 </Draggable>
@@ -220,7 +235,10 @@ const CarouselEdit: React.FC<CarouselEditProps> = ({
         </Droppable>
       </DragDropContext>
 
-      <SaveButton onClick={handleSave}>Save Carousel</SaveButton>
+      {/* Only show the Save button if it's standalone */}
+      {!isInsideParent && (
+        <SaveButton onClick={handleSave}>Save Carousel</SaveButton>
+      )}
     </CarouselEditContainer>
   );
 };

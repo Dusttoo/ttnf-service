@@ -110,7 +110,7 @@ const PageEditor: React.FC = () => {
               <HeroEdit page={page} onSaveHero={handleSaveHero} />
             )}
 
-            {page.carousel && (
+            {page.carousel && !page.customValues?.heroContent && (
               <CarouselEdit page={page} onSaveCarousel={handleSaveCarousel} />
             )}
 
