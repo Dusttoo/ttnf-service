@@ -19,19 +19,30 @@ const NavItem = styled.div`
 `;
 
 const Sidebar: React.FC = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    return (
-        <SidebarContainer>
-            <h2>Admin</h2>
-            <NavItem onClick={() => navigate('/admin/dashboard')}>Dashboard</NavItem>
-            <NavItem onClick={() => navigate('/admin/dashboard/pages')}>Pages</NavItem>
-            <NavItem onClick={() => navigate('/admin/dashboard/dogs')}>Dogs</NavItem>
-            <NavItem onClick={() => navigate('/admin/dashboard/productions')}>Productions</NavItem>
-            <NavItem onClick={() => navigate('/admin/dashboard/breedings')}>Breedings</NavItem>
-            <NavItem onClick={() => navigate('/admin/dashboard/litters')}>Litters</NavItem>
-        </SidebarContainer>
-    );
+  return (
+    <SidebarContainer>
+      <h2>Admin</h2>
+      <NavItem onClick={() => navigate('/admin/dashboard')}>Dashboard</NavItem>
+      <NavItem onClick={() => navigate('/admin/dashboard/pages')}>
+        Pages
+      </NavItem>
+      <NavItem onClick={() => navigate('/admin/dashboard/dogs')}>Dogs</NavItem>
+      <NavItem onClick={() => navigate('/admin/dashboard/productions')}>
+        Productions
+      </NavItem>
+      <NavItem onClick={() => navigate('/admin/dashboard/breedings')}>
+        Breedings
+      </NavItem>
+      <NavItem onClick={() => navigate('/admin/dashboard/litters')}>
+        Litters
+      </NavItem>
+      <NavItem onClick={() => navigate('/admin/dashboard/settings')}>
+        Settings
+      </NavItem>
+    </SidebarContainer>
+  );
 };
 
 export default Sidebar;

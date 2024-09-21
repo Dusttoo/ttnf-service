@@ -78,7 +78,11 @@ const PageList: React.FC = () => {
   };
 
   if (isLoading) {
-    return <LoadingContainer><LoadingSpinner /></LoadingContainer>;
+    return (
+      <LoadingContainer>
+        <LoadingSpinner />
+      </LoadingContainer>
+    );
   }
 
   if (error) return <ErrorComponent message={error} />;
@@ -88,15 +92,21 @@ const PageList: React.FC = () => {
       <h2>Pages</h2>
       <AddButton onClick={() => navigate('/admin/dashboard/pages/new')} />
 
-      {pages.map((page) => (
-        <PageItem key={page.id}>
-          <PageTitle>{page.name}</PageTitle>
-          <ButtonContainer>
-            <EditButton onClick={() => navigate(`/admin/dashboard/pages/edit/${page.slug}`)} />
-            <DeleteButton onClick={() => handleDelete(page.id)} />
-          </ButtonContainer>
-        </PageItem>
-      ))}
+      {pages
+        .filter((page) => !page.isLocked)
+        .map((page) => (
+          <PageItem key={page.id}>
+            <PageTitle>{page.name}</PageTitle>
+            <ButtonContainer>
+              <EditButton
+                onClick={() =>
+                  navigate(`/admin/dashboard/pages/edit/${page.slug}`)
+                }
+              />
+              <DeleteButton onClick={() => handleDelete(page.id)} />
+            </ButtonContainer>
+          </PageItem>
+        ))}
     </PageListContainer>
   );
 };

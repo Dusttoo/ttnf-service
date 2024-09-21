@@ -1,16 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, ChangeEvent } from 'react';
 import styled from 'styled-components';
 import { useDropzone } from 'react-dropzone';
 import { CarouselImage as CarouselImageType } from '../../../../../api/types/core';
 import { Page } from '../../../../../api/types/page';
-
-import {
-  DragDropContext,
-  Droppable,
-  Draggable,
-  DraggableProvided,
-  DroppableProvided,
-} from 'react-beautiful-dnd';
 
 // Styling for Carousel Edit Area
 const CarouselEditContainer = styled.div`
@@ -112,6 +104,25 @@ const SaveButton = styled.button`
   }
 `;
 
+const ControlButton = styled.button`
+  margin: 0.5rem;
+  background-color: ${(props) => props.theme.colors.primary};
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+
+  &:hover {
+    background-color: ${(props) => props.theme.colors.primaryDark};
+  }
+
+  &:disabled {
+    background-color: ${(props) => props.theme.colors.disabled};
+    cursor: not-allowed;
+  }
+`;
+
 interface CarouselEditProps {
   page: Page;
   onSaveCarousel: (updatedCarouselImages: CarouselImageType[]) => void;
@@ -161,20 +172,55 @@ const CarouselEdit: React.FC<CarouselEditProps> = ({
     onDrop,
   });
 
-  const handleRemoveImage = (id: number) => {
-    setCarouselImages(carouselImages.filter((image) => image.id !== id));
+  // Option 1: Move Up/Down Buttons
+  const handleMoveUp = (index: number) => {
+    if (index === 0) return; // Already at the top
+    const newImages = [...carouselImages];
+    [newImages[index - 1], newImages[index]] = [
+      newImages[index],
+      newImages[index - 1],
+    ];
+    setCarouselImages(newImages);
   };
 
-  const handleOnDragEnd = (result: any) => {
-    if (!result.destination) return;
-    const reorderedImages = Array.from(carouselImages);
-    const [reorderedItem] = reorderedImages.splice(result.source.index, 1);
-    reorderedImages.splice(result.destination.index, 0, reorderedItem);
-    setCarouselImages(reorderedImages);
+  const handleMoveDown = (index: number) => {
+    if (index === carouselImages.length - 1) return; // Already at the bottom
+    const newImages = [...carouselImages];
+    [newImages[index], newImages[index + 1]] = [
+      newImages[index + 1],
+      newImages[index],
+    ];
+    setCarouselImages(newImages);
+  };
+
+  // Option 2: Number Input for Positioning
+  const handlePositionChange = (
+    e: ChangeEvent<HTMLInputElement>,
+    index: number
+  ) => {
+    const newPosition = parseInt(e.target.value, 10) - 1; // Convert to zero-indexed
+    if (newPosition >= 0 && newPosition < carouselImages.length) {
+      const newImages = [...carouselImages];
+      const [movedImage] = newImages.splice(index, 1);
+      newImages.splice(newPosition, 0, movedImage);
+      setCarouselImages(newImages);
+    }
+  };
+
+  const handleAltChange = (e: ChangeEvent<HTMLInputElement>, index: number) => {
+    setCarouselImages((prevImages) =>
+      prevImages.map((img, idx) =>
+        idx === index ? { ...img, alt: e.target.value } : img
+      )
+    );
   };
 
   const handleSave = () => {
     onSaveCarousel(carouselImages);
+  };
+
+  const handleRemoveImage = (id: number) => {
+    setCarouselImages(carouselImages.filter((image) => image.id !== id));
   };
 
   return (
@@ -186,56 +232,48 @@ const CarouselEdit: React.FC<CarouselEditProps> = ({
         <p>Drag and drop images here, or click to select images</p>
       </UploadArea>
 
-      <DragDropContext onDragEnd={handleOnDragEnd}>
-        <Droppable
-          droppableId="carousel-images-droppable"
-          direction="horizontal"
-        >
-          {(provided: DroppableProvided) => (
-            <CarouselImagesContainer
-              {...provided.droppableProps}
-              ref={provided.innerRef}
-            >
-              {carouselImages.map((image, index) => (
-                <Draggable
-                  key={image.id.toString()} // Convert id to string for Draggable
-                  draggableId={image.id.toString()} // Convert id to string for draggableId
-                  index={index}
-                >
-                  {(provided: DraggableProvided) => (
-                    <ImagePreview
-                      ref={provided.innerRef}
-                      {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-                    >
-                      <ImageThumbnail src={image.src} alt={image.alt} />
-                      <ImageText
-                        type="text"
-                        value={image.alt}
-                        onChange={(e) =>
-                          setCarouselImages((prev) =>
-                            prev.map((img, idx) =>
-                              idx === index
-                                ? { ...img, alt: e.target.value }
-                                : img
-                            )
-                          )
-                        }
-                      />
-                      <DeleteButton onClick={() => handleRemoveImage(image.id)}>
-                        &times;
-                      </DeleteButton>
-                    </ImagePreview>
-                  )}
-                </Draggable>
-              ))}
-              {provided.placeholder}
-            </CarouselImagesContainer>
-          )}
-        </Droppable>
-      </DragDropContext>
+      <CarouselImagesContainer>
+        {carouselImages.map((image, index) => (
+          <ImagePreview key={image.id}>
+            <ImageThumbnail src={image.src} alt={image.alt} />
+            <ImageText
+              type="text"
+              value={image.alt}
+              onChange={(e) => handleAltChange(e, index)}
+            />
+            <DeleteButton onClick={() => handleRemoveImage(image.id)}>
+              &times;
+            </DeleteButton>
 
-      {/* Only show the Save button if it's standalone */}
+            {/* Option 1: Move Up/Down Buttons */}
+            <ControlButton
+              onClick={() => handleMoveUp(index)}
+              disabled={index === 0}
+            >
+              Move Up
+            </ControlButton>
+            <ControlButton
+              onClick={() => handleMoveDown(index)}
+              disabled={index === carouselImages.length - 1}
+            >
+              Move Down
+            </ControlButton>
+
+            {/* Option 2: Number Input for Positioning */}
+            <label>
+              Order:
+              <input
+                type="number"
+                value={index + 1}
+                min={1}
+                max={carouselImages.length}
+                onChange={(e) => handlePositionChange(e, index)}
+              />
+            </label>
+          </ImagePreview>
+        ))}
+      </CarouselImagesContainer>
+
       {!isInsideParent && (
         <SaveButton onClick={handleSave}>Save Carousel</SaveButton>
       )}
