@@ -3,8 +3,15 @@ import styled from 'styled-components';
 import { useDropzone } from 'react-dropzone';
 import { CarouselImage as CarouselImageType } from '../../../../../api/types/core';
 import { Page } from '../../../../../api/types/page';
+import {
+  faArrowUp,
+  faArrowDown,
+  faFloppyDisk,
+} from '@fortawesome/free-solid-svg-icons';
+import { IconButton, DeleteButton } from '../../../../common/Buttons';
+import Input from '../../../../common/Input';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-// Styling for Carousel Edit Area
 const CarouselEditContainer = styled.div`
   padding: 1rem;
   background-color: ${(props) => props.theme.colors.secondaryBackground};
@@ -13,81 +20,43 @@ const CarouselEditContainer = styled.div`
 `;
 
 const CarouselImagesContainer = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: 1rem;
   padding: 2rem;
   border-radius: 8px;
 `;
 
-const ImagePreview = styled.div`
-  position: relative;
-  background-color: #fff;
-  border: 1px solid ${(props) => props.theme.colors.border};
-  border-radius: 8px;
-  padding: 1rem;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s;
-  flex-shrink: 0;
-  max-width: 150px;
-  min-height: 150px;
+const ImageWrapper = styled.div`
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
+  border: 1px solid ${(props) => props.theme.colors.border};
+  padding: 1rem;
+  border-radius: 8px;
+  background-color: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+`;
 
-  &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  }
+const ImagePreview = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-left: 5px;
 `;
 
 const ImageThumbnail = styled.img`
-  width: 100%;
+  width: 100px;
   height: auto;
   object-fit: cover;
   border-radius: 8px;
-  margin-bottom: 0.5rem;
 `;
 
-const ImageText = styled.input`
-  width: calc(100% - 16px);
-  padding: 0.5rem;
-  font-size: 0.875rem;
-  color: ${(props) => props.theme.colors.text};
-  border: 1px solid ${(props) => props.theme.colors.border};
-  border-radius: 4px;
-  margin-top: 0.5rem;
-  text-align: center;
-
-  &:focus {
-    outline: none;
-    border-color: ${(props) => props.theme.colors.primary};
-  }
-`;
-
-const DeleteButton = styled.button`
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background-color: rgba(0, 0, 0, 0.6);
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  cursor: pointer;
-
-  &:hover {
-    background-color: rgba(0, 0, 0, 0.8);
-  }
-`;
-
-const UploadArea = styled.div`
-  padding: 2rem;
-  border: 2px dashed ${(props) => props.theme.colors.border};
-  border-radius: 8px;
-  text-align: center;
-  cursor: pointer;
+const ControlsContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
 `;
 
 const SaveButton = styled.button`
@@ -104,29 +73,10 @@ const SaveButton = styled.button`
   }
 `;
 
-const ControlButton = styled.button`
-  margin: 0.5rem;
-  background-color: ${(props) => props.theme.colors.primary};
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 0.5rem 1rem;
-  cursor: pointer;
-
-  &:hover {
-    background-color: ${(props) => props.theme.colors.primaryDark};
-  }
-
-  &:disabled {
-    background-color: ${(props) => props.theme.colors.disabled};
-    cursor: not-allowed;
-  }
-`;
-
 interface CarouselEditProps {
   page: Page;
   onSaveCarousel: (updatedCarouselImages: CarouselImageType[]) => void;
-  isInsideParent?: boolean; // Optional prop to detect if inside a parent component
+  isInsideParent?: boolean;
 }
 
 const CarouselEdit: React.FC<CarouselEditProps> = ({
@@ -150,7 +100,7 @@ const CarouselEdit: React.FC<CarouselEditProps> = ({
       setCarouselImages(
         page.carousel.map((image, index) => ({
           ...image,
-          id: image.id || index, // Ensure id is a number
+          id: image.id || index,
         }))
       );
     }
@@ -158,7 +108,7 @@ const CarouselEdit: React.FC<CarouselEditProps> = ({
 
   const onDrop = (acceptedFiles: File[]) => {
     const newImages = acceptedFiles.map((file, index) => ({
-      id: Date.now() + index, // Ensure id is a number
+      id: Date.now() + index,
       src: URL.createObjectURL(file),
       alt: file.name,
     }));
@@ -172,9 +122,8 @@ const CarouselEdit: React.FC<CarouselEditProps> = ({
     onDrop,
   });
 
-  // Option 1: Move Up/Down Buttons
   const handleMoveUp = (index: number) => {
-    if (index === 0) return; // Already at the top
+    if (index === 0) return;
     const newImages = [...carouselImages];
     [newImages[index - 1], newImages[index]] = [
       newImages[index],
@@ -184,7 +133,7 @@ const CarouselEdit: React.FC<CarouselEditProps> = ({
   };
 
   const handleMoveDown = (index: number) => {
-    if (index === carouselImages.length - 1) return; // Already at the bottom
+    if (index === carouselImages.length - 1) return;
     const newImages = [...carouselImages];
     [newImages[index], newImages[index + 1]] = [
       newImages[index + 1],
@@ -193,12 +142,11 @@ const CarouselEdit: React.FC<CarouselEditProps> = ({
     setCarouselImages(newImages);
   };
 
-  // Option 2: Number Input for Positioning
   const handlePositionChange = (
     e: ChangeEvent<HTMLInputElement>,
     index: number
   ) => {
-    const newPosition = parseInt(e.target.value, 10) - 1; // Convert to zero-indexed
+    const newPosition = parseInt(e.target.value, 10) - 1;
     if (newPosition >= 0 && newPosition < carouselImages.length) {
       const newImages = [...carouselImages];
       const [movedImage] = newImages.splice(index, 1);
@@ -227,55 +175,52 @@ const CarouselEdit: React.FC<CarouselEditProps> = ({
     <CarouselEditContainer>
       <h3>Edit Carousel</h3>
 
-      <UploadArea {...getRootProps()}>
+      <div {...getRootProps()}>
         <input {...getInputProps()} />
         <p>Drag and drop images here, or click to select images</p>
-      </UploadArea>
+      </div>
 
       <CarouselImagesContainer>
         {carouselImages.map((image, index) => (
-          <ImagePreview key={image.id}>
-            <ImageThumbnail src={image.src} alt={image.alt} />
-            <ImageText
-              type="text"
-              value={image.alt}
-              onChange={(e) => handleAltChange(e, index)}
+          <ImageWrapper key={image.id}>
+            <Input
+              type="number"
+              value={(index + 1).toString()}
+              onChange={(e) => handlePositionChange(e, index)}
+              width="40px"
             />
-            <DeleteButton onClick={() => handleRemoveImage(image.id)}>
-              &times;
-            </DeleteButton>
-
-            {/* Option 1: Move Up/Down Buttons */}
-            <ControlButton
-              onClick={() => handleMoveUp(index)}
-              disabled={index === 0}
-            >
-              Move Up
-            </ControlButton>
-            <ControlButton
-              onClick={() => handleMoveDown(index)}
-              disabled={index === carouselImages.length - 1}
-            >
-              Move Down
-            </ControlButton>
-
-            {/* Option 2: Number Input for Positioning */}
-            <label>
-              Order:
-              <input
-                type="number"
-                value={index + 1}
-                min={1}
-                max={carouselImages.length}
-                onChange={(e) => handlePositionChange(e, index)}
+            <ImagePreview>
+              <ImageThumbnail src={image.src} alt={image.alt} />
+              <Input
+                type="text"
+                value={image.alt}
+                onChange={(e) => handleAltChange(e, index)}
+                placeholder="Alt Text"
               />
-            </label>
-          </ImagePreview>
+            </ImagePreview>
+
+            <ControlsContainer>
+              <IconButton
+                icon={faArrowUp}
+                onClick={() => handleMoveUp(index)}
+                disabled={index === 0}
+              />
+              <DeleteButton onClick={() => handleRemoveImage(image.id)} />
+
+              <IconButton
+                icon={faArrowDown}
+                onClick={() => handleMoveDown(index)}
+                disabled={index === carouselImages.length - 1}
+              />
+            </ControlsContainer>
+          </ImageWrapper>
         ))}
       </CarouselImagesContainer>
 
       {!isInsideParent && (
-        <SaveButton onClick={handleSave}>Save Carousel</SaveButton>
+        <SaveButton onClick={handleSave}>
+          <FontAwesomeIcon icon={faFloppyDisk} />
+        </SaveButton>
       )}
     </CarouselEditContainer>
   );
