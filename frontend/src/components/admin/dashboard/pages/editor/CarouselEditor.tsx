@@ -177,7 +177,7 @@ const CarouselEdit: React.FC<CarouselEditProps> = ({
 
       <div {...getRootProps()}>
         <input {...getInputProps()} />
-        <p>Drag and drop images here, or click to select images</p>
+        <p>Arrange the order that the images appear on the carousel in.</p>
       </div>
 
       <CarouselImagesContainer>

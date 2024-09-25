@@ -16,7 +16,6 @@ Thumbs.db
 .husky/_
 
 # Package lock files
-package-lock.json
 yarn.lock
 
 # Environmental variables
