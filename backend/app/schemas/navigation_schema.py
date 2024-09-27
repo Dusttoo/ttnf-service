@@ -1,5 +1,6 @@
-from pydantic import BaseModel
 from typing import List, Optional
+
+from pydantic import BaseModel
 
 
 class NavLinkBase(BaseModel):
@@ -23,7 +24,7 @@ class NavLink(NavLinkBase):
     sub_links: Optional[List["NavLink"]] = []
 
     class Config:
-        from_attributes = True  
+        from_attributes = True
 
 
 NavLink.update_forward_refs()

@@ -1,20 +1,25 @@
 import enum
-from sqlalchemy import Column, Integer, String, Text, DateTime, JSON, Boolean, ForeignKey, Enum as SQLAlchemyEnum
-from sqlalchemy.sql import func
-from sqlalchemy.orm import relationship
-from app.core.database import Base
-from sqlalchemy.dialects.postgresql import UUID
 from datetime import datetime
+
+from sqlalchemy import JSON, Boolean, Column, DateTime
+from sqlalchemy import Enum as SQLAlchemyEnum
+from sqlalchemy import ForeignKey, Integer, String, Text
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
+
+from app.core.database import Base
+
 # from uuid import UUID
 
 
 class AnnouncementType(enum.Enum):
-    LITTER = 'litter'
-    BREEDING = 'breeding'
-    STUD = 'stud'
-    ANNOUNCEMENT = 'announcement'
-    SERVICE = 'service'
-    INFO = 'info'
+    LITTER = "litter"
+    BREEDING = "breeding"
+    STUD = "stud"
+    ANNOUNCEMENT = "announcement"
+    SERVICE = "service"
+    INFO = "info"
 
 
 class Announcement(Base):
@@ -27,7 +32,9 @@ class Announcement(Base):
     category = Column(SQLAlchemyEnum(AnnouncementType), nullable=False)
     page_id = Column(ForeignKey("pages.id"))
 
-    def __init__(self, title: str, date: datetime, message: str, category: AnnouncementType):
+    def __init__(
+        self, title: str, date: datetime, message: str, category: AnnouncementType
+    ):
         self.title = title
         self.date = date
         self.message = message
@@ -57,4 +64,6 @@ class Page(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     carousel = Column(JSON, nullable=True)
 
-    announcements = relationship("Announcement", backref="page", cascade="all, delete-orphan")
+    announcements = relationship(
+        "Announcement", backref="page", cascade="all, delete-orphan"
+    )

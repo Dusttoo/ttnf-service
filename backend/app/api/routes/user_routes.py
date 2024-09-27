@@ -1,17 +1,14 @@
-from fastapi import Depends, APIRouter, HTTPException, status
 from typing import List
-from sqlalchemy.orm import Session
-from app.core import get_database_session, create_access_token
-from app.schemas import (
-    UserCreateSchema,
-    UserSchema,
-    TokenSchema,
-)
-from app.services import UserService
-from app.models import User
-from app.utils import NotFoundError
-from app.core.settings import update_global_updated_at
 
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+
+from app.core import create_access_token, get_database_session
+from app.core.settings import update_global_updated_at
+from app.models import User
+from app.schemas import TokenSchema, UserCreateSchema, UserSchema
+from app.services import UserService
+from app.utils import NotFoundError
 
 user_router = APIRouter()
 user_service = UserService()
@@ -22,11 +19,12 @@ async def read_users(db: Session = Depends(get_database_session)):
     users = await user_service.get_all_users(db)
     return users
 
+
 @user_router.post("/", response_model=TokenSchema)
 async def create_a_user(
     user_create: UserCreateSchema,
     db: Session = Depends(get_database_session),
-    update_timestamp: None = Depends(update_global_updated_at)
+    update_timestamp: None = Depends(update_global_updated_at),
 ):
     try:
         user = await user_service.create_user(user_create, db)

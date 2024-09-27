@@ -1,15 +1,23 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from typing import List
-from sqlalchemy.ext.asyncio import AsyncSession
-from app.core.database import get_database_session
-from app.schemas import LitterCreate, LitterUpdate, Litter, UserSchema, Dog, PuppyCreate
-from app.services import LitterService
-from app.core.auth import get_current_user
-from app.utils import convert_to_litter_schema
-from app.schemas import PaginatedResponse
 import logging
-from app.core.settings import update_global_updated_at
+from typing import List
 
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.auth import get_current_user
+from app.core.database import get_database_session
+from app.core.settings import update_global_updated_at
+from app.schemas import (
+    Dog,
+    Litter,
+    LitterCreate,
+    LitterUpdate,
+    PaginatedResponse,
+    PuppyCreate,
+    UserSchema,
+)
+from app.services import LitterService
+from app.utils import convert_to_litter_schema
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +42,7 @@ async def populate_litter(
     breeding_id: int,
     litter: LitterCreate,
     db: AsyncSession = Depends(get_database_session),
-    update_timestamp: None = Depends(update_global_updated_at)
+    update_timestamp: None = Depends(update_global_updated_at),
 ):
     try:
         return await litter_svc.populate_litter(db, breeding_id, litter)
@@ -48,7 +56,7 @@ async def add_puppies_to_litter(
     litter_id: int,
     puppies: List[PuppyCreate],
     db: AsyncSession = Depends(get_database_session),
-    update_timestamp: None = Depends(update_global_updated_at)
+    update_timestamp: None = Depends(update_global_updated_at),
 ):
     try:
         return await litter_svc.add_puppies_to_litter(db, litter_id, puppies)
@@ -78,7 +86,7 @@ async def create_litter(
     litter_data: LitterCreate,
     db: AsyncSession = Depends(get_database_session),
     current_user: UserSchema = Depends(get_current_user),
-    update_timestamp: None = Depends(update_global_updated_at)
+    update_timestamp: None = Depends(update_global_updated_at),
 ):
     try:
         litter = await litter_svc.create_litter(litter_data, db)
@@ -94,7 +102,7 @@ async def update_litter(
     litter_data: LitterUpdate,
     db: AsyncSession = Depends(get_database_session),
     current_user: UserSchema = Depends(get_current_user),
-    update_timestamp: None = Depends(update_global_updated_at)
+    update_timestamp: None = Depends(update_global_updated_at),
 ):
     try:
         litter = await litter_svc.update_litter(litter_id, litter_data, db)
@@ -113,7 +121,7 @@ async def delete_litter(
     litter_id: int,
     db: AsyncSession = Depends(get_database_session),
     current_user: UserSchema = Depends(get_current_user),
-    update_timestamp: None = Depends(update_global_updated_at)
+    update_timestamp: None = Depends(update_global_updated_at),
 ):
     try:
         result = await litter_svc.delete_litter(litter_id, db)

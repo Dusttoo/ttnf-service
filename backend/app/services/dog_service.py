@@ -1,23 +1,22 @@
 import json
+import logging
+from typing import Dict, List, Optional, Tuple, Union
+
 from fastapi import HTTPException
-from typing import List, Optional, Dict, Tuple, Union
-from sqlalchemy.orm import selectinload
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy.orm import selectinload
 from sqlalchemy.sql import func
-from sqlalchemy.exc import SQLAlchemyError
-from app.models import Dog, Production, Photo, HealthInfo, GenderEnum, StatusEnum
-from app.schemas import (
-    DogCreate,
-    DogUpdate,
-    ProductionCreate,
-    Dog as DogSchema,
-    Production as ProductionSchema,
-)
-from app.utils.schema_converters import convert_to_dog_schema
+
 from app.core.redis import get_redis_client
-import logging
+from app.models import Dog, GenderEnum, HealthInfo, Photo, Production, StatusEnum
+from app.schemas import Dog as DogSchema
+from app.schemas import DogCreate, DogUpdate
+from app.schemas import Production as ProductionSchema
+from app.schemas import ProductionCreate
 from app.utils import DateTimeEncoder
+from app.utils.schema_converters import convert_to_dog_schema
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +26,7 @@ STATUS_MAPPING = {
     "stud": StatusEnum.stud,
     "available": StatusEnum.available,
 }
+
 
 class DogService:
     def __init__(self):
@@ -159,7 +159,7 @@ class DogService:
                     description=new_dog.description,
                     sire_id=new_dog.parent_male_id,
                     dam_id=new_dog.parent_female_id,
-                    gender=new_dog.gender
+                    gender=new_dog.gender,
                 )
                 db.add(new_production)
                 await db.commit()
@@ -208,9 +208,11 @@ class DogService:
                 logger.info(f"Updating dog with ID: {dog_id}")
 
                 for var, value in dog_data.dict(exclude_unset=True).items():
-                    if var == 'gender' and isinstance(value, str):
-                        value = GenderEnum(value) if var == "gender" else StatusEnum(value)
-                    elif var == 'status':
+                    if var == "gender" and isinstance(value, str):
+                        value = (
+                            GenderEnum(value) if var == "gender" else StatusEnum(value)
+                        )
+                    elif var == "status":
                         new_status = StatusEnum(value)
                         if new_status in [StatusEnum.retired, StatusEnum.sold]:
                             setattr(dog, "status", new_status)
@@ -223,7 +225,14 @@ class DogService:
                 await db.commit()
 
                 # Update or add profile photo
-                profile_photo = next((photo for photo in dog.photos if photo.photo_url == dog.profile_photo), None)
+                profile_photo = next(
+                    (
+                        photo
+                        for photo in dog.photos
+                        if photo.photo_url == dog.profile_photo
+                    ),
+                    None,
+                )
                 if profile_photo:
                     profile_photo.photo_url = dog_data.profile_photo
                     logger.info(f"Updated profile photo for dog ID: {dog_id}")
@@ -238,7 +247,11 @@ class DogService:
 
                 # Update or add gallery photos
                 existing_photo_urls = [photo.photo_url for photo in dog.photos]
-                new_photo_urls = [url for url in dog_data.gallery_photos if url not in existing_photo_urls]
+                new_photo_urls = [
+                    url
+                    for url in dog_data.gallery_photos
+                    if url not in existing_photo_urls
+                ]
                 for photo_url in new_photo_urls:
                     gallery_photo = Photo(
                         dog_id=dog.id,
@@ -268,7 +281,7 @@ class DogService:
                             description=dog.description,
                             sire_id=dog.parent_male_id,
                             dam_id=dog.parent_female_id,
-                            gender=dog.gender
+                            gender=dog.gender,
                         )
                         db.add(new_production)
                         await db.commit()
@@ -285,7 +298,12 @@ class DogService:
 
                 await db.refresh(
                     dog,
-                    attribute_names=["health_infos", "photos", "productions", "children"],
+                    attribute_names=[
+                        "health_infos",
+                        "photos",
+                        "productions",
+                        "children",
+                    ],
                 )
 
                 updated_dog_schema = convert_to_dog_schema(dog)
@@ -302,9 +320,13 @@ class DogService:
                                 index = dogs_data["items"].index(item)
                                 dogs_data["items"][index] = updated_dog_schema.dict()
                                 await redis_client.set(
-                                    cache_key, json.dumps(dogs_data, cls=DateTimeEncoder), ex=3600
+                                    cache_key,
+                                    json.dumps(dogs_data, cls=DateTimeEncoder),
+                                    ex=3600,
                                 )
-                                logger.info(f"Updated dog in paginated list cache: {cache_key}")
+                                logger.info(
+                                    f"Updated dog in paginated list cache: {cache_key}"
+                                )
                                 break
 
                 return updated_dog_schema
@@ -363,7 +385,9 @@ class DogService:
             cached_data = await redis.get(cache_key)
 
             if cached_data:
-                productions = [ProductionSchema(**prod) for prod in json.loads(cached_data)]
+                productions = [
+                    ProductionSchema(**prod) for prod in json.loads(cached_data)
+                ]
             else:
                 result = await db.execute(select(Dog).filter(Dog.id == dog_id))
                 dog = result.scalars().first()
@@ -414,9 +438,16 @@ class DogService:
                         statuses = [status.lower() for status in filters["status"]]
                         if "active" in statuses:
                             query = query.filter(
-                                (Dog.status == None) | (~Dog.status.in_([StatusEnum.retired, StatusEnum.sold]))
+                                (Dog.status == None)
+                                | (
+                                    ~Dog.status.in_(
+                                        [StatusEnum.retired, StatusEnum.sold]
+                                    )
+                                )
                             )
-                            statuses = [status for status in statuses if status != "active"]
+                            statuses = [
+                                status for status in statuses if status != "active"
+                            ]
                         if statuses:
                             mapped_statuses = statuses
                             query = query.filter(Dog.status.in_(mapped_statuses))

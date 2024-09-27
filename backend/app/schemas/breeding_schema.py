@@ -1,6 +1,8 @@
-from pydantic import BaseModel
-from typing import List, Optional, Union, Dict
 from datetime import date
+from typing import Dict, List, Optional, Union
+
+from pydantic import BaseModel
+
 from app.schemas import Dog
 
 
@@ -34,6 +36,7 @@ class Breeding(BreedingBase):
 class Description(BaseModel):
     content: str
     style: Optional[Dict[str, str]] = None
+
 
 class LitterBase(BaseModel):
     breeding_id: int

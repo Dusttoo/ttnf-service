@@ -1,16 +1,27 @@
+import json
+import logging
+from typing import Dict, List, Optional
+
 from fastapi import HTTPException
-from typing import List, Optional, Dict
+from sqlalchemy import func
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
-from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy import func
-from app.models import Litter, Dog, Breeding, litter_puppies, GenderEnum, StatusEnum, Production
-from app.schemas import LitterCreate, LitterUpdate, PuppyCreate, Litter as LitterSchema
-from app.utils import DateTimeEncoder, convert_to_litter_schema
+
 from app.core.redis import get_redis_client
-import json
-import logging
+from app.models import (
+    Breeding,
+    Dog,
+    GenderEnum,
+    Litter,
+    Production,
+    StatusEnum,
+    litter_puppies,
+)
+from app.schemas import Litter as LitterSchema
+from app.schemas import LitterCreate, LitterUpdate, PuppyCreate
+from app.utils import DateTimeEncoder, convert_to_litter_schema
 
 logger = logging.getLogger(__name__)
 
@@ -151,7 +162,9 @@ class LitterService:
                 breeding_id=litter_data.breeding_id,
                 birth_date=litter_data.birth_date,
                 number_of_puppies=litter_data.number_of_puppies,
-                description=litter_data.description.dict() if litter_data.description else None,
+                description=(
+                    litter_data.description.dict() if litter_data.description else None
+                ),
             )
             db.add(new_litter)
             await db.commit()
@@ -197,28 +210,26 @@ class LitterService:
                         selectinload(Dog.health_infos),
                         selectinload(Dog.photos),
                         selectinload(Dog.productions).options(
-                            selectinload(Production.sire),
-                            selectinload(Production.dam)
+                            selectinload(Production.sire), selectinload(Production.dam)
                         ),
                         selectinload(Dog.children).options(
-                            selectinload(Dog.health_infos),
-                            selectinload(Dog.photos)
-                        )
+                            selectinload(Dog.health_infos), selectinload(Dog.photos)
+                        ),
                     ),
                     selectinload(Litter.breeding).options(
                         selectinload(Breeding.female_dog).options(
                             selectinload(Dog.health_infos),
                             selectinload(Dog.photos),
                             selectinload(Dog.productions),
-                            selectinload(Dog.children)
+                            selectinload(Dog.children),
                         ),
                         selectinload(Breeding.male_dog).options(
                             selectinload(Dog.health_infos),
                             selectinload(Dog.photos),
                             selectinload(Dog.productions),
-                            selectinload(Dog.children)
-                        )
-                    )
+                            selectinload(Dog.children),
+                        ),
+                    ),
                 )
             )
             litter = result.scalars().first()
@@ -238,27 +249,26 @@ class LitterService:
                             selectinload(Dog.photos),
                             selectinload(Dog.productions).options(
                                 selectinload(Production.sire),
-                                selectinload(Production.dam)
+                                selectinload(Production.dam),
                             ),
                             selectinload(Dog.children).options(
-                                selectinload(Dog.health_infos),
-                                selectinload(Dog.photos)
-                            )
+                                selectinload(Dog.health_infos), selectinload(Dog.photos)
+                            ),
                         ),
                         selectinload(Litter.breeding).options(
                             selectinload(Breeding.female_dog).options(
                                 selectinload(Dog.health_infos),
                                 selectinload(Dog.photos),
                                 selectinload(Dog.productions),
-                                selectinload(Dog.children)
+                                selectinload(Dog.children),
                             ),
                             selectinload(Breeding.male_dog).options(
                                 selectinload(Dog.health_infos),
                                 selectinload(Dog.photos),
                                 selectinload(Dog.productions),
-                                selectinload(Dog.children)
-                            )
-                        )
+                                selectinload(Dog.children),
+                            ),
+                        ),
                     )
                 )
                 litter = result.scalars().first()
@@ -421,7 +431,9 @@ class LitterService:
                 puppy_objs.append(new_puppy)
 
                 await db.execute(
-                    litter_puppies.insert().values(litter_id=litter_id, dog_id=new_puppy.id)
+                    litter_puppies.insert().values(
+                        litter_id=litter_id, dog_id=new_puppy.id
+                    )
                 )
                 await db.commit()
 

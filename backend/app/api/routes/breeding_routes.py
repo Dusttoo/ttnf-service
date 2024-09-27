@@ -1,12 +1,19 @@
-from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
+
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.core.database import get_database_session
-from app.schemas import BreedingCreate, BreedingUpdate, Breeding, UserSchema
-from app.services import BreedingService
+
 from app.core.auth import get_current_user
-from app.schemas import PaginatedResponse
+from app.core.database import get_database_session
 from app.core.settings import update_global_updated_at
+from app.schemas import (
+    Breeding,
+    BreedingCreate,
+    BreedingUpdate,
+    PaginatedResponse,
+    UserSchema,
+)
+from app.services import BreedingService
 
 breeding_router = APIRouter()
 breeding_svc = BreedingService()
@@ -35,7 +42,7 @@ async def create_breeding(
     breeding_data: BreedingCreate,
     db: AsyncSession = Depends(get_database_session),
     current_user: UserSchema = Depends(get_current_user),
-    update_timestamp: None = Depends(update_global_updated_at)
+    update_timestamp: None = Depends(update_global_updated_at),
 ):
     if not current_user:
         raise HTTPException(
@@ -52,7 +59,7 @@ async def update_breeding(
     breeding_data: BreedingUpdate,
     db: AsyncSession = Depends(get_database_session),
     current_user: UserSchema = Depends(get_current_user),
-    update_timestamp: None = Depends(update_global_updated_at)
+    update_timestamp: None = Depends(update_global_updated_at),
 ):
     if not current_user:
         raise HTTPException(
@@ -70,7 +77,7 @@ async def delete_breeding(
     breeding_id: int,
     db: AsyncSession = Depends(get_database_session),
     current_user: UserSchema = Depends(get_current_user),
-    update_timestamp: None = Depends(update_global_updated_at)
+    update_timestamp: None = Depends(update_global_updated_at),
 ):
     if not current_user:
         raise HTTPException(

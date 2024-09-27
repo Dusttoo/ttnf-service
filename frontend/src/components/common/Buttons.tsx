@@ -17,9 +17,10 @@ interface IconButtonProps {
   hoverColor?: string;
   backgroundColor?: string;
   hoverBackgroundColor?: string;
+  title?: string;
 }
 
-const StyledButton = styled.button<IconButtonProps>`
+const StyledButton = styled.button<Partial<IconButtonProps>>`
   background-color: ${(props) => props.backgroundColor || 'transparent'};
   color: ${(props) => props.color || props.theme.colors.primary};
   border: none;
@@ -31,6 +32,7 @@ const StyledButton = styled.button<IconButtonProps>`
   align-items: center;
   justify-content: center;
   font-size: 1.25rem;
+
   &:hover {
     background-color: ${(props) =>
       props.hoverBackgroundColor || props.theme.colors.primary};
@@ -46,6 +48,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
   backgroundColor,
   hoverBackgroundColor,
   disabled = false,
+  title = '',
 }) => (
   <StyledButton
     disabled={disabled}
@@ -54,22 +57,22 @@ export const IconButton: React.FC<IconButtonProps> = ({
     hoverColor={hoverColor}
     backgroundColor={backgroundColor}
     hoverBackgroundColor={hoverBackgroundColor}
-    icon={icon}
+    title={title}
   >
     <FontAwesomeIcon icon={icon} />
   </StyledButton>
 );
 
 export const EditButton: React.FC<{ onClick?: () => void }> = ({ onClick }) => (
-  <IconButton icon={faEdit} onClick={onClick} />
+  <IconButton icon={faEdit} onClick={onClick} title="Edit" />
 );
 
 export const ViewButton: React.FC<{ onClick?: () => void }> = ({ onClick }) => (
-  <IconButton icon={faEye} onClick={onClick} />
+  <IconButton icon={faEye} onClick={onClick} title="View" />
 );
 
 export const AddButton: React.FC<{ onClick?: () => void }> = ({ onClick }) => (
-  <IconButton icon={faPlus} onClick={onClick} />
+  <IconButton icon={faPlus} onClick={onClick} title="Add" />
 );
 
 export const DeleteButton: React.FC<{ onClick?: () => void }> = ({
@@ -80,5 +83,6 @@ export const DeleteButton: React.FC<{ onClick?: () => void }> = ({
     onClick={onClick}
     color="#ff4d4f"
     hoverBackgroundColor="#ff4d4f"
+    title="Delete"
   />
 );

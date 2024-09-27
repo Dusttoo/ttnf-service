@@ -1,6 +1,7 @@
-from typing import List, Generic, TypeVar, Optional
-from pydantic import BaseModel
 from datetime import datetime
+from typing import Generic, List, Optional, TypeVar
+
+from pydantic import BaseModel
 
 T = TypeVar("T")
 
@@ -9,6 +10,7 @@ class PaginatedResponse(BaseModel, Generic[T]):
     items: List[T]
     total_count: int
 
+
 class WebsiteSettingsSchema(BaseModel):
     id: int
     setting_key: str
@@ -16,6 +18,7 @@ class WebsiteSettingsSchema(BaseModel):
 
     class Config:
         from_attributes = True
+
 
 class UpdateWebsiteSettingsSchema(BaseModel):
     setting_key: Optional[str]

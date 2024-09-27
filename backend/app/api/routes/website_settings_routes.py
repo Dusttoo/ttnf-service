@@ -1,12 +1,15 @@
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from datetime import datetime
+
 from app.core.database import get_database_session
 from app.models import WebsiteSettings
-from app.schemas import WebsiteSettingsSchema, UpdateWebsiteSettingsSchema
+from app.schemas import UpdateWebsiteSettingsSchema, WebsiteSettingsSchema
 
 settings_router = APIRouter()
+
 
 @settings_router.get("/", response_model=WebsiteSettingsSchema)
 async def get_website_settings(db: AsyncSession = Depends(get_database_session)):
@@ -18,10 +21,11 @@ async def get_website_settings(db: AsyncSession = Depends(get_database_session))
 
     return settings
 
+
 @settings_router.put("/", response_model=WebsiteSettingsSchema)
 async def update_website_settings(
     update_data: UpdateWebsiteSettingsSchema,
-    db: AsyncSession = Depends(get_database_session)
+    db: AsyncSession = Depends(get_database_session),
 ):
     result = await db.execute(select(WebsiteSettings))
     settings = result.scalars().first()
@@ -39,6 +43,7 @@ async def update_website_settings(
     await db.commit()
     await db.refresh(settings)
     return settings
+
 
 @settings_router.put("/update-timestamp", response_model=WebsiteSettingsSchema)
 async def update_timestamp_manually(db: AsyncSession = Depends(get_database_session)):

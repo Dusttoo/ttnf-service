@@ -1,24 +1,22 @@
-from app.schemas import (
-    Dog as DogSchema,
-    Production as ProductionSchema,
-    DogChildSchema,
-    Litter as LitterSchema,
-    Breeding as BreedingSchema,
-    Page as PageSchema,
-    PageCreate as PageCreateSchema,
-    PageUpdate as PageUpdateSchema,
-    NavLink as NavLinkSchema,
-    Author,
-    IMeta,
-    Translation,
-    Announcement as AnnouncementSchema
-)
-from app.models import Dog, Litter, Breeding, Production, NavLink, Announcement, Page
 import json
-from typing import Union, Dict, Any
 import logging
-from uuid import UUID
 from datetime import datetime
+from typing import Any, Dict, Union
+from uuid import UUID
+
+from app.models import Announcement, Breeding, Dog, Litter, NavLink, Page, Production
+from app.schemas import Announcement as AnnouncementSchema
+from app.schemas import Author
+from app.schemas import Breeding as BreedingSchema
+from app.schemas import Dog as DogSchema
+from app.schemas import DogChildSchema, IMeta
+from app.schemas import Litter as LitterSchema
+from app.schemas import NavLink as NavLinkSchema
+from app.schemas import Page as PageSchema
+from app.schemas import PageCreate as PageCreateSchema
+from app.schemas import PageUpdate as PageUpdateSchema
+from app.schemas import Production as ProductionSchema
+from app.schemas import Translation
 
 logger = logging.getLogger(__name__)
 
@@ -86,9 +84,7 @@ def convert_to_litter_schema(litter: Litter) -> LitterSchema:
             )
         except json.JSONDecodeError:
             logger.error(f"Invalid JSON in litter description: {litter.description}")
-            description = {
-                "content": litter.description
-            }  
+            description = {"content": litter.description}
 
     return LitterSchema(
         id=litter.id,
@@ -115,6 +111,7 @@ def convert_to_production_schema(production: Production) -> ProductionSchema:
         dam_id=production.dam_id,
     )
 
+
 def convert_to_navigation_schema(navigation: NavLink) -> NavLinkSchema:
 
     return NavLinkSchema(
@@ -126,9 +123,11 @@ def convert_to_navigation_schema(navigation: NavLink) -> NavLinkSchema:
         position=navigation.position,
     )
 
-from typing import Union
-from datetime import datetime
+
 import json
+from datetime import datetime
+from typing import Union
+
 
 def convert_to_page_schema(page: Union[Page, dict]) -> PageSchema:
     # Content handling
@@ -155,17 +154,42 @@ def convert_to_page_schema(page: Union[Page, dict]) -> PageSchema:
         translations = [Translation(**translation) for translation in translations]
 
     # Announcements handling (optional)
-    announcements = page["announcements"] if isinstance(page, dict) else page.announcements
+    announcements = (
+        page["announcements"] if isinstance(page, dict) else page.announcements
+    )
     if announcements and isinstance(announcements, list):
         announcements = [
             AnnouncementSchema(
-                id=announcement.get("id") if isinstance(announcement, dict) else announcement.id,
-                title=announcement.get("title") if isinstance(announcement, dict) else announcement.title,
+                id=(
+                    announcement.get("id")
+                    if isinstance(announcement, dict)
+                    else announcement.id
+                ),
+                title=(
+                    announcement.get("title")
+                    if isinstance(announcement, dict)
+                    else announcement.title
+                ),
                 # Date Handling: Ensure date is in ISO format
-                date=announcement["date"] if isinstance(announcement, dict)
-                else (announcement.date.isoformat() if isinstance(announcement.date, datetime) else announcement.date),
-                message=announcement.get("message") if isinstance(announcement, dict) else announcement.message,
-                category=announcement.get("category") if isinstance(announcement, dict) else announcement.category
+                date=(
+                    announcement["date"]
+                    if isinstance(announcement, dict)
+                    else (
+                        announcement.date.isoformat()
+                        if isinstance(announcement.date, datetime)
+                        else announcement.date
+                    )
+                ),
+                message=(
+                    announcement.get("message")
+                    if isinstance(announcement, dict)
+                    else announcement.message
+                ),
+                category=(
+                    announcement.get("category")
+                    if isinstance(announcement, dict)
+                    else announcement.category
+                ),
             )
             for announcement in announcements
         ]
@@ -174,11 +198,9 @@ def convert_to_page_schema(page: Union[Page, dict]) -> PageSchema:
     carousel = page["carousel"] if isinstance(page, dict) else page.carousel
     if carousel and isinstance(carousel, list):
         carousel = [
-            {
-                "src": item.get("src"),
-                "alt": item.get("alt")
-            }
-            for item in carousel if item.get("src")  # Ensure `src` exists
+            {"src": item.get("src"), "alt": item.get("alt")}
+            for item in carousel
+            if item.get("src")  # Ensure `src` exists
         ]
 
     # Build and return PageSchema
@@ -188,19 +210,35 @@ def convert_to_page_schema(page: Union[Page, dict]) -> PageSchema:
         name=page["name"] if isinstance(page, dict) else page.name,
         slug=page["slug"] if isinstance(page, dict) else page.slug,
         meta=meta,
-        custom_values=page["custom_values"] if isinstance(page, dict) else page.custom_values,
-        external_data=page["external_data"] if isinstance(page, dict) else page.external_data,
+        custom_values=(
+            page["custom_values"] if isinstance(page, dict) else page.custom_values
+        ),
+        external_data=(
+            page["external_data"] if isinstance(page, dict) else page.external_data
+        ),
         content=content,
         author_id=page["author_id"] if isinstance(page, dict) else page.author_id,
         author=author,
         status=page["status"] if isinstance(page, dict) else page.status,
         is_locked=page["is_locked"] if isinstance(page, dict) else page.is_locked,
         tags=page["tags"] if isinstance(page, dict) else page.tags,
-        created_at=page["created_at"] if isinstance(page, dict) else (page.created_at.isoformat() if page.created_at else None),
-        published_at=page["published_at"] if isinstance(page, dict) else (page.published_at.isoformat() if page.published_at else None),
+        created_at=(
+            page["created_at"]
+            if isinstance(page, dict)
+            else (page.created_at.isoformat() if page.created_at else None)
+        ),
+        published_at=(
+            page["published_at"]
+            if isinstance(page, dict)
+            else (page.published_at.isoformat() if page.published_at else None)
+        ),
         language=page["language"] if isinstance(page, dict) else page.language,
         translations=translations,
-        updated_at=page["updated_at"] if isinstance(page, dict) else (page.updated_at.isoformat() if page.updated_at else None),
+        updated_at=(
+            page["updated_at"]
+            if isinstance(page, dict)
+            else (page.updated_at.isoformat() if page.updated_at else None)
+        ),
         announcements=announcements,
-        carousel=carousel  # Include the carousel data
+        carousel=carousel,  # Include the carousel data
     )

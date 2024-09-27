@@ -3,11 +3,14 @@ import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 
 const SidebarContainer = styled.div`
-  width: 250px;
+  width: 150px;
   background-color: ${(props) => props.theme.colors.secondary};
   color: ${(props) => props.theme.colors.white};
   padding: 2rem 1rem;
-  height: 100%;
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100vh;
 `;
 
 const NavItem = styled.div`

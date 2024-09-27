@@ -1,7 +1,8 @@
-from pydantic import BaseModel, HttpUrl
-from typing import Optional, List, Dict, Any
 from datetime import datetime
 from enum import Enum
+from typing import Any, Dict, List, Optional
+
+from pydantic import BaseModel, HttpUrl
 
 
 class CarouselImage(BaseModel):
@@ -13,12 +14,12 @@ class CarouselImage(BaseModel):
 
 
 class AnnouncementType(str, Enum):
-    LITTER = 'litter'
-    BREEDING = 'breeding'
-    STUD = 'stud'
-    ANNOUNCEMENT = 'announcement'
-    SERVICE = 'service'
-    INFO = 'info'
+    LITTER = "litter"
+    BREEDING = "breeding"
+    STUD = "stud"
+    ANNOUNCEMENT = "announcement"
+    SERVICE = "service"
+    INFO = "info"
 
 
 class Announcement(BaseModel):

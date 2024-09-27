@@ -1,18 +1,22 @@
 import json
 import logging
 from typing import List, Optional
+from uuid import UUID
+
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from app.models import Page
 from sqlalchemy.orm import selectinload
-from app.schemas import PageCreate, PageUpdate, Page as PageSchema
-from app.utils.schema_converters import convert_to_page_schema
-from app.core.redis import get_redis_client, delete_pattern
+
+from app.core.redis import delete_pattern, get_redis_client
+from app.models import Page
+from app.schemas import Page as PageSchema
+from app.schemas import PageCreate, PageUpdate
 from app.utils import DateTimeEncoder
-from uuid import UUID
+from app.utils.schema_converters import convert_to_page_schema
 
 logger = logging.getLogger(__name__)
+
 
 class PageService:
     def __init__(self):
@@ -40,14 +44,18 @@ class PageService:
                 logger.error(f"Failed to decode cache for page {page_id}: {e}")
                 await redis_client.delete(cache_key)
 
-        result = await db.execute(select(Page).options(selectinload(Page.announcements)).filter(Page.id == page_id))
+        result = await db.execute(
+            select(Page)
+            .options(selectinload(Page.announcements))
+            .filter(Page.id == page_id)
+        )
         db_page = result.scalars().first()
         if db_page:
             page_schema = convert_to_page_schema(db_page)
             try:
                 page_data = page_schema.dict()  # Convert Pydantic model to dict
                 await redis_client.set(
-                    cache_key, json.dumps(page_data, cls=DateTimeEncoder), ex=3600  
+                    cache_key, json.dumps(page_data, cls=DateTimeEncoder), ex=3600
                 )
             except Exception as e:
                 logger.error(f"Failed to cache page {page_id}: {e}")
@@ -56,7 +64,9 @@ class PageService:
 
         return None
 
-    async def get_page_by_slug(self, db: AsyncSession, slug: str) -> Optional[PageSchema]:
+    async def get_page_by_slug(
+        self, db: AsyncSession, slug: str
+    ) -> Optional[PageSchema]:
         cache_key = f"page:slug:{slug}"
         redis_client = await self.get_redis_client()
 
@@ -103,7 +113,7 @@ class PageService:
             tags=page.tags,
             language=page.language,
             translations=page.translations,
-            announcements=page.announcements
+            announcements=page.announcements,
         )
         db.add(db_page)
         await db.commit()
@@ -113,8 +123,14 @@ class PageService:
 
         return convert_to_page_schema(db_page)
 
-    async def update_page(self, db: AsyncSession, page_id: str, page: PageUpdate) -> Optional[PageSchema]:
-        result = await db.execute(select(Page).options(selectinload(Page.announcements)).filter(Page.id == page_id))
+    async def update_page(
+        self, db: AsyncSession, page_id: str, page: PageUpdate
+    ) -> Optional[PageSchema]:
+        result = await db.execute(
+            select(Page)
+            .options(selectinload(Page.announcements))
+            .filter(Page.id == page_id)
+        )
         db_page = result.scalars().first()
 
         if db_page:
@@ -153,7 +169,12 @@ class PageService:
                 logger.error(f"Failed to decode cached pages for key {cache_key}: {e}")
                 await redis_client.delete(cache_key)  # Invalidate corrupt cache
 
-        result = await db.execute(select(Page).options(selectinload(Page.announcements)).offset(skip).limit(limit))
+        result = await db.execute(
+            select(Page)
+            .options(selectinload(Page.announcements))
+            .offset(skip)
+            .limit(limit)
+        )
         db_pages = result.scalars().all()
         page_schemas = [convert_to_page_schema(page) for page in db_pages]
         try:
@@ -171,7 +192,11 @@ class PageService:
         return page_schemas
 
     async def delete_page(self, db: AsyncSession, page_id: str) -> Optional[PageSchema]:
-        result = await db.execute(select(Page).options(selectinload(Page.announcements)).filter(Page.id == page_id))
+        result = await db.execute(
+            select(Page)
+            .options(selectinload(Page.announcements))
+            .filter(Page.id == page_id)
+        )
         db_page = result.scalars().first()
 
         if db_page:

@@ -1,17 +1,19 @@
-from fastapi import HTTPException
-from typing import List, Optional, Dict
-from sqlalchemy.orm import selectinload
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
-from sqlalchemy import func
-from sqlalchemy.exc import SQLAlchemyError
-from app.models import Breeding, Dog
-from app.schemas import BreedingCreate, BreedingUpdate
-from app.utils.schema_converters import convert_to_breeding_schema
-from app.utils import DateTimeEncoder
-from app.core.redis import get_redis_client
 import json
 import logging
+from typing import Dict, List, Optional
+
+from fastapi import HTTPException
+from sqlalchemy import func
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+from sqlalchemy.orm import selectinload
+
+from app.core.redis import get_redis_client
+from app.models import Breeding, Dog
+from app.schemas import BreedingCreate, BreedingUpdate
+from app.utils import DateTimeEncoder
+from app.utils.schema_converters import convert_to_breeding_schema
 
 logger = logging.getLogger(__name__)
 
@@ -81,7 +83,7 @@ class BreedingService:
             cached_data = await redis_client.get(cache_key)
 
             if cached_data:
-               return json.loads(cached_data)
+                return json.loads(cached_data)
 
             result = await db.execute(
                 select(Breeding)

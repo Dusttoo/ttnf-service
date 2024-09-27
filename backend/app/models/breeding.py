@@ -1,6 +1,8 @@
-from sqlalchemy import Column, Integer, ForeignKey, Date, String
+from sqlalchemy import Column, Date, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
+
 from app.core.database import Base
+
 
 # Need to add a way to add an un-owned parent
 # Should also add pedigree link

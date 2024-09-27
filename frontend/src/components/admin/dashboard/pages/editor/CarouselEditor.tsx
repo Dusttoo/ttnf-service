@@ -1,6 +1,5 @@
-import React, { useState, useEffect, ChangeEvent } from 'react';
+import React, { useState, useEffect, ChangeEvent, useRef } from 'react';
 import styled from 'styled-components';
-import { useDropzone } from 'react-dropzone';
 import { CarouselImage as CarouselImageType } from '../../../../../api/types/core';
 import { Page } from '../../../../../api/types/page';
 import {
@@ -11,38 +10,47 @@ import {
 import { IconButton, DeleteButton } from '../../../../common/Buttons';
 import Input from '../../../../common/Input';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import ImageUpload from '../../../../common/ImageUpload'; // Import ImageUpload component
 
 const CarouselEditContainer = styled.div`
   padding: 1rem;
-  background-color: ${(props) => props.theme.colors.secondaryBackground};
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 `;
 
-const CarouselImagesContainer = styled.div`
+const CarouselImagesContainer = styled.div<{ isColumn: boolean }>`
   display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  flex-direction: ${(props) => (props.isColumn ? 'column' : 'row')};
+  gap: 1.5rem;
   padding: 2rem;
   border-radius: 8px;
+  flex-wrap: wrap;
 `;
 
-const ImageWrapper = styled.div`
+const ImageWrapper = styled.div<{ isColumn: boolean }>`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border: 1px solid ${(props) => props.theme.colors.border};
   padding: 1rem;
+  border: 1px solid ${(props) => props.theme.colors.border};
   border-radius: 8px;
   background-color: #fff;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+  width: 100%;
+  flex-direction: ${(props) => (props.isColumn ? 'column' : 'row')};
+
+  /* Responsive layout */
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: center;
+  }
 `;
 
-const ImagePreview = styled.div`
+const ImagePreview = styled.div<{ isColumn: boolean }>`
   display: flex;
   align-items: center;
   gap: 1rem;
-  margin-left: 5px;
+  margin-left: ${(props) => (props.isColumn ? '0' : '5px')};
+  flex-direction: ${(props) => (props.isColumn ? 'column' : 'row')};
 `;
 
 const ImageThumbnail = styled.img`
@@ -57,6 +65,13 @@ const ControlsContainer = styled.div`
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
+
+  /* Align buttons in a row on smaller screens */
+  @media (max-width: 768px) {
+    flex-direction: row;
+    width: 100%;
+    justify-content: space-between;
+  }
 `;
 
 const SaveButton = styled.button`
@@ -85,6 +100,8 @@ const CarouselEdit: React.FC<CarouselEditProps> = ({
   isInsideParent = false,
 }) => {
   const [carouselImages, setCarouselImages] = useState<CarouselImageType[]>([]);
+  const [isColumnLayout, setIsColumnLayout] = useState(true);
+  const contentAreaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (page.customValues?.carouselImages) {
@@ -106,21 +123,29 @@ const CarouselEdit: React.FC<CarouselEditProps> = ({
     }
   }, [page]);
 
-  const onDrop = (acceptedFiles: File[]) => {
-    const newImages = acceptedFiles.map((file, index) => ({
+  useEffect(() => {
+    // Function to update the layout based on the content area width
+    const updateLayout = () => {
+      const contentAreaWidth = contentAreaRef.current?.offsetWidth || 0;
+      // If content area width is less than a certain threshold, switch to column layout
+      setIsColumnLayout(contentAreaWidth < 600); // You can adjust this breakpoint as needed
+    };
+
+    // Call the update function on mount and window resize
+    window.addEventListener('resize', updateLayout);
+    updateLayout();
+
+    return () => window.removeEventListener('resize', updateLayout);
+  }, []);
+
+  const handleImageUpload = (urls: string[]) => {
+    const newImages = urls.map((url, index) => ({
       id: Date.now() + index,
-      src: URL.createObjectURL(file),
-      alt: file.name,
+      src: url,
+      alt: `Uploaded Image ${index + 1}`,
     }));
     setCarouselImages((prevImages) => [...prevImages, ...newImages]);
   };
-
-  const { getRootProps, getInputProps } = useDropzone({
-    accept: {
-      'image/*': ['.jpeg', '.jpg', '.png', '.gif'],
-    },
-    onDrop,
-  });
 
   const handleMoveUp = (index: number) => {
     if (index === 0) return;
@@ -172,31 +197,38 @@ const CarouselEdit: React.FC<CarouselEditProps> = ({
   };
 
   return (
-    <CarouselEditContainer>
+    <CarouselEditContainer ref={contentAreaRef}>
       <h3>Edit Carousel</h3>
 
-      <div {...getRootProps()}>
-        <input {...getInputProps()} />
-        <p>Arrange the order that the images appear on the carousel in.</p>
-      </div>
+      <ImageUpload
+        maxImages={10}
+        onImagesChange={handleImageUpload}
+        initialImages={carouselImages.map((img) => img.src)}
+      />
 
-      <CarouselImagesContainer>
+      <CarouselImagesContainer isColumn={isColumnLayout}>
         {carouselImages.map((image, index) => (
-          <ImageWrapper key={image.id}>
-            <Input
-              type="number"
-              value={(index + 1).toString()}
-              onChange={(e) => handlePositionChange(e, index)}
-              width="40px"
-            />
-            <ImagePreview>
-              <ImageThumbnail src={image.src} alt={image.alt} />
+          <ImageWrapper key={image.id} isColumn={isColumnLayout}>
+            <div>
               <Input
-                type="text"
-                value={image.alt}
-                onChange={(e) => handleAltChange(e, index)}
-                placeholder="Alt Text"
+                type="number"
+                value={(index + 1).toString()}
+                onChange={(e) => handlePositionChange(e, index)}
+                width="50px"
+                label="Position"
               />
+            </div>
+            <ImagePreview isColumn={isColumnLayout}>
+              <ImageThumbnail src={image.src} alt={image.alt} />
+              <div>
+                <Input
+                  type="text"
+                  value={image.alt}
+                  onChange={(e) => handleAltChange(e, index)}
+                  placeholder="Alt Text"
+                  label="Alt Text"
+                />
+              </div>
             </ImagePreview>
 
             <ControlsContainer>
@@ -204,13 +236,14 @@ const CarouselEdit: React.FC<CarouselEditProps> = ({
                 icon={faArrowUp}
                 onClick={() => handleMoveUp(index)}
                 disabled={index === 0}
+                title="Move up"
               />
               <DeleteButton onClick={() => handleRemoveImage(image.id)} />
-
               <IconButton
                 icon={faArrowDown}
                 onClick={() => handleMoveDown(index)}
                 disabled={index === carouselImages.length - 1}
+                title="Move down"
               />
             </ControlsContainer>
           </ImageWrapper>
@@ -219,7 +252,7 @@ const CarouselEdit: React.FC<CarouselEditProps> = ({
 
       {!isInsideParent && (
         <SaveButton onClick={handleSave}>
-          <FontAwesomeIcon icon={faFloppyDisk} />
+          <FontAwesomeIcon icon={faFloppyDisk} /> Save Carousel
         </SaveButton>
       )}
     </CarouselEditContainer>

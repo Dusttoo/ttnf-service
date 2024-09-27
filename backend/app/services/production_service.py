@@ -1,17 +1,18 @@
+import json
+import logging
+from typing import Dict, List, Optional, Tuple
+
 from fastapi import HTTPException
-from typing import List, Optional, Tuple, Dict
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import func
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
-from sqlalchemy.exc import SQLAlchemyError
-from app.models import Production, dog_production_link, GenderEnum
-from app.schemas import ProductionCreate, ProductionUpdate
-from app.utils import convert_to_production_schema
+
 from app.core.redis import get_redis_client
-import logging
-import json
-from app.utils import DateTimeEncoder
+from app.models import GenderEnum, Production, dog_production_link
+from app.schemas import ProductionCreate, ProductionUpdate
+from app.utils import DateTimeEncoder, convert_to_production_schema
 
 logger = logging.getLogger(__name__)
 
@@ -43,10 +44,15 @@ class ProductionService:
             total_count = total_count_result.scalar_one()
 
             data = {
-                "items": [convert_to_production_schema(production).dict() for production in productions],
+                "items": [
+                    convert_to_production_schema(production).dict()
+                    for production in productions
+                ],
                 "total_count": total_count,
             }
-            await redis_client.set(cache_key, json.dumps(data, cls=DateTimeEncoder), ex=3600)  # Cache for 1 hour
+            await redis_client.set(
+                cache_key, json.dumps(data, cls=DateTimeEncoder), ex=3600
+            )  # Cache for 1 hour
             return data
         except SQLAlchemyError as e:
             logger.error(f"Error in get_all_productions: {e}", exc_info=True)

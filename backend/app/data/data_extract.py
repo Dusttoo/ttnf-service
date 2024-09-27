@@ -1,5 +1,6 @@
-import requests
 import json
+
+import requests
 
 
 def fetch_data_from_wordpress(endpoint):
@@ -8,7 +9,7 @@ def fetch_data_from_wordpress(endpoint):
 
     if response.status_code == 200:
         try:
-            return response.json() 
+            return response.json()
         except json.JSONDecodeError:
             print(f"Error decoding JSON from {url}")
             return None
