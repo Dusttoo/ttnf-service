@@ -183,13 +183,14 @@ const HomePage: React.FC = () => {
   if (!settings) return <ErrorComponent message={"Error loading settings"} />;
 
   const sanitizedContent = DOMPurify.sanitize(page.content);
-  const carouselImages = page.carousel || [];
+  const carouselImages = page?.customValues?.heroContent?.carouselImages || [];
   const announcements = page.announcements || [];
 
   const carouselSettings: ImageCarouselSettings = {
-    autoplaySpeed: 8000,
+    autoplaySpeed: page?.customValues?.heroContent?.carouselSpeed || 8000,
   };
 
+  console.log('Home page: ', page?.customValues?.heroContent)
   return (
     <HomePageContainer>
         {/* Announcements */}

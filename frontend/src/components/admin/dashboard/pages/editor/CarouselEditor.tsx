@@ -10,7 +10,7 @@ import {
 import { IconButton, DeleteButton } from '../../../../common/Buttons';
 import Input from '../../../../common/Input';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import ImageUpload from '../../../../common/ImageUpload'; // Import ImageUpload component
+import ImageUpload from '../../../../common/ImageUpload';
 
 const CarouselEditContainer = styled.div`
   padding: 1rem;
@@ -60,18 +60,12 @@ const ImageThumbnail = styled.img`
   border-radius: 8px;
 `;
 
-const ControlsContainer = styled.div`
+const ControlsContainer = styled.div<{ isColumn: boolean }>`
   display: flex;
-  flex-direction: column;
+  flex-direction: ${(props) => (props.isColumn ? 'row' : 'column')};
+  justify-content: ${(props) => (props.isColumn ? 'space-between' : 'center')};
   align-items: center;
   gap: 0.5rem;
-
-  /* Align buttons in a row on smaller screens */
-  @media (max-width: 768px) {
-    flex-direction: row;
-    width: 100%;
-    justify-content: space-between;
-  }
 `;
 
 const SaveButton = styled.button`
@@ -90,21 +84,24 @@ const SaveButton = styled.button`
 
 interface CarouselEditProps {
   page: Page;
-  onSaveCarousel: (updatedCarouselImages: CarouselImageType[]) => void;
+  onSaveCarousel: (carouselSpeed: number, updatedCarouselImages: CarouselImageType[]) => void;
   isInsideParent?: boolean;
+  isSidebarOpen: boolean;
 }
 
 const CarouselEdit: React.FC<CarouselEditProps> = ({
   page,
   onSaveCarousel,
+  isSidebarOpen,
   isInsideParent = false,
 }) => {
   const [carouselImages, setCarouselImages] = useState<CarouselImageType[]>([]);
   const [isColumnLayout, setIsColumnLayout] = useState(true);
   const contentAreaRef = useRef<HTMLDivElement>(null);
+  const [carouselSpeed, setCarouselSpeed] = useState(3000);
 
   useEffect(() => {
-    if (page.customValues?.carouselImages) {
+    if (page.customValues?.carouselImages && carouselImages.length === 0) {
       setCarouselImages(
         page.customValues.carouselImages.map(
           (image: CarouselImageType, index: number) => ({
@@ -113,39 +110,36 @@ const CarouselEdit: React.FC<CarouselEditProps> = ({
           })
         )
       );
-    } else if (page.carousel) {
+    } else if (page.carousel && carouselImages.length === 0) {
       setCarouselImages(
         page.carousel.map((image, index) => ({
           ...image,
           id: image.id || index,
         }))
       );
+    } else if (page.customValues?.heroContent?.carouselImages && carouselImages.length === 0) {
+      setCarouselImages(
+        page.customValues.heroContent.carouselImages.map(
+          (image: CarouselImageType, index: number) => ({
+            ...image,
+            id: image.id || index,
+          })
+        )
+      );
     }
-  }, [page]);
+  }, [page, carouselImages.length]);
 
   useEffect(() => {
-    // Function to update the layout based on the content area width
     const updateLayout = () => {
       const contentAreaWidth = contentAreaRef.current?.offsetWidth || 0;
-      // If content area width is less than a certain threshold, switch to column layout
-      setIsColumnLayout(contentAreaWidth < 600); // You can adjust this breakpoint as needed
+      setIsColumnLayout(contentAreaWidth < 578);
     };
 
-    // Call the update function on mount and window resize
     window.addEventListener('resize', updateLayout);
     updateLayout();
 
     return () => window.removeEventListener('resize', updateLayout);
-  }, []);
-
-  const handleImageUpload = (urls: string[]) => {
-    const newImages = urls.map((url, index) => ({
-      id: Date.now() + index,
-      src: url,
-      alt: `Uploaded Image ${index + 1}`,
-    }));
-    setCarouselImages((prevImages) => [...prevImages, ...newImages]);
-  };
+  }, [isSidebarOpen]);
 
   const handleMoveUp = (index: number) => {
     if (index === 0) return;
@@ -167,39 +161,65 @@ const CarouselEdit: React.FC<CarouselEditProps> = ({
     setCarouselImages(newImages);
   };
 
-  const handlePositionChange = (
-    e: ChangeEvent<HTMLInputElement>,
-    index: number
-  ) => {
+  const handleImageUpload = (urls: string[]) => {
+    const newImages = urls.map((url, index) => ({
+      id: Date.now() + index,
+      src: url,
+      alt: `Uploaded Image ${index + 1}`,
+    }));
+
+    setCarouselImages((prevImages) => {
+      const existingUrls = prevImages.map((img) => img.src);
+      const nonDuplicateImages = newImages.filter(
+        (img) => !existingUrls.includes(img.src)
+      );
+      return [...prevImages, ...nonDuplicateImages];
+    });
+
+    // Call onSaveCarousel to immediately update the parent
+    onSaveCarousel(carouselSpeed, [...carouselImages, ...newImages]);
+  };
+
+  const handleSpeedChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const newSpeed = Number(e.target.value);
+    setCarouselSpeed(newSpeed);
+
+    // Immediately propagate the speed change to the parent
+    onSaveCarousel(newSpeed, carouselImages);
+  };
+
+  const handlePositionChange = (e: ChangeEvent<HTMLInputElement>, index: number) => {
     const newPosition = parseInt(e.target.value, 10) - 1;
     if (newPosition >= 0 && newPosition < carouselImages.length) {
       const newImages = [...carouselImages];
       const [movedImage] = newImages.splice(index, 1);
       newImages.splice(newPosition, 0, movedImage);
       setCarouselImages(newImages);
+
+      // Call onSaveCarousel to update the parent immediately
+      onSaveCarousel(carouselSpeed, newImages);
     }
   };
 
-  const handleAltChange = (e: ChangeEvent<HTMLInputElement>, index: number) => {
-    setCarouselImages((prevImages) =>
-      prevImages.map((img, idx) =>
-        idx === index ? { ...img, alt: e.target.value } : img
-      )
-    );
-  };
-
-  const handleSave = () => {
-    onSaveCarousel(carouselImages);
-  };
-
   const handleRemoveImage = (id: number) => {
-    setCarouselImages(carouselImages.filter((image) => image.id !== id));
+    const updatedImages = carouselImages.filter((image) => image.id !== id);
+    setCarouselImages(updatedImages);
+
+    // Call onSaveCarousel to update the parent immediately
+    onSaveCarousel(carouselSpeed, updatedImages);
   };
 
   return (
     <CarouselEditContainer ref={contentAreaRef}>
       <h3>Edit Carousel</h3>
-
+      <Input
+        type="number"
+        value={carouselSpeed.toString()}
+        onChange={handleSpeedChange}
+        width="100px"
+        label="Carousel Speed (ms)"
+        placeholder="3000"
+      />
       <ImageUpload
         maxImages={10}
         onImagesChange={handleImageUpload}
@@ -224,14 +244,14 @@ const CarouselEdit: React.FC<CarouselEditProps> = ({
                 <Input
                   type="text"
                   value={image.alt}
-                  onChange={(e) => handleAltChange(e, index)}
+                  onChange={(e) => handlePositionChange(e, index)}
                   placeholder="Alt Text"
                   label="Alt Text"
                 />
               </div>
             </ImagePreview>
 
-            <ControlsContainer>
+            <ControlsContainer isColumn={isColumnLayout}>
               <IconButton
                 icon={faArrowUp}
                 onClick={() => handleMoveUp(index)}
@@ -249,12 +269,6 @@ const CarouselEdit: React.FC<CarouselEditProps> = ({
           </ImageWrapper>
         ))}
       </CarouselImagesContainer>
-
-      {!isInsideParent && (
-        <SaveButton onClick={handleSave}>
-          <FontAwesomeIcon icon={faFloppyDisk} /> Save Carousel
-        </SaveButton>
-      )}
     </CarouselEditContainer>
   );
 };

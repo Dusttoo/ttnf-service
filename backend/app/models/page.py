@@ -33,13 +33,26 @@ class Announcement(Base):
     page_id = Column(ForeignKey("pages.id"))
 
     def __init__(
-        self, title: str, date: datetime, message: str, category: AnnouncementType
+        self, title: str, date: datetime, message: str, category: AnnouncementType, page_id: str
     ):
         self.title = title
         self.date = date
         self.message = message
         self.category = category
+        self.page_id = page_id
 
+class CarouselImage(Base):
+    __tablename__ = "carousel_images"
+
+    id = Column(Integer, primary_key=True, index=True)
+    src = Column(String, nullable=False)
+    alt = Column(String, nullable=True)
+    page_id = Column(UUID(as_uuid=True), ForeignKey("pages.id"), nullable=False)
+
+    def __init__(self, src: str, alt: str, page_id: UUID):
+        self.src = src
+        self.alt = alt
+        self.page_id = page_id
 
 class Page(Base):
     __tablename__ = "pages"
@@ -67,3 +80,4 @@ class Page(Base):
     announcements = relationship(
         "Announcement", backref="page", cascade="all, delete-orphan"
     )
+    carousel_images = relationship("CarouselImage", backref="page", cascade="all, delete-orphan")

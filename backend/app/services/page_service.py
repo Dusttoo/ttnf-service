@@ -2,6 +2,7 @@ import json
 import logging
 from typing import List, Optional
 from uuid import UUID
+from datetime import datetime
 
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,8 +10,8 @@ from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 
 from app.core.redis import delete_pattern, get_redis_client
-from app.models import Page
-from app.schemas import Page as PageSchema
+from app.models import Page, CarouselImage, Announcement, AnnouncementType
+from app.schemas import Page as PageSchema, AnnouncementType as AnnouncementTypeSchema
 from app.schemas import PageCreate, PageUpdate
 from app.utils import DateTimeEncoder
 from app.utils.schema_converters import convert_to_page_schema
@@ -46,7 +47,7 @@ class PageService:
 
         result = await db.execute(
             select(Page)
-            .options(selectinload(Page.announcements))
+            .options(selectinload(Page.announcements), selectinload(Page.carousel_images))
             .filter(Page.id == page_id)
         )
         db_page = result.scalars().first()
@@ -80,7 +81,7 @@ class PageService:
                 await redis_client.delete(cache_key)
         result = await db.execute(
             select(Page)
-            .options(selectinload(Page.announcements))
+            .options(selectinload(Page.announcements), selectinload(Page.carousel_images))
             .filter(Page.slug == slug)
         )
         db_page = result.scalars().first()
@@ -116,6 +117,12 @@ class PageService:
             announcements=page.announcements,
         )
         db.add(db_page)
+        await db.flush()
+
+        for image in page.carousel_images:
+            db_image = CarouselImage(src=image.src, alt=image.alt, page_id=db_page.id)
+            db.add(db_image)
+
         await db.commit()
         await db.refresh(db_page)
 
@@ -128,15 +135,80 @@ class PageService:
     ) -> Optional[PageSchema]:
         result = await db.execute(
             select(Page)
-            .options(selectinload(Page.announcements))
+            .options(selectinload(Page.announcements), selectinload(Page.carousel_images))  # Load relationships
             .filter(Page.id == page_id)
         )
         db_page = result.scalars().first()
 
         if db_page:
             update_data = page.dict(exclude_unset=True)
+
+            if "announcements" in update_data:
+                new_announcements = []
+                for announcement in update_data["announcements"]:
+                    if isinstance(announcement["date"], str):
+                        announcement_date = datetime.fromisoformat(announcement["date"])
+                    else:
+                        announcement_date = announcement["date"]
+
+                    if "category" in announcement:
+                        announcement_category = AnnouncementType(announcement["category"])
+                        print(f'\n\n{announcement_category}\n\n')
+
+                    if "id" in announcement:
+                        existing_announcement = await db.execute(
+                            select(Announcement).filter(Announcement.id == announcement["id"])
+                        )
+                        existing_announcement = existing_announcement.scalars().first()
+
+                        if existing_announcement:
+                            existing_announcement.title = announcement["title"]
+                            existing_announcement.date = announcement_date
+                            existing_announcement.message = announcement["message"]
+                            existing_announcement.category = announcement_category
+                            new_announcements.append(existing_announcement)
+                        else:
+                            new_announcement = Announcement(
+                                title=announcement["title"],
+                                date=announcement_date,
+                                message=announcement["message"],
+                                category=announcement_category,
+                                page_id=page_id
+                            )
+                            new_announcements.append(new_announcement)
+                    else:
+                        new_announcement = Announcement(
+                            title=announcement["title"],
+                            date=announcement_date,
+                            message=announcement["message"],
+                            category=announcement_category,
+                            page_id=page_id
+                        )
+                        new_announcements.append(new_announcement)
+
+                db_page.announcements.clear()
+                db_page.announcements.extend(new_announcements)
+                del update_data["announcements"]
+
+            if "customValues" in update_data:
+                custom_values = update_data["customValues"]
+
+                if "carouselImages" in custom_values:
+                    db_page.custom_values["carouselImages"] = custom_values["carouselImages"]
+
+                if "heroContent" in custom_values and "carouselImages" in custom_values["heroContent"]:
+                    db_page.custom_values["heroContent"]["carouselImages"] = custom_values["heroContent"]["carouselImages"]
+
+                if "carousel" in update_data:
+                    db_page.carousel.clear()  # Clear existing carousel images
+                    db_page.carousel.extend(update_data["carousel"])
+
+                del update_data["customValues"]
+
             for key, value in update_data.items():
+                print(f'\n{key} : {value}\n')
                 setattr(db_page, key, value)
+
             await db.commit()
             await db.refresh(db_page)
 
@@ -159,11 +231,6 @@ class PageService:
         if cached_pages:
             try:
                 pages_data = json.loads(cached_pages)
-                for page_data in pages_data:
-                    if isinstance(page_data["content"], str):
-                        page_data["content"] = json.loads(
-                            page_data["content"]
-                        )  # Deserialize content
                 return [PageSchema(**page) for page in pages_data]
             except (json.JSONDecodeError, TypeError) as e:
                 logger.error(f"Failed to decode cached pages for key {cache_key}: {e}")
@@ -171,18 +238,15 @@ class PageService:
 
         result = await db.execute(
             select(Page)
-            .options(selectinload(Page.announcements))
+            .options(selectinload(Page.announcements), selectinload(Page.carousel_images))
             .offset(skip)
             .limit(limit)
         )
         db_pages = result.scalars().all()
         page_schemas = [convert_to_page_schema(page) for page in db_pages]
+
         try:
             pages_data = [page.dict() for page in page_schemas]
-            for page_data in pages_data:
-                page_data["content"] = json.dumps(
-                    page_data["content"], cls=DateTimeEncoder
-                )
             await redis_client.set(
                 cache_key, json.dumps(pages_data, cls=DateTimeEncoder), ex=3600
             )  # Cache for 1 hour
@@ -194,12 +258,19 @@ class PageService:
     async def delete_page(self, db: AsyncSession, page_id: str) -> Optional[PageSchema]:
         result = await db.execute(
             select(Page)
-            .options(selectinload(Page.announcements))
+            .options(selectinload(Page.announcements), selectinload(Page.carousel_images))
             .filter(Page.id == page_id)
         )
         db_page = result.scalars().first()
 
         if db_page:
+            # Delete associated carousel images
+            await db.execute(
+                select(CarouselImage)
+                .filter(CarouselImage.page_id == page_id)
+                .delete(synchronize_session=False)
+            )
+
             await db.delete(db_page)
             await db.commit()
 

@@ -164,14 +164,31 @@ def convert_to_page_schema(page: Union[Page, dict]) -> PageSchema:
             for announcement in announcements
         ]
 
-    carousel = page["carousel"] if isinstance(page, dict) else page.carousel
-    if carousel and isinstance(carousel, list):
-        carousel = [
+    # Handle carousel images from different sources
+    carousel_images = None
+    if isinstance(page, dict):
+        # Handle when page is a dictionary (JSON)
+        carousel_images = (
+            page["custom_values"].get("carouselImages")
+            or page["custom_values"].get("heroContent", {}).get("carouselImages")
+            or page.get("carousel", [])
+        )
+    else:
+        # Handle when page is an SQLAlchemy model
+        carousel_images = (
+            page.custom_values.get("carouselImages")
+            or page.custom_values.get("heroContent", {}).get("carouselImages")
+            or page.carousel
+        )
+
+    if carousel_images and isinstance(carousel_images, list):
+        carousel_images = [
             {
+                "id": item.get("id"),
                 "src": item.get("src"),
                 "alt": item.get("alt")
             }
-            for item in carousel if item.get("src")
+            for item in carousel_images if item.get("src")
         ]
 
     return PageSchema(
@@ -194,5 +211,5 @@ def convert_to_page_schema(page: Union[Page, dict]) -> PageSchema:
         translations=translations,
         updated_at=page["updated_at"] if isinstance(page, dict) else (page.updated_at.isoformat() if page.updated_at else None),
         announcements=announcements,
-        carousel=carousel  # Include the carousel data
+        carousel_images=carousel_images
     )

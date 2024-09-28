@@ -22,15 +22,21 @@ const CTAButton = styled(Button)`
 interface HeroEditProps {
   page: Page;
   onSaveHero: (updatedHeroContent: HeroContent) => void;
+  isSidebarOpen: boolean;
 }
 
-const HeroEdit: React.FC<HeroEditProps> = ({ page, onSaveHero }) => {
+const HeroEdit: React.FC<HeroEditProps> = ({
+  page,
+  onSaveHero,
+  isSidebarOpen,
+}) => {
   const [heroContent, setHeroContent] = useState<HeroContent>({
     title: '',
     description: '',
     ctaText: '',
     introductionText: '',
     carouselImages: [],
+    carouselSpeed: 5000
   });
 
   useEffect(() => {
@@ -40,20 +46,21 @@ const HeroEdit: React.FC<HeroEditProps> = ({ page, onSaveHero }) => {
   }, [page]);
 
   const handleSaveHero = () => {
-    onSaveHero({
-      ...heroContent,
-      carouselImages: heroContent.carouselImages,
-    });
+    console.log("HeroEditor HeroContent: ", heroContent)
+    onSaveHero(heroContent);
   };
 
   const handleUpdateCarousel = (
-    updatedCarouselImages: HeroContent['carouselImages']
-  ) => {
-    setHeroContent((prevState) => ({
-      ...prevState,
-      carouselImages: updatedCarouselImages,
-    }));
-  };
+      speed: number,
+      updatedCarouselImages: HeroContent['carouselImages']
+    ) => {
+      console.log("Update heroCOntent in heroEditor: ", speed, updatedCarouselImages)
+      setHeroContent((prevState) => ({
+        ...prevState,
+        carouselImages: updatedCarouselImages,
+        carouselSpeed: speed,
+      }));
+    };
 
   return (
     <HeroEditContainer>
@@ -92,6 +99,7 @@ const HeroEdit: React.FC<HeroEditProps> = ({ page, onSaveHero }) => {
         page={page}
         onSaveCarousel={handleUpdateCarousel}
         isInsideParent
+        isSidebarOpen={isSidebarOpen}
       />
 
       <CTAButton variant="primary" onClick={handleSaveHero}>

@@ -57,9 +57,18 @@ async def log_requests(request: Request, call_next):
 
         logger.info(f"[{request_id}] Headers: {request.headers}")
 
+        # Check the content type for binary data (e.g., file upload)
+        content_type = request.headers.get("Content-Type", "")
         if request.method in ("POST", "PUT", "PATCH"):
             body = await request.body()
-            logger.info(f"[{request_id}] Request Body: {body.decode('utf-8')}")
+
+            if "multipart/form-data" in content_type:  # File uploads or binary data
+                logger.info(f"[{request_id}] Request Body: [binary data skipped]")
+            else:
+                try:
+                    logger.info(f"[{request_id}] Request Body: {body.decode('utf-8')}")
+                except UnicodeDecodeError:
+                    logger.warning(f"[{request_id}] Could not decode body, possibly binary data.")
 
         response = await call_next(request)
 
@@ -67,9 +76,17 @@ async def log_requests(request: Request, call_next):
         logger.info(f"[{request_id}] Response status: {response.status_code}")
         logger.info(f"[{request_id}] Process time: {process_time:.4f} seconds")
 
+        # Check if response is binary and skip logging if it is
         if isinstance(response, Response):
             response_body = b"".join([chunk async for chunk in response.body_iterator])
-            logger.info(f"[{request_id}] Response Body: {response_body.decode('utf-8')}")
+
+            if "application/octet-stream" in response.headers.get("Content-Type", ""):
+                logger.info(f"[{request_id}] Response Body: [binary data skipped]")
+            else:
+                try:
+                    logger.info(f"[{request_id}] Response Body: {response_body.decode('utf-8')}")
+                except UnicodeDecodeError:
+                    logger.warning(f"[{request_id}] Could not decode response body, possibly binary data.")
 
             return Response(content=response_body, status_code=response.status_code, headers=dict(response.headers), media_type=response.media_type)
         else:
