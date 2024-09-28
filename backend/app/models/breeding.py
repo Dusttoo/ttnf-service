@@ -19,3 +19,4 @@ class Breeding(Base):
         "Dog", foreign_keys=[male_dog_id], backref="breedings_as_male"
     )
     litters = relationship("Litter", back_populates="breeding")
+    

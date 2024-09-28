@@ -1,93 +1,71 @@
-import React, { useState, useEffect, ChangeEvent } from 'react';
+import React, { useState, useEffect, ChangeEvent, useRef } from 'react';
 import styled from 'styled-components';
-import { useDropzone } from 'react-dropzone';
 import { CarouselImage as CarouselImageType } from '../../../../../api/types/core';
 import { Page } from '../../../../../api/types/page';
+import {
+  faArrowUp,
+  faArrowDown,
+  faFloppyDisk,
+} from '@fortawesome/free-solid-svg-icons';
+import { IconButton, DeleteButton } from '../../../../common/Buttons';
+import Input from '../../../../common/Input';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import ImageUpload from '../../../../common/ImageUpload';
 
-// Styling for Carousel Edit Area
 const CarouselEditContainer = styled.div`
   padding: 1rem;
-  background-color: ${(props) => props.theme.colors.secondaryBackground};
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 `;
 
-const CarouselImagesContainer = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 1rem;
+const CarouselImagesContainer = styled.div<{ isColumn: boolean }>`
+  display: flex;
+  flex-direction: ${(props) => (props.isColumn ? 'column' : 'row')};
+  gap: 1.5rem;
   padding: 2rem;
   border-radius: 8px;
+  flex-wrap: wrap;
 `;
 
-const ImagePreview = styled.div`
-  position: relative;
-  background-color: #fff;
+const ImageWrapper = styled.div<{ isColumn: boolean }>`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
   border: 1px solid ${(props) => props.theme.colors.border};
   border-radius: 8px;
-  padding: 1rem;
+  background-color: #fff;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s;
-  flex-shrink: 0;
-  max-width: 150px;
-  min-height: 150px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  box-sizing: border-box;
+  width: 100%;
+  flex-direction: ${(props) => (props.isColumn ? 'column' : 'row')};
 
-  &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  /* Responsive layout */
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: center;
   }
+`;
+
+const ImagePreview = styled.div<{ isColumn: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-left: ${(props) => (props.isColumn ? '0' : '5px')};
+  flex-direction: ${(props) => (props.isColumn ? 'column' : 'row')};
 `;
 
 const ImageThumbnail = styled.img`
-  width: 100%;
+  width: 100px;
   height: auto;
   object-fit: cover;
   border-radius: 8px;
-  margin-bottom: 0.5rem;
 `;
 
-const ImageText = styled.input`
-  width: calc(100% - 16px);
-  padding: 0.5rem;
-  font-size: 0.875rem;
-  color: ${(props) => props.theme.colors.text};
-  border: 1px solid ${(props) => props.theme.colors.border};
-  border-radius: 4px;
-  margin-top: 0.5rem;
-  text-align: center;
-
-  &:focus {
-    outline: none;
-    border-color: ${(props) => props.theme.colors.primary};
-  }
-`;
-
-const DeleteButton = styled.button`
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background-color: rgba(0, 0, 0, 0.6);
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  cursor: pointer;
-
-  &:hover {
-    background-color: rgba(0, 0, 0, 0.8);
-  }
-`;
-
-const UploadArea = styled.div`
-  padding: 2rem;
-  border: 2px dashed ${(props) => props.theme.colors.border};
-  border-radius: 8px;
-  text-align: center;
-  cursor: pointer;
+const ControlsContainer = styled.div<{ isColumn: boolean }>`
+  display: flex;
+  flex-direction: ${(props) => (props.isColumn ? 'row' : 'column')};
+  justify-content: ${(props) => (props.isColumn ? 'space-between' : 'center')};
+  align-items: center;
+  gap: 0.5rem;
 `;
 
 const SaveButton = styled.button`
@@ -104,40 +82,26 @@ const SaveButton = styled.button`
   }
 `;
 
-const ControlButton = styled.button`
-  margin: 0.5rem;
-  background-color: ${(props) => props.theme.colors.primary};
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 0.5rem 1rem;
-  cursor: pointer;
-
-  &:hover {
-    background-color: ${(props) => props.theme.colors.primaryDark};
-  }
-
-  &:disabled {
-    background-color: ${(props) => props.theme.colors.disabled};
-    cursor: not-allowed;
-  }
-`;
-
 interface CarouselEditProps {
   page: Page;
-  onSaveCarousel: (updatedCarouselImages: CarouselImageType[]) => void;
-  isInsideParent?: boolean; // Optional prop to detect if inside a parent component
+  onSaveCarousel: (carouselSpeed: number, updatedCarouselImages: CarouselImageType[]) => void;
+  isInsideParent?: boolean;
+  isSidebarOpen: boolean;
 }
 
 const CarouselEdit: React.FC<CarouselEditProps> = ({
   page,
   onSaveCarousel,
+  isSidebarOpen,
   isInsideParent = false,
 }) => {
   const [carouselImages, setCarouselImages] = useState<CarouselImageType[]>([]);
+  const [isColumnLayout, setIsColumnLayout] = useState(true);
+  const contentAreaRef = useRef<HTMLDivElement>(null);
+  const [carouselSpeed, setCarouselSpeed] = useState(3000);
 
   useEffect(() => {
-    if (page.customValues?.carouselImages) {
+    if (page.customValues?.carouselImages && carouselImages.length === 0) {
       setCarouselImages(
         page.customValues.carouselImages.map(
           (image: CarouselImageType, index: number) => ({
@@ -146,35 +110,39 @@ const CarouselEdit: React.FC<CarouselEditProps> = ({
           })
         )
       );
-    } else if (page.carousel) {
+    } else if (page.carousel && carouselImages.length === 0) {
       setCarouselImages(
         page.carousel.map((image, index) => ({
           ...image,
-          id: image.id || index, // Ensure id is a number
+          id: image.id || index,
         }))
       );
+    } else if (page.customValues?.heroContent?.carouselImages && carouselImages.length === 0) {
+      setCarouselImages(
+        page.customValues.heroContent.carouselImages.map(
+          (image: CarouselImageType, index: number) => ({
+            ...image,
+            id: image.id || index,
+          })
+        )
+      );
     }
-  }, [page]);
+  }, [page, carouselImages.length]);
 
-  const onDrop = (acceptedFiles: File[]) => {
-    const newImages = acceptedFiles.map((file, index) => ({
-      id: Date.now() + index, // Ensure id is a number
-      src: URL.createObjectURL(file),
-      alt: file.name,
-    }));
-    setCarouselImages((prevImages) => [...prevImages, ...newImages]);
-  };
+  useEffect(() => {
+    const updateLayout = () => {
+      const contentAreaWidth = contentAreaRef.current?.offsetWidth || 0;
+      setIsColumnLayout(contentAreaWidth < 578);
+    };
 
-  const { getRootProps, getInputProps } = useDropzone({
-    accept: {
-      'image/*': ['.jpeg', '.jpg', '.png', '.gif'],
-    },
-    onDrop,
-  });
+    window.addEventListener('resize', updateLayout);
+    updateLayout();
 
-  // Option 1: Move Up/Down Buttons
+    return () => window.removeEventListener('resize', updateLayout);
+  }, [isSidebarOpen]);
+
   const handleMoveUp = (index: number) => {
-    if (index === 0) return; // Already at the top
+    if (index === 0) return;
     const newImages = [...carouselImages];
     [newImages[index - 1], newImages[index]] = [
       newImages[index],
@@ -184,7 +152,7 @@ const CarouselEdit: React.FC<CarouselEditProps> = ({
   };
 
   const handleMoveDown = (index: number) => {
-    if (index === carouselImages.length - 1) return; // Already at the bottom
+    if (index === carouselImages.length - 1) return;
     const newImages = [...carouselImages];
     [newImages[index], newImages[index + 1]] = [
       newImages[index + 1],
@@ -193,90 +161,114 @@ const CarouselEdit: React.FC<CarouselEditProps> = ({
     setCarouselImages(newImages);
   };
 
-  // Option 2: Number Input for Positioning
-  const handlePositionChange = (
-    e: ChangeEvent<HTMLInputElement>,
-    index: number
-  ) => {
-    const newPosition = parseInt(e.target.value, 10) - 1; // Convert to zero-indexed
+  const handleImageUpload = (urls: string[]) => {
+    const newImages = urls.map((url, index) => ({
+      id: Date.now() + index,
+      src: url,
+      alt: `Uploaded Image ${index + 1}`,
+    }));
+
+    setCarouselImages((prevImages) => {
+      const existingUrls = prevImages.map((img) => img.src);
+      const nonDuplicateImages = newImages.filter(
+        (img) => !existingUrls.includes(img.src)
+      );
+      return [...prevImages, ...nonDuplicateImages];
+    });
+
+    // Call onSaveCarousel to immediately update the parent
+    onSaveCarousel(carouselSpeed, [...carouselImages, ...newImages]);
+  };
+
+  const handleSpeedChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const newSpeed = Number(e.target.value);
+    setCarouselSpeed(newSpeed);
+
+    // Immediately propagate the speed change to the parent
+    onSaveCarousel(newSpeed, carouselImages);
+  };
+
+  const handlePositionChange = (e: ChangeEvent<HTMLInputElement>, index: number) => {
+    const newPosition = parseInt(e.target.value, 10) - 1;
     if (newPosition >= 0 && newPosition < carouselImages.length) {
       const newImages = [...carouselImages];
       const [movedImage] = newImages.splice(index, 1);
       newImages.splice(newPosition, 0, movedImage);
       setCarouselImages(newImages);
+
+      // Call onSaveCarousel to update the parent immediately
+      onSaveCarousel(carouselSpeed, newImages);
     }
   };
 
-  const handleAltChange = (e: ChangeEvent<HTMLInputElement>, index: number) => {
-    setCarouselImages((prevImages) =>
-      prevImages.map((img, idx) =>
-        idx === index ? { ...img, alt: e.target.value } : img
-      )
-    );
-  };
-
-  const handleSave = () => {
-    onSaveCarousel(carouselImages);
-  };
-
   const handleRemoveImage = (id: number) => {
-    setCarouselImages(carouselImages.filter((image) => image.id !== id));
+    const updatedImages = carouselImages.filter((image) => image.id !== id);
+    setCarouselImages(updatedImages);
+
+    // Call onSaveCarousel to update the parent immediately
+    onSaveCarousel(carouselSpeed, updatedImages);
   };
 
   return (
-    <CarouselEditContainer>
+    <CarouselEditContainer ref={contentAreaRef}>
       <h3>Edit Carousel</h3>
+      <Input
+        type="number"
+        value={carouselSpeed.toString()}
+        onChange={handleSpeedChange}
+        width="100px"
+        label="Carousel Speed (ms)"
+        placeholder="3000"
+      />
+      <ImageUpload
+        maxImages={10}
+        onImagesChange={handleImageUpload}
+        initialImages={carouselImages.map((img) => img.src)}
+      />
 
-      <UploadArea {...getRootProps()}>
-        <input {...getInputProps()} />
-        <p>Drag and drop images here, or click to select images</p>
-      </UploadArea>
-
-      <CarouselImagesContainer>
+      <CarouselImagesContainer isColumn={isColumnLayout}>
         {carouselImages.map((image, index) => (
-          <ImagePreview key={image.id}>
-            <ImageThumbnail src={image.src} alt={image.alt} />
-            <ImageText
-              type="text"
-              value={image.alt}
-              onChange={(e) => handleAltChange(e, index)}
-            />
-            <DeleteButton onClick={() => handleRemoveImage(image.id)}>
-              &times;
-            </DeleteButton>
-
-            {/* Option 1: Move Up/Down Buttons */}
-            <ControlButton
-              onClick={() => handleMoveUp(index)}
-              disabled={index === 0}
-            >
-              Move Up
-            </ControlButton>
-            <ControlButton
-              onClick={() => handleMoveDown(index)}
-              disabled={index === carouselImages.length - 1}
-            >
-              Move Down
-            </ControlButton>
-
-            {/* Option 2: Number Input for Positioning */}
-            <label>
-              Order:
-              <input
+          <ImageWrapper key={image.id} isColumn={isColumnLayout}>
+            <div>
+              <Input
                 type="number"
-                value={index + 1}
-                min={1}
-                max={carouselImages.length}
+                value={(index + 1).toString()}
                 onChange={(e) => handlePositionChange(e, index)}
+                width="50px"
+                label="Position"
               />
-            </label>
-          </ImagePreview>
+            </div>
+            <ImagePreview isColumn={isColumnLayout}>
+              <ImageThumbnail src={image.src} alt={image.alt} />
+              <div>
+                <Input
+                  type="text"
+                  value={image.alt}
+                  onChange={(e) => handlePositionChange(e, index)}
+                  placeholder="Alt Text"
+                  label="Alt Text"
+                />
+              </div>
+            </ImagePreview>
+
+            <ControlsContainer isColumn={isColumnLayout}>
+              <IconButton
+                icon={faArrowUp}
+                onClick={() => handleMoveUp(index)}
+                disabled={index === 0}
+                title="Move up"
+              />
+              <DeleteButton onClick={() => handleRemoveImage(image.id)} />
+              <IconButton
+                icon={faArrowDown}
+                onClick={() => handleMoveDown(index)}
+                disabled={index === carouselImages.length - 1}
+                title="Move down"
+              />
+            </ControlsContainer>
+          </ImageWrapper>
         ))}
       </CarouselImagesContainer>
-
-      {!isInsideParent && (
-        <SaveButton onClick={handleSave}>Save Carousel</SaveButton>
-      )}
     </CarouselEditContainer>
   );
 };

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import {SEOSettings, LayoutSettings} from '../../../../../api/types/page'
-import Checkbox from '../../../../common/form/Checkbox'
+import { SEOSettings, LayoutSettings } from '../../../../../api/types/page';
+import Checkbox from '../../../../common/form/Checkbox';
 interface SidebarProps {
   seoSettings: SEOSettings;
   setSEOSettings: React.Dispatch<React.SetStateAction<SEOSettings>>;
@@ -12,8 +12,6 @@ interface SidebarProps {
 const SidebarContainer = styled.div`
   width: 300px;
   padding: 1rem;
-  background-color: ${(props) => props.theme.colors.sidebarBackground};
-  border-left: 1px solid ${(props) => props.theme.colors.border};
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -61,7 +59,12 @@ const ToggleIcon = styled.span`
   cursor: pointer;
 `;
 
-const Sidebar: React.FC<SidebarProps> = ({ seoSettings, setSEOSettings, layoutSettings, setLayoutSettings }) => {
+const Sidebar: React.FC<SidebarProps> = ({
+  seoSettings,
+  setSEOSettings,
+  layoutSettings,
+  setLayoutSettings,
+}) => {
   const [isSEOSettingsVisible, setSEOSettingsVisible] = useState(true);
   const [isLayoutSettingsVisible, setLayoutSettingsVisible] = useState(true);
 
@@ -78,8 +81,11 @@ const Sidebar: React.FC<SidebarProps> = ({ seoSettings, setSEOSettings, layoutSe
       </SectionContainer>
 
       <SectionContainer>
-        <SectionHeader onClick={() => setSEOSettingsVisible(!isSEOSettingsVisible)}>
-          SEO Settings <ToggleIcon>{isSEOSettingsVisible ? '▼' : '▲'}</ToggleIcon>
+        <SectionHeader
+          onClick={() => setSEOSettingsVisible(!isSEOSettingsVisible)}
+        >
+          SEO Settings{' '}
+          <ToggleIcon>{isSEOSettingsVisible ? '▼' : '▲'}</ToggleIcon>
         </SectionHeader>
         <SectionContent isVisible={isSEOSettingsVisible}>
           <Label>SEO Title</Label>
@@ -92,19 +98,26 @@ const Sidebar: React.FC<SidebarProps> = ({ seoSettings, setSEOSettings, layoutSe
       </SectionContainer>
 
       <SectionContainer>
-        <SectionHeader onClick={() => setLayoutSettingsVisible(!isLayoutSettingsVisible)}>
-          Layout Settings <ToggleIcon>{isLayoutSettingsVisible ? '▼' : '▲'}</ToggleIcon>
+        <SectionHeader
+          onClick={() => setLayoutSettingsVisible(!isLayoutSettingsVisible)}
+        >
+          Layout Settings{' '}
+          <ToggleIcon>{isLayoutSettingsVisible ? '▼' : '▲'}</ToggleIcon>
         </SectionHeader>
         <SectionContent isVisible={isLayoutSettingsVisible}>
           <Checkbox
             label="Show Header"
             checked={layoutSettings?.header || false}
-            onChange={(checked) => setLayoutSettings({ ...layoutSettings, header: checked })}
+            onChange={(checked) =>
+              setLayoutSettings({ ...layoutSettings, header: checked })
+            }
           />
           <Checkbox
             label="Show Footer"
             checked={layoutSettings?.footer || false}
-            onChange={(checked) => setLayoutSettings({ ...layoutSettings, footer: checked })}
+            onChange={(checked) =>
+              setLayoutSettings({ ...layoutSettings, footer: checked })
+            }
           />
         </SectionContent>
       </SectionContainer>

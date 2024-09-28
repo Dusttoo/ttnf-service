@@ -1,27 +1,31 @@
-import logging
+import datetime
 import json
+import logging
+import uuid
+
+from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.exc import SQLAlchemyError
+
+from app.core.config import settings
 from app.core.database import Base
 from app.models import (
     Announcement,
-    User,
-    Dog,
-    Production,
-    HealthInfo,
-    Photo,
+    AnnouncementType,
     Breeding,
+    Dog,
+    GenderEnum,
+    HealthInfo,
     Litter,
-    Page,
     NavLink,
+    Page,
+    Photo,
+    Production,
+    StatusEnum,
+    User,
 )
-from app.models import GenderEnum, StatusEnum, AnnouncementType
-from app.core.config import settings
-from sqlalchemy import text
 from scripts.page_data import default_page_data
-import datetime
-import uuid
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -33,6 +37,7 @@ engine = create_async_engine(DATABASE_URL, echo=True)
 SessionLocal = sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
 
 dog_name_to_id = {}
+
 
 async def create_session():
     try:
@@ -128,8 +133,12 @@ async def seed_data():
                     for dog in dogs_data:
                         if "parent_male_name" in dog or "parent_female_name" in dog:
                             dog_id = dog_name_to_id[dog["name"]]
-                            parent_male_id = dog_name_to_id.get(dog.get("parent_male_name"))
-                            parent_female_id = dog_name_to_id.get(dog.get("parent_female_name"))
+                            parent_male_id = dog_name_to_id.get(
+                                dog.get("parent_male_name")
+                            )
+                            parent_female_id = dog_name_to_id.get(
+                                dog.get("parent_female_name")
+                            )
                             await session.execute(
                                 session.query(Dog)
                                 .filter_by(id=dog_id)
@@ -286,8 +295,14 @@ async def seed_data():
                             },
                             custom_values={"hero_image": "hero_landing.jpg"},
                             carousel=[  # Carousel images
-                                {"src": "https://example.com/image1.jpg", "alt": "First Image"},
-                                {"src": "https://example.com/image2.jpg", "alt": "Second Image"},
+                                {
+                                    "src": "https://example.com/image1.jpg",
+                                    "alt": "First Image",
+                                },
+                                {
+                                    "src": "https://example.com/image2.jpg",
+                                    "alt": "Second Image",
+                                },
                             ],
                             external_data=None,
                             content="""
@@ -305,7 +320,11 @@ async def seed_data():
                             published_at=datetime.datetime.utcnow(),
                             language="en",
                             translations=[
-                                {"slug": "inicio", "name": "Página de Inicio", "language": "es"}
+                                {
+                                    "slug": "inicio",
+                                    "name": "Página de Inicio",
+                                    "language": "es",
+                                }
                             ],
                         ),
                         # About Us Page
@@ -333,8 +352,13 @@ async def seed_data():
                             created_at=datetime.datetime.utcnow(),
                             published_at=datetime.datetime.utcnow(),
                             language="en",
-                            translations=[{"slug": "acerca-de", "name": "Sobre Nosotros", "language": "es"}
-                                          ],
+                            translations=[
+                                {
+                                    "slug": "acerca-de",
+                                    "name": "Sobre Nosotros",
+                                    "language": "es",
+                                }
+                            ],
                         ),
                         # Services Page
                         Page(
@@ -360,8 +384,13 @@ async def seed_data():
                             created_at=datetime.datetime.utcnow(),
                             published_at=datetime.datetime.utcnow(),
                             language="en",
-                            translations=[{"slug": "nuestros-servicios", "name": "Nuestros Servicios", "language": "es"}
-                                          ],
+                            translations=[
+                                {
+                                    "slug": "nuestros-servicios",
+                                    "name": "Nuestros Servicios",
+                                    "language": "es",
+                                }
+                            ],
                         ),
                         # Recommendations Page
                         Page(
@@ -387,8 +416,13 @@ async def seed_data():
                             created_at=datetime.datetime.utcnow(),
                             published_at=datetime.datetime.utcnow(),
                             language="en",
-                            translations=[{"slug": "recomendaciones", "name": "Recomendaciones", "language": "es"}
-                                          ],
+                            translations=[
+                                {
+                                    "slug": "recomendaciones",
+                                    "name": "Recomendaciones",
+                                    "language": "es",
+                                }
+                            ],
                         ),
                         # Static Pages (Males, Females, Breedings, Litters, Contact, Productions)
                         Page(
@@ -396,7 +430,9 @@ async def seed_data():
                             type="males",
                             name="Our Males",
                             slug="males",
-                            meta={"description": "Meet our champion male French Bulldogs."},
+                            meta={
+                                "description": "Meet our champion male French Bulldogs."
+                            },
                             custom_values={},
                             external_data=None,
                             content="",
@@ -407,15 +443,22 @@ async def seed_data():
                             created_at=datetime.datetime.utcnow(),
                             published_at=datetime.datetime.utcnow(),
                             language="en",
-                            translations=[{"slug": "machos", "name": "Nuestros Machos", "language": "es"}
-                                          ],
+                            translations=[
+                                {
+                                    "slug": "machos",
+                                    "name": "Nuestros Machos",
+                                    "language": "es",
+                                }
+                            ],
                         ),
                         Page(
                             id=uuid.uuid4(),
                             type="females",
                             name="Our Females",
                             slug="females",
-                            meta={"description": "Meet our beautiful female French Bulldogs."},
+                            meta={
+                                "description": "Meet our beautiful female French Bulldogs."
+                            },
                             custom_values={},
                             external_data=None,
                             content="",
@@ -426,10 +469,14 @@ async def seed_data():
                             created_at=datetime.datetime.utcnow(),
                             published_at=datetime.datetime.utcnow(),
                             language="en",
-                            translations=[{"slug": "hembras", "name": "Nuestras Hembras", "language": "es"}
-                                          ],
+                            translations=[
+                                {
+                                    "slug": "hembras",
+                                    "name": "Nuestras Hembras",
+                                    "language": "es",
+                                }
+                            ],
                         ),
-
                         # Breedings Page (Static)
                         Page(
                             id=uuid.uuid4(),
@@ -449,12 +496,13 @@ async def seed_data():
                             created_at=datetime.datetime.utcnow(),
                             published_at=datetime.datetime.utcnow(),
                             language="en",
-                            translations=[{
-                                "slug": "proximas-criadas",
-                                "name": "Próximas Crías",
-                                "language": "es"
-                            }
-                                          ],
+                            translations=[
+                                {
+                                    "slug": "proximas-criadas",
+                                    "name": "Próximas Crías",
+                                    "language": "es",
+                                }
+                            ],
                         ),
                         # Litters Page (Static)
                         Page(
@@ -475,12 +523,13 @@ async def seed_data():
                             created_at=datetime.datetime.utcnow(),
                             published_at=datetime.datetime.utcnow(),
                             language="en",
-                            translations=[{
-                                "slug": "camas-disponibles",
-                                "name": "Camas Disponibles",
-                                "language": "es"
-                            }
-                                          ],
+                            translations=[
+                                {
+                                    "slug": "camas-disponibles",
+                                    "name": "Camas Disponibles",
+                                    "language": "es",
+                                }
+                            ],
                         ),
                         # Contact Page (Static)
                         Page(
@@ -499,13 +548,17 @@ async def seed_data():
                             created_at=datetime.datetime.utcnow(),
                             published_at=datetime.datetime.utcnow(),
                             language="en",
-                            translations=[{"slug": "contacto", "name": "Contáctenos", "language": "es"}
-                                          ],
+                            translations=[
+                                {
+                                    "slug": "contacto",
+                                    "name": "Contáctenos",
+                                    "language": "es",
+                                }
+                            ],
                         ),
-
                         # Productions Page (Static)
                         Page(
-                            id=uuid.uuid4(), 
+                            id=uuid.uuid4(),
                             type="productions",
                             name="Our Productions",
                             slug="productions",
@@ -522,13 +575,14 @@ async def seed_data():
                             created_at=datetime.datetime.utcnow(),
                             published_at=datetime.datetime.utcnow(),
                             language="en",
-                            translations=[{
-                                "slug": "producciones",
-                                "name": "Nuestras Producciones",
-                                "language": "es"
-                            }
-                                          ],
-                        )
+                            translations=[
+                                {
+                                    "slug": "producciones",
+                                    "name": "Nuestras Producciones",
+                                    "language": "es",
+                                }
+                            ],
+                        ),
                     ]
 
                     # Add pages to the session
@@ -544,8 +598,7 @@ async def seed_data():
             landing_page_id = None
             try:
                 landing_page = await session.execute(
-                    text("SELECT id FROM pages WHERE slug = :slug"),
-                    {"slug": "landing"}
+                    text("SELECT id FROM pages WHERE slug = :slug"), {"slug": "landing"}
                 )
                 landing_page_id = landing_page.scalar_one_or_none()
 
@@ -563,19 +616,19 @@ async def seed_data():
                             title="New Litter Available!",
                             date=datetime.datetime(2024, 9, 10),
                             message="We are excited to announce a new litter of French Bulldogs! Contact us for more information.",
-                            category=AnnouncementType.INFO
+                            category=AnnouncementType.INFO,
                         ),
                         Announcement(
                             title="Upcoming Planned Breeding",
                             date=datetime.datetime(2024, 8, 30),
                             message="We have an upcoming planned breeding in October. Stay tuned for details!",
-                            category=AnnouncementType.BREEDING
+                            category=AnnouncementType.BREEDING,
                         ),
                         Announcement(
                             title="New Stud Service Available",
                             date=datetime.datetime(2024, 8, 15),
                             message="Our male, Thunder Cat, is now available for stud services! Contact us for more details.",
-                            category=AnnouncementType.STUD
+                            category=AnnouncementType.STUD,
                         ),
                     ]
 
@@ -706,6 +759,7 @@ async def seed_data():
         except Exception as general_e:
             logger.error("General error occurred: %s", general_e)
             await session.rollback()
+
 
 if __name__ == "__main__":
     import asyncio

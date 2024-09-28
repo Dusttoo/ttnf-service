@@ -103,9 +103,7 @@ def main():
 
     dogs_data = data["tp/v1/dogs/males"] + data["tp/v1/dogs/females"]
     breedings_data = data["wp/v2/breeding"]
-    productions_data = data[
-        "wp/v2/production"
-    ]
+    productions_data = data["wp/v2/production"]
     all_dogs = []
     all_health_infos = []
     all_photos = []

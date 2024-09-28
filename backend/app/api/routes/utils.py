@@ -1,8 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
-from app.core.redis import get_redis_client
+
 from app.core.auth import get_current_user
+from app.core.redis import get_redis_client
 
 utils_router = APIRouter()
+
 
 @utils_router.post("/clear-cache", dependencies=[Depends(get_current_user)])
 async def clear_cache(redis=Depends(get_redis_client)):

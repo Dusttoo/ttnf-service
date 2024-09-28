@@ -88,7 +88,7 @@ def convert_to_litter_schema(litter: Litter) -> LitterSchema:
             logger.error(f"Invalid JSON in litter description: {litter.description}")
             description = {
                 "content": litter.description
-            }  
+            }
 
     return LitterSchema(
         id=litter.id,
@@ -131,37 +131,31 @@ from datetime import datetime
 import json
 
 def convert_to_page_schema(page: Union[Page, dict]) -> PageSchema:
-    # Content handling
     content = page["content"] if isinstance(page, dict) else page.content
     if isinstance(content, str):
         try:
-            content = json.loads(content)  # Try parsing if it's a JSON string
+            content = json.loads(content)
         except json.JSONDecodeError:
-            pass  # Keep it as a string if it's not JSON
+            pass
 
-    # Meta handling (optional)
     meta = page["meta"] if isinstance(page, dict) else page.meta
     if meta and isinstance(meta, dict):
-        meta = IMeta(**meta)  # Convert to IMeta Pydantic model
+        meta = IMeta(**meta)
 
-    # Author handling (optional)
     author = page["author"] if isinstance(page, dict) else page.author
     if author and isinstance(author, dict):
         author = Author(**author)
 
-    # Translations handling (optional)
     translations = page["translations"] if isinstance(page, dict) else page.translations
     if translations and isinstance(translations, list):
         translations = [Translation(**translation) for translation in translations]
 
-    # Announcements handling (optional)
     announcements = page["announcements"] if isinstance(page, dict) else page.announcements
     if announcements and isinstance(announcements, list):
         announcements = [
             AnnouncementSchema(
                 id=announcement.get("id") if isinstance(announcement, dict) else announcement.id,
                 title=announcement.get("title") if isinstance(announcement, dict) else announcement.title,
-                # Date Handling: Ensure date is in ISO format
                 date=announcement["date"] if isinstance(announcement, dict)
                 else (announcement.date.isoformat() if isinstance(announcement.date, datetime) else announcement.date),
                 message=announcement.get("message") if isinstance(announcement, dict) else announcement.message,
@@ -170,18 +164,33 @@ def convert_to_page_schema(page: Union[Page, dict]) -> PageSchema:
             for announcement in announcements
         ]
 
-    # Carousel handling (optional)
-    carousel = page["carousel"] if isinstance(page, dict) else page.carousel
-    if carousel and isinstance(carousel, list):
-        carousel = [
+    # Handle carousel images from different sources
+    carousel_images = None
+    if isinstance(page, dict):
+        # Handle when page is a dictionary (JSON)
+        carousel_images = (
+            page["custom_values"].get("carouselImages")
+            or page["custom_values"].get("heroContent", {}).get("carouselImages")
+            or page.get("carousel", [])
+        )
+    else:
+        # Handle when page is an SQLAlchemy model
+        carousel_images = (
+            page.custom_values.get("carouselImages")
+            or page.custom_values.get("heroContent", {}).get("carouselImages")
+            or page.carousel
+        )
+
+    if carousel_images and isinstance(carousel_images, list):
+        carousel_images = [
             {
+                "id": item.get("id"),
                 "src": item.get("src"),
                 "alt": item.get("alt")
             }
-            for item in carousel if item.get("src")  # Ensure `src` exists
+            for item in carousel_images if item.get("src")
         ]
 
-    # Build and return PageSchema
     return PageSchema(
         id=str(page["id"]) if isinstance(page, dict) else str(page.id),
         type=page["type"] if isinstance(page, dict) else page.type,
@@ -202,5 +211,5 @@ def convert_to_page_schema(page: Union[Page, dict]) -> PageSchema:
         translations=translations,
         updated_at=page["updated_at"] if isinstance(page, dict) else (page.updated_at.isoformat() if page.updated_at else None),
         announcements=announcements,
-        carousel=carousel  # Include the carousel data
+        carousel_images=carousel_images
     )

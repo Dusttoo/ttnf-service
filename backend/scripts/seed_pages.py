@@ -1,10 +1,12 @@
 import logging
-from sqlalchemy.orm import Session
+
 from sqlalchemy import create_engine
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session
+
+from app.core.config import settings
 from app.core.database import Base
 from app.models.page import Page
-from app.core.config import settings
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -12,6 +14,7 @@ logger = logging.getLogger(__name__)
 DATABASE_URL = (
     "postgresql://ttnf_app:password123!@ttnf.postgres.database.azure.com:5432/ttnf"
 )
+
 
 def create_session(database_url: str):
     try:

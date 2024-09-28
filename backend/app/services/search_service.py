@@ -1,9 +1,13 @@
-from sqlalchemy import or_
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
-from sqlalchemy.future import select
+import logging
 from typing import List
-from app.models import Dog, Production, Breeding, Litter, dog_production_link
+
+from sqlalchemy import or_
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+from sqlalchemy.orm import joinedload, selectinload
+
+from app.models import Breeding, Dog, Litter, Production, dog_production_link
 from app.schemas import SearchResult
 from app.utils import (
     convert_to_breeding_schema,
@@ -11,9 +15,6 @@ from app.utils import (
     convert_to_litter_schema,
     convert_to_production_schema,
 )
-from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import joinedload
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +24,7 @@ async def search_resources(
 ) -> List[SearchResult]:
     results = []
     resources = resources[0].split(",")
-    dog_ids = set()  
+    dog_ids = set()
 
     try:
         if "dogs" in resources:
@@ -39,7 +40,7 @@ async def search_resources(
                 .limit(limit)
             )
             dogs_result = await db.execute(dogs_query)
-            dogs = dogs_result.scalars().unique().all()  
+            dogs = dogs_result.scalars().unique().all()
             for dog in dogs:
                 dog_ids.add(dog.id)
                 results.append(
@@ -61,9 +62,7 @@ async def search_resources(
                 .limit(limit)
             )
             productions_result = await db.execute(productions_query)
-            productions = (
-                productions_result.scalars().unique().all()
-            ) 
+            productions = productions_result.scalars().unique().all()
             for production in productions:
                 results.append(
                     SearchResult(

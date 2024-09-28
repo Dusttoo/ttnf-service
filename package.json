@@ -9,12 +9,12 @@
   },
   "lint-staged": {
     "frontend/**/*.{js,ts,jsx,tsx}": [
-      "eslint --fix",
-      "prettier --write"
+      "cd frontend && npm run lint",
+      "cd frontend && npm run format"
     ],
     "backend/**/*.py": [
-      "black",
-      "isort"
+      "cd backend && source venv/bin/activate && black",
+      "cd backend && source venv/bin/activate && isort"
     ]
   }
 }

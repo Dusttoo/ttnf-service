@@ -1,10 +1,12 @@
-from pydantic import BaseModel, HttpUrl
-from typing import Optional, List, Dict, Any
 from datetime import datetime
 from enum import Enum
+from typing import Any, Dict, List, Optional
+
+from pydantic import BaseModel, HttpUrl
 
 
 class CarouselImage(BaseModel):
+    id: str
     src: str
     alt: str
 
@@ -13,12 +15,12 @@ class CarouselImage(BaseModel):
 
 
 class AnnouncementType(str, Enum):
-    LITTER = 'litter'
-    BREEDING = 'breeding'
-    STUD = 'stud'
-    ANNOUNCEMENT = 'announcement'
-    SERVICE = 'service'
-    INFO = 'info'
+    LITTER = "litter"
+    BREEDING = "breeding"
+    STUD = "stud"
+    ANNOUNCEMENT = "announcement"
+    SERVICE = "service"
+    INFO = "info"
 
 
 class Announcement(BaseModel):
@@ -72,10 +74,11 @@ class PageBase(BaseModel):
     language: str
     translations: Optional[List[Translation]] = None
     updated_at: Optional[datetime] = None
-    carousel: Optional[List[CarouselImage]] = None  # Adding the carousel images here
+    # carousel_images: Optional[List[CarouselImage]] = None
 
 
 class PageCreate(PageBase):
+    # carousel_images: Optional[List[CarouselImage]] = None
     pass
 
 
@@ -94,7 +97,7 @@ class PageUpdate(BaseModel):
     announcements: Optional[List[Announcement]] = None
     language: Optional[str] = None
     translations: Optional[List[Translation]] = None
-    carousel: Optional[List[CarouselImage]] = None  # Carousel support in update
+    # carousel_images: Optional[List[CarouselImage]] = None
 
 
 class Page(PageBase):

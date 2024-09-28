@@ -6,6 +6,7 @@ export interface HeroContent {
   ctaText: string;
   introductionText: string;
   carouselImages: CarouselImage[];
+  carouselSpeed: number;
 }
 
 export interface Page {
@@ -18,6 +19,7 @@ export interface Page {
     heroContent?: HeroContent;
     iconArea?: { icon: string; label: string }[];
     aboutContent?: string;
+    carouselImages?: CarouselImage[];
     [key: string]: any;
   };
   externalData?: { [key: string]: any };

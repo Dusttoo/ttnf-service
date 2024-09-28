@@ -1,17 +1,21 @@
 import json
 import logging
 from typing import List, Optional
+
+from fastapi import HTTPException
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
-from sqlalchemy.exc import SQLAlchemyError
-from fastapi import HTTPException
-from app.models.navigation import NavLink
-from app.schemas import NavLinkCreate, NavLinkUpdate, NavLink as NavLinkSchema
+
 from app.core.redis import get_redis_client
+from app.models.navigation import NavLink
+from app.schemas import NavLink as NavLinkSchema
+from app.schemas import NavLinkCreate, NavLinkUpdate
 from app.utils.schema_converters import convert_to_navigation_schema
 
 logger = logging.getLogger(__name__)
+
 
 class NavigationService:
     async def get_nav_links(
@@ -33,7 +37,12 @@ class NavigationService:
             # Cache the result
             await redis_client.set(
                 cache_key,
-                json.dumps([convert_to_navigation_schema(nav_link).dict() for nav_link in nav_links]),
+                json.dumps(
+                    [
+                        convert_to_navigation_schema(nav_link).dict()
+                        for nav_link in nav_links
+                    ]
+                ),
                 ex=3600,
             )
 

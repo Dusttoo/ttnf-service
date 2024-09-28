@@ -1,11 +1,14 @@
-from pydantic import BaseModel, Field, field_validator
 import re
+
+from pydantic import BaseModel, Field, field_validator
+
 
 class UserBaseSchema(BaseModel):
     username: str = Field(..., json_schema_extra={"example": "john_doe"})
     email: str = Field(..., json_schema_extra={"example": "john@example.com"})
     first_name: str
     last_name: str
+
     @field_validator("email", mode="before")
     def validate_email(cls, value):
         pattern = r"^\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b$"

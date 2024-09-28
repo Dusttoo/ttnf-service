@@ -1,7 +1,8 @@
-from pydantic import BaseModel
-from typing import List, Optional, TYPE_CHECKING
 from datetime import date
 from enum import Enum
+from typing import TYPE_CHECKING, List, Optional
+
+from pydantic import BaseModel
 
 if TYPE_CHECKING:
     from app.schemas import Dog
@@ -147,6 +148,7 @@ class DogChildSchema(BaseModel):
     dob: Optional[date] = None
     gender: GenderEnum
     profile_photo: Optional[str] = None
+
 
 class DogParentSchema(BaseModel):
     id: int

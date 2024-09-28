@@ -2,9 +2,9 @@ from pydantic import BaseModel
 
 
 class MediaResponse(BaseModel):
-    id: str  
+    id: str
     url: str
-    type: str 
+    type: str
     filename: str
 
 
@@ -14,4 +14,4 @@ class ImageResponse(MediaResponse):
 
 
 class VideoResponse(MediaResponse):
-    duration: int  
+    duration: int

@@ -11,6 +11,8 @@ export default [
     },
   },
   {
+    files: ['**/*.{js,jsx,ts,tsx}'],
+    ignores: [],
     rules: {
       ...eslintConfigPrettier.rules,
       'no-unused-vars': 'warn',

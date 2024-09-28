@@ -1,3 +1,4 @@
 {
-    "prettier.mode": "Auto"
+    "prettier.mode": "Auto",
+    "toolchains": []
 }

@@ -16,7 +16,6 @@ const CarouselContainer = styled.div<{ width?: string; height?: string }>`
   }
 `;
 
-// Ensures the image is centered both horizontally and vertically
 const CarouselSlide = styled.div`
   display: flex;
   justify-content: center;
@@ -50,7 +49,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ images, settings, width, 
     slidesToShow: 1,
     slidesToScroll: 1,
     autoplay: true,
-    autoplaySpeed: 3000,
+    autoplaySpeed: 3000, 
   };
 
   const carouselSettings = { ...defaultSettings, ...settings };
