@@ -1,0 +1,47 @@
+pr:
+  branches:
+    include:
+      - main
+      - develop
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  - group: ttnf
+
+stages:
+  - stage: BuildBackend
+    jobs:
+      - job: BuildBackendJob
+        steps:
+          - checkout: self
+
+          - task: Docker@2
+            inputs:
+              containerRegistry: 'ttnfdockerservice'
+              repository: 'backend'
+              command: 'build'
+              Dockerfile: 'backend/Dockerfile'
+              tags: |
+                $(Build.BuildId)
+
+  - stage: BuildFrontend
+    jobs:
+      - job: BuildFrontendJob
+        steps:
+          - checkout: self
+          - script: echo $(REACT_APP_BACKEND_URL)
+            displayName: 'Verify REACT_APP_BACKEND_URL is set'
+
+          - task: Docker@2
+            inputs:
+              containerRegistry: 'ttnfdockerservice'
+              repository: 'frontend'
+              command: 'build'
+              Dockerfile: 'frontend/Dockerfile'
+              buildArguments: |
+                REACT_APP_BACKEND_URL=$(REACT_APP_BACKEND_URL)
+                REACT_APP_TINYMCE_API_KEY=$(REACT_APP_TINYMCE_API_KEY)
+              tags: |
+                $(Build.BuildId)
