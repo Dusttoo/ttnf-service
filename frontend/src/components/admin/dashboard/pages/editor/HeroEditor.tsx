@@ -54,7 +54,7 @@ const HeroEdit: React.FC<HeroEditProps> = ({
       speed: number,
       updatedCarouselImages: HeroContent['carouselImages']
     ) => {
-      console.log("Update heroCOntent in heroEditor: ", speed, updatedCarouselImages)
+      console.log("Update hero images: ", updatedCarouselImages)
       setHeroContent((prevState) => ({
         ...prevState,
         carouselImages: updatedCarouselImages,

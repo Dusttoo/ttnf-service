@@ -167,17 +167,11 @@ const CarouselEdit: React.FC<CarouselEditProps> = ({
       src: url,
       alt: `Uploaded Image ${index + 1}`,
     }));
+    console.log("new images: ", newImages)
 
-    setCarouselImages((prevImages) => {
-      const existingUrls = prevImages.map((img) => img.src);
-      const nonDuplicateImages = newImages.filter(
-        (img) => !existingUrls.includes(img.src)
-      );
-      return [...prevImages, ...nonDuplicateImages];
-    });
+    setCarouselImages(newImages);
 
-    // Call onSaveCarousel to immediately update the parent
-    onSaveCarousel(carouselSpeed, [...carouselImages, ...newImages]);
+    onSaveCarousel(carouselSpeed, newImages);
   };
 
   const handleSpeedChange = (e: ChangeEvent<HTMLInputElement>) => {
