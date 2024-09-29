@@ -167,7 +167,6 @@ const CarouselEdit: React.FC<CarouselEditProps> = ({
       src: url,
       alt: `Uploaded Image ${index + 1}`,
     }));
-    console.log("new images: ", newImages)
 
     setCarouselImages(newImages);
 

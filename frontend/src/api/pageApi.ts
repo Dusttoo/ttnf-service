@@ -22,7 +22,6 @@ export const createPage = async (pageData: Partial<Page>): Promise<Page> => {
 };
 
 export const updatePage = async (id: string, page: Page): Promise<void> => {
-  console.log(page)
   await axiosWithTimeout.put(`/pages/${id}`, page);
 };
 
