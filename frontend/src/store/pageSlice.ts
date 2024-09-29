@@ -63,7 +63,6 @@ export const updateExistingPage = createAsyncThunk<
   { id: string; pageData: Page },
   { id: string; pageData: Page }
 >('pages/updateExistingPage', async ({ id, pageData }) => {
-  console.log("pageSlice: ", pageData)
   await updatePage(id, pageData);
   return { id, pageData };
 });

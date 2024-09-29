@@ -46,7 +46,6 @@ const HeroEdit: React.FC<HeroEditProps> = ({
   }, [page]);
 
   const handleSaveHero = () => {
-    console.log("HeroEditor HeroContent: ", heroContent)
     onSaveHero(heroContent);
   };
 
@@ -54,7 +53,6 @@ const HeroEdit: React.FC<HeroEditProps> = ({
       speed: number,
       updatedCarouselImages: HeroContent['carouselImages']
     ) => {
-      console.log("Update heroCOntent in heroEditor: ", speed, updatedCarouselImages)
       setHeroContent((prevState) => ({
         ...prevState,
         carouselImages: updatedCarouselImages,

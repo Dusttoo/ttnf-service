@@ -48,7 +48,6 @@ const Section = styled.div`
 const DogDetailPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const [dog, setDog] = useState<Dog | null>(null);
-    console.log(dog?.photos)
     useEffect(() => {
         const fetchDog = async () => {
             if (id) {

@@ -13,7 +13,6 @@ export const useDogs = (filters: SelectedFilters, page: number, pageSize: number
 };
 
 export const useFilteredDogs = (filters: SelectedFilters) => {
-    console.log("useDog filters: ", filters)
     return useQuery(['dogs', filters], () => getDogsFiltered(filters));
 };
 

@@ -13,6 +13,8 @@ import PreviewMode from './PreviewMode';
 import styled from 'styled-components';
 import LoadingSpinner from '../../../../common/LoadingSpinner';
 import ErrorComponent from '../../../../common/Error';
+import GlobalModal from '../../../../common/Modal'
+import SuccessMessage from '../../../../common/SuccessMessage'
 import HeroEdit from './HeroEditor';
 import CarouselEdit from './CarouselEditor';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -88,7 +90,7 @@ const SaveButton = styled.button`
 
 const PageEditor: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const { page, loading, error, handleSave } = usePage(id);
+  const { page, loading, error, handleSave, modalMessage, isModalOpen, setIsModalOpen, setModalMessage } = usePage(id);
   const dispatch: AppDispatch = useDispatch();
   const [isEditMode, setIsEditMode] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -108,16 +110,17 @@ const PageEditor: React.FC = () => {
   >(page?.carousel || []);
   const [carouselSpeed, setCarouselSpeed] = useState<number>(page?.customValues?.heroContent?.carouselSpeed || 5000)
 
+
   useEffect(() => {
     if (page) {
       setContent(page.content);
       setSEOSettings(page.settings?.seo || {});
       setLayoutSettings(page.settings?.layout || {});
       setAboutContent(page.customValues?.aboutContent || '');
-      setHeroCarouselImages(
-        page.customValues?.heroContent?.carouselImages || []
-      );
+      setHeroCarouselImages(page.customValues?.heroContent?.carouselImages || []);
       setStandaloneCarouselImages(page.carousel || []);
+    } else {
+      console.log("Page is undefined in useEffect");
     }
   }, [page]);
 
@@ -143,9 +146,7 @@ const PageEditor: React.FC = () => {
       carousel: standaloneCarouselImages,
     };
 
-    console.log("Updated page: ", updatedPage);
-    dispatch(updateExistingPage({ id: page.id, pageData: updatedPage }));
-    handleSave();
+    handleSave(updatedPage);
   }
 };
 
@@ -166,9 +167,7 @@ const PageEditor: React.FC = () => {
       },
     };
 
-    console.log("Hero updates in PageEditor: ", updatedPage);
-    dispatch(updateExistingPage({ id: page.id, pageData: updatedPage }));
-    handleSave();
+    handleSave(updatedPage);
   }
 };
 
@@ -248,6 +247,9 @@ const PageEditor: React.FC = () => {
           icon={isSidebarOpen ? faChevronRight : faChevronLeft}
         />
       </ToggleButton>
+      <GlobalModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+          <SuccessMessage message={modalMessage} />
+      </GlobalModal>
     </EditorContainer>
   );
 };

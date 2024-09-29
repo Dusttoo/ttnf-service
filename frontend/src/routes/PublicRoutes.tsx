@@ -60,7 +60,6 @@ const PublicRoutes = () => {
 
                 {pages.map((page) => {
                     const Component = pageComponentMap[page.slug] || DynamicPage;
-                    console.log(page.slug)
 
                     return (
                         <Route

@@ -8,6 +8,8 @@ const usePage = (slug: string | undefined) => {
     const page = useSelector((state: RootState) => state.pages.pages.find(p => p.slug === slug));
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [modalMessage, setModalMessage] = useState<string>('');
 
     useEffect(() => {
         if (!slug || page) {
@@ -30,19 +32,21 @@ const usePage = (slug: string | undefined) => {
         fetchPage();
     }, [slug, dispatch, page]);
 
-    const handleSave = async () => {
+    const handleSave = async (updatedPage: any) => {
         if (page) {
-            try {
-                await dispatch(updateExistingPage({ id: page.id, pageData: page })).unwrap();
-                alert('Page saved!');
-                setError(null);
-            } catch (err) {
-                setError('Failed to save page');
-            }
+          try {
+            await dispatch(updateExistingPage({ id: page.id, pageData: updatedPage })).unwrap();
+            setModalMessage('Page updated successfully!');
+          } catch (error) {
+            setError(`Failed to update the page: ${error && error}`);
+            setModalMessage('Failed to update the page.');
+          } finally {
+            setIsModalOpen(true);
+          }
         }
-    };
+      };
 
-    return { page, loading, error, handleSave };
+    return { page, loading, error, handleSave, modalMessage, isModalOpen, setIsModalOpen, setModalMessage };
 };
 
 export default usePage;

@@ -66,18 +66,18 @@ const PageDetailsForm: React.FC<PageDetailsFormProps> = ({ initialTitle = '', in
         if (onSubmit) {
             onSubmit(title, slug, showTitle);
         } else if (page) {
-            dispatch(updateExistingPage({
-                id: page.id,
-                pageData: {
-                    ...page,
-                    name: title,
-                    slug,
-                    customValues: {
-                        ...page.customValues,
-                        show_title: showTitle,
-                    }
-                }
-            }));
+//            dispatch(updateExistingPage({
+//                id: page.id,
+//                pageData: {
+//                    ...page,
+//                    name: title,
+//                    slug,
+//                    customValues: {
+//                        ...page.customValues,
+//                        show_title: showTitle,
+//                    }
+//                }
+//            }));
             navigate('/admin/pages');
         }
     };

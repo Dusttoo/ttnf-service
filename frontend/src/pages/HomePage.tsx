@@ -190,7 +190,6 @@ const HomePage: React.FC = () => {
     autoplaySpeed: page?.customValues?.heroContent?.carouselSpeed || 8000,
   };
 
-  console.log('Home page: ', page?.customValues?.heroContent)
   return (
     <HomePageContainer>
         {/* Announcements */}
