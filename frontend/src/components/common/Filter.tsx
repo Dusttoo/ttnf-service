@@ -9,8 +9,10 @@ import Dropdown from './form/Dropdown';
 const FilterContainer = styled.div`
   position: relative;
   display: flex;
+  flex-direction: column;
   margin: 1rem;
   width: 100%;
+  max-width: 600px;
   @media (max-width: 768px) {
     justify-content: center;
   }
@@ -19,13 +21,13 @@ const FilterContainer = styled.div`
 const DropdownButton = styled.button`
   background-color: white;
   border: 1px solid ${(props) => props.theme.colors.primary};
-  border-radius: 8px;
-  padding: 0.8rem;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  width: 250px;
+  width: 100%;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 `;
 
@@ -35,39 +37,48 @@ const DropdownContent = styled.div<{ show: boolean }>`
   background-color: white;
   border-radius: 12px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-  padding: 1.5rem;
+  padding: 1rem;
   z-index: 1;
   width: 100%;
 `;
 
 const Section = styled.div`
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 `;
 
 const SectionTitle = styled.h3`
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   color: ${(props) => props.theme.colors.primary};
-  margin-bottom: 1rem;
-`;
-
-const FilterLabel = styled.label`
-  font-size: 14px;
-  color: ${(props) => props.theme.colors.text};
 `;
 
 const CheckboxContainer = styled.div`
   display: flex;
   align-items: center;
-  margin-bottom: 1rem;
+  gap: 0.5rem;
 `;
 
 const Checkbox = styled.input`
-  margin-right: 1rem;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
+  margin-right: 0.5rem;
+  width: 16px;
+  height: 16px;
   accent-color: ${(props) => props.theme.colors.primary};
+`;
+
+const InputSelect = styled.select`
+  padding: 0.5rem;
+  width: 100%;
+  border-radius: 4px;
+  border: 1px solid ${(props) => props.theme.colors.border};
+`;
+const ButtonContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
 `;
 
 const ClearAll = styled.button`
@@ -76,19 +87,18 @@ const ClearAll = styled.button`
   font-size: 14px;
   border: none;
   cursor: pointer;
-  margin-bottom: 1rem;
-  text-align: right;
+  text-align: left;
 `;
 
 const ApplyButton = styled.button`
-  width: 100%;
-  padding: 1rem;
+  padding: 0.8rem 1.2rem;
   background-color: ${(props) => props.theme.colors.primary};
   color: ${(props) => props.theme.colors.white};
   font-weight: 600;
-  border-radius: 8px;
+  border-radius: 4px;
   cursor: pointer;
   text-align: center;
+  border: none;
 `;
 
 const FilterComponent: React.FC<FilterProps> = ({
@@ -104,7 +114,7 @@ const FilterComponent: React.FC<FilterProps> = ({
   isGenderDisabled = false,
   isColorDisabled = true,
   isDamDisabled = true,
-  isSireDisabled = true
+  isSireDisabled = true,
 }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedFilters, setSelectedFilters] = useState<SelectedFilters>({
@@ -149,15 +159,26 @@ const FilterComponent: React.FC<FilterProps> = ({
   const handleDropdownChange = (e: React.ChangeEvent<HTMLSelectElement>, type: 'sire' | 'dam') => {
     const selectedDogId = parseInt(e.target.value, 10);
     if (type === 'sire') {
-      onSireChange && onSireChange(dogs.find((dog: Dog) => dog.id === selectedDogId));
+      const selectedSire = dogs.find((dog: Dog) => dog.id === selectedDogId);
+      handleSireChange(selectedSire);
     } else if (type === 'dam') {
-      onDamChange && onDamChange(dogs.find((dog: Dog) => dog.id === selectedDogId));
+      const selectedDam = dogs.find((dog: Dog) => dog.id === selectedDogId);
+      handleDamChange(selectedDam);
     }
   };
 
+  const handleSireChange = (sire?: Dog) => {
+    setSelectedFilters((prevFilters) => ({ ...prevFilters, sire: sire ? { id: sire.id } : undefined }));
+    onSireChange && onSireChange(sire);
+  };
+
+  const handleDamChange = (dam?: Dog) => {
+    setSelectedFilters((prevFilters) => ({ ...prevFilters, dam: dam ? { id: dam.id } : undefined }));
+    onDamChange && onDamChange(dam);
+  };
+
   const handleApplyFilters = () => {
-    setShowDropdown(false); // Close the dropdown
-    // Add any additional logic to handle the filters, if needed
+    setShowDropdown(false);
   };
 
   return (
@@ -178,7 +199,7 @@ const FilterComponent: React.FC<FilterProps> = ({
                 checked={selectedFilters.status!.includes(statusOption)}
                 onChange={() => handleCheckboxChange(statusOption)}
               />
-              <FilterLabel>{statusOption}</FilterLabel>
+              <label>{statusOption}</label>
             </CheckboxContainer>
           ))}
         </Section>
@@ -193,7 +214,7 @@ const FilterComponent: React.FC<FilterProps> = ({
                 checked={selectedFilters.gender === GenderEnum.Male}
                 onChange={() => onGenderChange && onGenderChange(GenderEnum.Male)}
               />
-              <FilterLabel>Male</FilterLabel>
+              <label>Male</label>
             </CheckboxContainer>
             <CheckboxContainer>
               <Checkbox
@@ -201,7 +222,7 @@ const FilterComponent: React.FC<FilterProps> = ({
                 checked={selectedFilters.gender === GenderEnum.Female}
                 onChange={() => onGenderChange && onGenderChange(GenderEnum.Female)}
               />
-              <FilterLabel>Female</FilterLabel>
+              <label>Female</label>
             </CheckboxContainer>
           </Section>
         )}
@@ -210,12 +231,18 @@ const FilterComponent: React.FC<FilterProps> = ({
         {!isSireDisabled && (
           <Section>
             <SectionTitle>Sire</SectionTitle>
-            <Dropdown
+            <InputSelect
               name="sire"
-              options={dogs.filter((dog: Dog) => dog.gender.toLowerCase() === 'male').map((dog: Dog) => dog.name)}
               value={selectedFilters.sire?.id.toString() || ''}
               onChange={(e) => handleDropdownChange(e, 'sire')}
-            />
+            >
+              <option value="">Select Sire</option>
+              {dogs.filter((dog: Dog) => dog.gender.toLowerCase() === 'male').map((dog: Dog) => (
+                <option key={dog.id} value={dog.id}>
+                  {dog.name}
+                </option>
+              ))}
+            </InputSelect>
           </Section>
         )}
 
@@ -223,12 +250,18 @@ const FilterComponent: React.FC<FilterProps> = ({
         {!isDamDisabled && (
           <Section>
             <SectionTitle>Dam</SectionTitle>
-            <Dropdown
+            <InputSelect
               name="dam"
-              options={dogs.filter((dog: Dog) => dog.gender.toLowerCase() === 'female').map((dog: Dog) => dog.name)}
               value={selectedFilters.dam?.id.toString() || ''}
               onChange={(e) => handleDropdownChange(e, 'dam')}
-            />
+            >
+              <option value="">Select Dam</option>
+              {dogs.filter((dog: Dog) => dog.gender.toLowerCase() === 'female').map((dog: Dog) => (
+                <option key={dog.id} value={dog.id}>
+                  {dog.name}
+                </option>
+              ))}
+            </InputSelect>
           </Section>
         )}
 
@@ -236,15 +269,20 @@ const FilterComponent: React.FC<FilterProps> = ({
         {!isColorDisabled && (
           <Section>
             <SectionTitle>Color</SectionTitle>
-            <select onChange={(e) => onColorChange && onColorChange(e.target.value)} value={selectedFilters.color}>
+            <InputSelect
+              onChange={(e) => onColorChange && onColorChange(e.target.value)}
+              value={selectedFilters.color}
+            >
               <option value="">Select Color</option>
-              {/* Populate with color options */}
-            </select>
+              {/* Add color options here */}
+            </InputSelect>
           </Section>
         )}
 
-        <ClearAll onClick={handleClearAll}>Clear All</ClearAll>
-        <ApplyButton onClick={handleApplyFilters}>Apply Filters</ApplyButton>
+        <ButtonContainer>
+          <ClearAll onClick={handleClearAll}>Clear All</ClearAll>
+          <ApplyButton onClick={handleApplyFilters}>Apply Filters</ApplyButton>
+        </ButtonContainer>
       </DropdownContent>
     </FilterContainer>
   );
