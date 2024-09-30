@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { Modal, Pagination, Carousel } from 'react-bootstrap';
 import { Photo } from '../../api/types/dog';
+import ImageCarousel from './ImageCarousel'
+import GlobalModal from './Modal'
+import Pagination from './Pagination';
+import NoResults from './NoResults'
+
 
 interface ImageGalleryProps {
     images: Photo[];
@@ -38,6 +42,10 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
     const [imagesPerPage] = useState(9);
     const [showModal, setShowModal] = useState(false);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const carouselImages = images.map((image) => (
+        {id: image.id, src: image.photoUrl, alt: image.alt}
+    ))
+    const [itemsPerPage, setItemsPerPage] = useState(10);
 
     const indexOfLastImage = currentPage * imagesPerPage;
     const indexOfFirstImage = indexOfLastImage - imagesPerPage;
@@ -52,7 +60,10 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
 
     const handleCloseModal = () => setShowModal(false);
 
-    const handlePageChange = (pageNumber: number) => setCurrentPage(pageNumber);
+    const handlePageChange = (page: number, newItemsPerPage: number) => {
+        setCurrentPage(page);
+        setItemsPerPage(newItemsPerPage);
+      };
 
     return (
         <>
@@ -65,32 +76,20 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
                         onClick={() => handleClick(index + indexOfFirstImage)}
                     />
                 ))}
+                {!images.length && <NoResults message={"No images at the moment"} description={"Please check back later for updated photos"}/>}
             </GalleryContainer>
-            <PaginationContainer>
-                <Pagination>
-                    {[...Array(totalPages)].map((_, i) => (
-                        <Pagination.Item
-                            key={i}
-                            active={i + 1 === currentPage}
-                            onClick={() => handlePageChange(i + 1)}
-                        >
-                            {i + 1}
-                        </Pagination.Item>
-                    ))}
-                </Pagination>
-            </PaginationContainer>
+            {images.length > 0 &&
+                <Pagination
+                totalItems={images?.length || 0}
+                currentPage={currentPage}
+                itemsPerPage={itemsPerPage}
+                onPageChange={handlePageChange}
+              />
+            }
 
-            <Modal show={showModal} onHide={handleCloseModal} centered>
-                <Modal.Body>
-                    <Carousel activeIndex={currentImageIndex} onSelect={setCurrentImageIndex}>
-                        {images.map((image, index) => (
-                            <Carousel.Item key={index}>
-                                <img className="d-block w-100" src={image.photoUrl} alt={`${image.alt}`} />
-                            </Carousel.Item>
-                        ))}
-                    </Carousel>
-                </Modal.Body>
-            </Modal>
+            <GlobalModal isOpen={showModal} onClose={handleCloseModal}>
+                    <ImageCarousel images={carouselImages} />
+            </GlobalModal>
         </>
     );
 };
