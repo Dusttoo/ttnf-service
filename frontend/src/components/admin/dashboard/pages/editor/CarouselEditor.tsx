@@ -202,6 +202,18 @@ const CarouselEdit: React.FC<CarouselEditProps> = ({
     onSaveCarousel(carouselSpeed, updatedImages);
   };
 
+  const handleAltTextChange = (e: ChangeEvent<HTMLInputElement>, index: number) => {
+    const newImages = [...carouselImages];
+    newImages[index] = {
+      ...newImages[index],
+      alt: e.target.value,
+    };
+    setCarouselImages(newImages);
+
+    // Call onSaveCarousel to update the parent immediately
+    onSaveCarousel(carouselSpeed, newImages);
+  };
+
   return (
     <CarouselEditContainer ref={contentAreaRef}>
       <h3>Edit Carousel</h3>
@@ -237,7 +249,7 @@ const CarouselEdit: React.FC<CarouselEditProps> = ({
                 <Input
                   type="text"
                   value={image.alt}
-                  onChange={(e) => handlePositionChange(e, index)}
+                  onChange={(e) => handleAltTextChange(e, index)}
                   placeholder="Alt Text"
                   label="Alt Text"
                 />
