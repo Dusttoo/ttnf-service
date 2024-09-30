@@ -15,7 +15,7 @@ const Tile = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  max-width: 700px;
+  max-width: 500px;
   width: 100%;
   height: auto;
   flex-direction: column;
@@ -50,8 +50,8 @@ const Image = styled.img`
   top: 0;
   left: 0;
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  max-height: 100%;
+  object-fit: contain;
   object-position: center;
   border-radius: 8px 8px 0 0;
 `;

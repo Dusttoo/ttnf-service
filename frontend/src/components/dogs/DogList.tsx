@@ -123,6 +123,8 @@ const DogList: React.FC<{ defaultGender?: GenderEnum | undefined, owned?: boolea
     itemsPerPage
   );
 
+  console.log("loading: ", effectiveStatus)
+
   const handlePageChange = (page: number, newItemsPerPage: number) => {
     setCurrentPage(page);
     setItemsPerPage(newItemsPerPage);
@@ -143,6 +145,10 @@ const DogList: React.FC<{ defaultGender?: GenderEnum | undefined, owned?: boolea
   const handleDamChange = (dam?: Dog) => {
     setFilters((prevFilters) => ({ ...prevFilters, dam }));
   };
+
+  const handleTabChange = (selectedTab: 'active' | 'retired') => {
+    setSelectedTab(selectedTab)
+  }
 
   if (isLoading) return <LoadingSpinner />;
 
@@ -175,14 +181,18 @@ const DogList: React.FC<{ defaultGender?: GenderEnum | undefined, owned?: boolea
 
       <Section>
         <SectionTitle>{selectedTab === 'active' ? 'Active Dogs' : 'Retired Dogs'}</SectionTitle>
-        <ListContainer>
+        {!isLoading ?
+          <ListContainer>
             {dogsData?.items.map((dog: Dog) => (
               <DogTile key={dog.id} dog={dog} />
             ))}
             {dogsData?.items.length === 0 &&
             <NoResults />
             }
-        </ListContainer>
+        </ListContainer> :
+        <LoadingSpinner />
+        }
+
         <Pagination
           totalItems={dogsData?.total || 0}
           currentPage={currentPage}
