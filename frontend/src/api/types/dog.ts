@@ -156,8 +156,8 @@ export interface FilterProps {
     onColorChange?: (color: string) => void;
     gender?: GenderEnum;
     status?: StatusEnum[];
-    sire?: Dog;
-    dam?: Dog;
+    sire?: { id: number };
+    dam?: { id: number };
     color?: string;
     isGenderDisabled?: boolean;
     isSireDisabled?: boolean;
@@ -168,8 +168,8 @@ export interface FilterProps {
 export interface SelectedFilters {
     gender?: GenderEnum;
     status?: StatusEnum[];
-    sire?: Dog;
-    dam?: Dog;
+    sire?: { id: number };
+    dam?: { id: number };
     color?: string;
     owned?: boolean;
 }

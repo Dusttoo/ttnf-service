@@ -7,6 +7,7 @@ import LoadingSpinner from '../common/LoadingSpinner';
 import { GenderEnum, StatusEnum } from '../../api/types/core';
 import { SelectedFilters, Dog } from '../../api/types/dog';
 import FilterComponent from '../common/Filter';
+import NoResults from '../common/NoResults'
 
 // Styled containers
 const ListContainer = styled.div`
@@ -101,22 +102,20 @@ const DogList: React.FC<{ defaultGender?: GenderEnum | undefined, owned?: boolea
   const [selectedTab, setSelectedTab] = useState<'active' | 'retired'>('active');
 
   const [filters, setFilters] = useState<SelectedFilters>({
-    status: [], // User-selected status filters (without Active or Retired)
+    status: [],
     color: '',
     sire: undefined,
     dam: undefined,
   });
 
-  // Compute the effective status based on the tab and user-selected statuses
   const effectiveStatus = selectedTab === 'active'
     ? [...(filters.status ?? []).filter((status) => status !== StatusEnum.Retired), StatusEnum.Active]
     : [...(filters.status ?? []).filter((status) => status !== StatusEnum.Active), StatusEnum.Retired];
 
-  // Fetch dogs based on the effective status and other filters
   const { data: dogsData, isLoading } = useDogs(
     {
       ...filters,
-      status: effectiveStatus, // Use the computed effective status here
+      status: effectiveStatus,
       owned,
       gender: defaultGender,
     },
@@ -129,7 +128,6 @@ const DogList: React.FC<{ defaultGender?: GenderEnum | undefined, owned?: boolea
     setItemsPerPage(newItemsPerPage);
   };
 
-  // Handlers for each filter type
   const handleStatusChange = (status: StatusEnum[]) => {
     setFilters((prevFilters) => ({ ...prevFilters, status }));
   };
@@ -178,9 +176,12 @@ const DogList: React.FC<{ defaultGender?: GenderEnum | undefined, owned?: boolea
       <Section>
         <SectionTitle>{selectedTab === 'active' ? 'Active Dogs' : 'Retired Dogs'}</SectionTitle>
         <ListContainer>
-          {dogsData?.items.map((dog: Dog) => (
-            <DogTile key={dog.id} dog={dog} />
-          ))}
+            {dogsData?.items.map((dog: Dog) => (
+              <DogTile key={dog.id} dog={dog} />
+            ))}
+            {dogsData?.items.length === 0 &&
+            <NoResults />
+            }
         </ListContainer>
         <Pagination
           totalItems={dogsData?.total || 0}
