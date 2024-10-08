@@ -1,9 +1,10 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router-dom';
 import { Dog } from '../../api/types/dog';
+import {GenderEnum} from '../../api/types/core'
 import { StatusBadge } from '../common/StatusBadge';
-import { LinkComponent } from '../common/Link'
+import { LinkComponent } from '../common/Link';
 
 const Tile = styled.div`
   background-color: ${(props) => props.theme.colors.secondaryBackground};
@@ -19,7 +20,6 @@ const Tile = styled.div`
   width: 100%;
   height: auto;
   flex-direction: column;
-
 
   &:hover {
     transform: scale(1.05);
@@ -66,7 +66,6 @@ const Info = styled.div`
   overflow: hidden;
   text-overflow: ellipsis;
   width: 95%;
-
 
   @media (max-width: 768px) {
     padding: 0.5rem;
@@ -137,11 +136,14 @@ const DogTile: React.FC<{ dog: Dog }> = ({ dog }) => {
         return 'black';
     }
   };
+  const slug = dog.gender === GenderEnum.Male ? 'males' : 'females'
 
   return (
     <Tile>
       <ImageContainer>
-        <LinkComponent to={`/dogs/${dog.id}`}>
+        <LinkComponent
+          to={`/dogs/${dog.name.split(' ').join('-')}?id=${dog.id}`}
+        >
           <Image src={dog.profilePhoto} alt={dog.name} />
         </LinkComponent>
       </ImageContainer>
@@ -155,15 +157,25 @@ const DogTile: React.FC<{ dog: Dog }> = ({ dog }) => {
           {dog.description && <Description>{dog.description}</Description>}
           {dog.pedigreeLink && (
             <Detail>
-              <LinkComponent to={dog.pedigreeLink} target="_blank" rel="noopener noreferrer">
+              <LinkComponent
+                to={dog.pedigreeLink}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 Pedigree Link
               </LinkComponent>
             </Detail>
           )}
-          <ViewProfileLink to={`/dogs/${dog.id}`}>View Profile</ViewProfileLink>
+          <ViewProfileLink
+            to={`/${slug}/${dog.name.split(' ').join('-')}?id=${dog.id}`}
+          >
+            View Profile
+          </ViewProfileLink>
           {dog.status && (
             <StatusContainer>
-              <StatusBadge color={getStatusColor(dog.status)}>{dog.status}</StatusBadge>
+              <StatusBadge color={getStatusColor(dog.status)}>
+                {dog.status}
+              </StatusBadge>
             </StatusContainer>
           )}
         </div>

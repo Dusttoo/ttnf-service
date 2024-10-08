@@ -56,7 +56,10 @@ const PublicRoutes = () => {
                 <Route path="/" element={<Navigate to="/landing" />} />
 
                 <Route path="/login" element={<Login />} />
-                <Route path="/dogs/:id" element={<DogDetailPage />} />
+                <Route path="/dogs/:name" element={<DogDetailPage />} />
+                <Route path="/males/:name" element={<DogDetailPage />} />
+                <Route path="/females/:name" element={<DogDetailPage />} />
+
 
                 {pages.map((page) => {
                     const Component = pageComponentMap[page.slug] || DynamicPage;
