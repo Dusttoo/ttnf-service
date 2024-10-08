@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { getDogById } from '../../api/dogApi';
 import { Dog } from '../../api/types/dog';
 import styled from 'styled-components';
@@ -46,60 +46,87 @@ const Section = styled.div`
 `;
 
 const DogDetailPage: React.FC = () => {
-    const { id } = useParams<{ id: string }>();
-    const [dog, setDog] = useState<Dog | null>(null);
-    useEffect(() => {
-        const fetchDog = async () => {
-            if (id) {
-                const data = await getDogById(parseInt(id));
-                setDog(data);
-            }
-        };
-        fetchDog();
-    }, [id]);
-
-    if (!dog) return <LoadingSpinner/>;
-
-    const getStatusColor = (status: string): string => {
-        switch (status) {
-            case 'available':
-                return 'green';
-            case 'sold':
-                return 'gray';
-            case 'stud':
-                return 'blue';
-            case 'retired':
-                return 'red';
-            default:
-                return 'black';
-        }
+  const { name } = useParams<{ name: string }>();
+  const [searchParams] = useSearchParams();
+  const [dog, setDog] = useState<Dog | null>(null);
+  useEffect(() => {
+    const fetchDog = async () => {
+      if (name) {
+        const id = searchParams.get('id') || '0';
+        const data = await getDogById(parseInt(id));
+        console.log('data: ', data);
+        setDog(data);
+      }
     };
+    fetchDog();
+  }, [name]);
 
-    return (
-        <DogDetailContainer>
-            <Header>{dog.name}</Header>
-            <ImageContainer>
-                <Image src={dog.profilePhoto} alt={dog.name} />
-            </ImageContainer>
-            <Section>
-                {dog.status && <StatusBadge color={getStatusColor(dog.status)}>{dog.status}</StatusBadge>}
-                <Detail><strong>Age:</strong> {dog.dob}</Detail>
-                <Detail><strong>Gender:</strong> {dog.gender}</Detail>
-                <Detail><strong>Color:</strong> {dog.color}</Detail>
-                {dog.studFee && <Detail><strong>Stud Fee:</strong> ${dog.studFee}</Detail>}
-                {dog.saleFee && <Detail><strong>Sale Fee:</strong> ${dog.saleFee}</Detail>}
-                <Detail><strong>Description:</strong> {dog.description}</Detail>
-                {dog.pedigreeLink && (
-                    <Detail>
-                        <a href={dog.pedigreeLink} target="_blank" rel="noopener noreferrer">
-                            Pedigree Link
-                        </a>
-                    </Detail>
-                )}
-                <ImageGallery images={dog.photos} />
-            </Section>
-        </DogDetailContainer>
-    );
+  if (!dog) return <LoadingSpinner />;
+
+  const getStatusColor = (status: string): string => {
+    switch (status) {
+      case 'available':
+        return 'green';
+      case 'sold':
+        return 'gray';
+      case 'stud':
+        return 'blue';
+      case 'retired':
+        return 'red';
+      default:
+        return 'black';
+    }
+  };
+
+  return (
+    <DogDetailContainer>
+      <Header>{dog.name}</Header>
+      <ImageContainer>
+        <Image src={dog.profilePhoto} alt={dog.name} />
+      </ImageContainer>
+      <Section>
+        {dog.status && (
+          <StatusBadge color={getStatusColor(dog.status)}>
+            {dog.status}
+          </StatusBadge>
+        )}
+        <Detail>
+          <strong>Age:</strong> {dog.dob}
+        </Detail>
+        <Detail>
+          <strong>Gender:</strong> {dog.gender}
+        </Detail>
+        <Detail>
+          <strong>Color:</strong> {dog.color}
+        </Detail>
+        {dog.studFee && (
+          <Detail>
+            <strong>Stud Fee:</strong> ${dog.studFee}
+          </Detail>
+        )}
+        {dog.saleFee && (
+          <Detail>
+            <strong>Sale Fee:</strong> ${dog.saleFee}
+          </Detail>
+        )}
+        <Detail>
+          <strong>Description:</strong> {dog.description}
+        </Detail>
+        {dog.pedigreeLink && (
+          <Detail>
+            <a
+              href={dog.pedigreeLink}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Pedigree Link
+            </a>
+          </Detail>
+        )}
+        <ImageGallery images={dog.photos} />
+      </Section>
+    </DogDetailContainer>
+  );
 };
 
 export default DogDetailPage;
