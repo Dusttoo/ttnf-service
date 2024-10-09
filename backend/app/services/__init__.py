@@ -7,3 +7,4 @@ from app.services.image_service import MediaService
 from app.services.search_service import search_resources
 from app.services.page_service import PageService
 from app.services.navigation_service import NavigationService
+from app.services.services_service import ServicesService
