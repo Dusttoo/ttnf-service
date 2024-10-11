@@ -15,7 +15,8 @@ from app.schemas import (
     TagResponse,
     ServiceCategoryResponse,
     ServiceResponse,
-    ServiceListResponse)
+    ServiceListResponse,
+    ServiceStatus)
 from app.models import Dog, Litter, Breeding, Production, NavLink, Announcement, Page, Tag, ServiceCategory, Service
 import json
 from typing import Union, Dict, Any, List
@@ -228,18 +229,21 @@ def convert_to_service_category_schema(category: ServiceCategory) -> ServiceCate
     )
 
 def convert_to_service_schema(service: Service) -> ServiceResponse:
-    shipping_info = None
-    if service.shipping_info:
-        shipping_info = convert_to_shipping_info_schema(service.shipping_info)
+    # shipping_info = None
+    # if service.shipping_info:
+    #     shipping_info = convert_to_shipping_info_schema(service.shipping_info)
 
     tags = [convert_to_tag_schema(tag) for tag in service.tags] if service.tags else []
 
+    availability = service.availability.value
+
+    print(f'\n\nAvailability in schema: {availability}')
     return ServiceResponse(
         id=service.id,
         name=service.name,
         description=service.description,
         price=service.price,
-        availability=service.availability,
+        availability=availability,
         cta_name=service.cta_name,
         cta_link=service.cta_link,
         disclaimer=service.disclaimer,

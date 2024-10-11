@@ -2,18 +2,7 @@ from typing import List, Optional
 from datetime import datetime
 from pydantic import BaseModel
 from enum import Enum
-
-
-class ServiceStatus(str, Enum):
-    AVAILABLE = "Available"
-    LIMITED = "Limited"
-    OUT_OF_STOCK = "Out of Stock"
-
-
-class ShippingType(str, Enum):
-    STANDARD = "Standard"
-    EXPRESS = "Express"
-    OVERNIGHT = "Overnight"
+from app.models import ServiceStatus, ShippingType
 
 
 class TagBase(BaseModel):

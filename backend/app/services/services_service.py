@@ -217,11 +217,7 @@ class ServicesService:
 
     async def create_service(self, service_data: ServiceCreate, db: AsyncSession) -> ServiceResponse:
         """Create a new service."""
-        new_service = Service(**service_data.dict(exclude={"availability"}))
-
-        if service_data.availability:
-            # Map Pydantic enum to SQLAlchemy enum (ServiceStatus)
-            new_service.availability = ServiceStatus[service_data.availability.name]
+        new_service = Service(**service_data.dict())
 
         if service_data.category_id:
             category_query = select(ServiceCategory).filter(ServiceCategory.id == service_data.category_id)
@@ -239,9 +235,18 @@ class ServicesService:
 
         db.add(new_service)
         await db.commit()
+
         await db.refresh(new_service)
 
-        return convert_to_service_schema(new_service)
+        service_query = select(Service).filter(Service.id == new_service.id).options(
+            selectinload(Service.category),
+            selectinload(Service.tags)
+        )
+
+        result = await db.execute(service_query)
+        loaded_service = result.scalars().first()
+
+        return convert_to_service_schema(loaded_service)
 
     async def update_service(self, service_id: int, service_data: ServiceCreate, db: AsyncSession) -> ServiceResponse:
         """Update an existing service."""

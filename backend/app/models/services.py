@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, Enum, Text, DateTime, Float, Table, ForeignKey
+from sqlalchemy import Column, Integer, String, Enum as SAEnum, Boolean, Enum, Text, DateTime, Float, Table, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
@@ -7,7 +7,7 @@ import enum
 Base = declarative_base()
 
 # Enums for availability and shipping type
-class ServiceStatus(enum.Enum):
+class ServiceStatus(str, enum.Enum):
     AVAILABLE = "Available"
     LIMITED = "Limited"
     OUT_OF_STOCK = "Out of Stock"
@@ -49,14 +49,14 @@ class Service(Base):
     name = Column(String(150), nullable=False)
     description = Column(Text, nullable=False)
     price = Column(String(50))
-    availability = Column(Enum(ServiceStatus), default=ServiceStatus.AVAILABLE)
+    availability = Column(SAEnum(ServiceStatus), default=ServiceStatus.AVAILABLE)
     cta_name = Column(String(100))
     cta_link = Column(String(250))
     disclaimer = Column(Text)
 
     eta = Column(DateTime, default=None)
     estimated_price = Column(String(50))
-    shipping_type = Column(Enum(ShippingType))
+    shipping_type = Column(SAEnum(ShippingType))
 
     image = Column(String(250))
     category_id = Column(Integer, ForeignKey('service_categories.id'))
