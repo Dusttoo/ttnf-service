@@ -6,3 +6,4 @@ from app.schemas.global_schema import PaginatedResponse, WebsiteSettingsSchema, 
 from app.schemas.search_schema import DogOut, ProductionOut, BreedingOut, LitterOut, SearchResponse, SearchResult
 from app.schemas.page_schema import PageCreate, Page, PageUpdate, Author, IMeta, Translation, AnnouncementType, Announcement
 from app.schemas.navigation_schema import NavLink, NavLinkUpdate, NavLinkCreate
+from app.schemas.service_schema import ServiceStatus, ShippingType, TagCreate, TagResponse, ServiceCategoryCreate, ServiceCategoryResponse, ShippingInfo, ServiceCreate, ServiceResponse, ServiceListResponse 

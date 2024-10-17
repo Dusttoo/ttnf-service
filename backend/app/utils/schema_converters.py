@@ -11,11 +11,15 @@ from app.schemas import (
     Author,
     IMeta,
     Translation,
-    Announcement as AnnouncementSchema
-)
-from app.models import Dog, Litter, Breeding, Production, NavLink, Announcement, Page
+    Announcement as AnnouncementSchema,
+    TagResponse,
+    ServiceCategoryResponse,
+    ServiceResponse,
+    ServiceListResponse,
+    ServiceStatus)
+from app.models import Dog, Litter, Breeding, Production, NavLink, Announcement, Page, Tag, ServiceCategory, Service
 import json
-from typing import Union, Dict, Any
+from typing import Union, Dict, Any, List
 import logging
 from uuid import UUID
 from datetime import datetime
@@ -126,10 +130,6 @@ def convert_to_navigation_schema(navigation: NavLink) -> NavLinkSchema:
         position=navigation.position,
     )
 
-from typing import Union
-from datetime import datetime
-import json
-
 def convert_to_page_schema(page: Union[Page, dict]) -> PageSchema:
     content = page["content"] if isinstance(page, dict) else page.content
     if isinstance(content, str):
@@ -212,4 +212,50 @@ def convert_to_page_schema(page: Union[Page, dict]) -> PageSchema:
         updated_at=page["updated_at"] if isinstance(page, dict) else (page.updated_at.isoformat() if page.updated_at else None),
         announcements=announcements,
         carousel_images=carousel_images
+    )
+
+def convert_to_tag_schema(tag: Tag) -> TagResponse:
+    return TagResponse(
+        id=tag.id,
+        name=tag.name,
+    )
+
+def convert_to_service_category_schema(category: ServiceCategory) -> ServiceCategoryResponse:
+    return ServiceCategoryResponse(
+        id=category.id,
+        name=category.name,
+        display=category.display,
+        position=category.position,
+    )
+
+def convert_to_service_schema(service: Service) -> ServiceResponse:
+    # shipping_info = None
+    # if service.shipping_info:
+    #     shipping_info = convert_to_shipping_info_schema(service.shipping_info)
+
+    tags = [convert_to_tag_schema(tag) for tag in service.tags] if service.tags else []
+
+    availability = service.availability.value
+
+    print(f'\n\nAvailability in schema: {availability}')
+    return ServiceResponse(
+        id=service.id,
+        name=service.name,
+        description=service.description,
+        price=service.price,
+        availability=availability,
+        cta_name=service.cta_name,
+        cta_link=service.cta_link,
+        disclaimer=service.disclaimer,
+        eta=service.eta,
+        estimated_price=service.estimated_price,
+        shipping_type=service.shipping_type,
+        image=service.image,
+        tags=tags,
+        category=convert_to_service_category_schema(service.category) if service.category else None,
+    )
+
+def convert_to_service_list_schema(services: List[Service]) -> ServiceListResponse:
+    return ServiceListResponse(
+        services=[convert_to_service_schema(service) for service in services]
     )

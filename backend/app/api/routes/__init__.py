@@ -10,3 +10,4 @@ from app.api.routes.search_routes import search_router
 from app.api.routes.user_routes import user_router
 from app.api.routes.utils import utils_router
 from app.api.routes.website_settings_routes import settings_router
+from app.api.routes.service_routes import service_router

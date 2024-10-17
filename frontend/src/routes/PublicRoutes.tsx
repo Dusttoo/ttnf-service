@@ -19,6 +19,7 @@ import ContactPage from "../pages/ContactPage";
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import ErrorComponent from "../components/common/Error";
 import HomePage from '../pages/HomePage';
+import ServicesPage from '../pages/services/ServicesPage'
 
 const PublicRoutes = () => {
     const dispatch: AppDispatch = useDispatch();
@@ -46,6 +47,7 @@ const PublicRoutes = () => {
         productions: ProductionsPage,
         about: AboutPage,
         contact: ContactPage,
+        services: ServicesPage
     };
 
     return (

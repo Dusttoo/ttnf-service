@@ -1,4 +1,5 @@
 {
     "prettier.mode": "Auto",
-    "toolchains": []
+    "toolchains": [],
+    "nodejs.typescript.rebuildOnChanges": true
 }
