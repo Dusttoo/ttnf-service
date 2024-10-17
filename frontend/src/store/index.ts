@@ -9,6 +9,7 @@ import searchReducer from './searchSlice';
 import navigationReducer from './navigationSlice';
 import editModeReducer from './editModeSlice';
 import authReducer from './authSlice';
+import serviceReducer from './serviceSlice'
 
 const store = configureStore({
     reducer: {
@@ -22,6 +23,7 @@ const store = configureStore({
         search: searchReducer,
         navigation: navigationReducer,
         editMode: editModeReducer,
+        services: serviceReducer,
     },
 });
 

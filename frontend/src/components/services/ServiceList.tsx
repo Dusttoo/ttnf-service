@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
+import { useServices } from '../../hooks/useService';
 import ServiceCard from './ServiceCard';
 
 const ServiceListContainer = styled.div`
@@ -17,67 +18,54 @@ const CategoryHeader = styled.h2`
   margin: 2rem 0;
 `;
 
-const services = [
-  {
-    category: "Repro Services",
-    items: [
-      {
-        name: "Semen collection for analysis only",
-        description: "Complete semen collection for analysis purposes.",
-        price: "$30",
-        availability: "Available",
-        ctaName: "Book Now",
-        ctaLink: "/services/book/semen-analysis",
-        disclaimer: "Contact us for further information."
-      },
-      {
-        name: "Semen collection w/ AI and analysis",
-        description: "Semen collection combined with AI and analysis.",
-        price: "$50",
-        availability: "Available",
-        ctaName: "Book Now",
-        ctaLink: "/services/book/semen-ai",
-        disclaimer: "Please ensure your pet is in good health before booking."
-      },
-      {
-        name: "Semen packaging for shipment",
-        description: "Packaging semen with optional box for shipment.",
-        price: "$75 with box",
-        availability: "Limited",
-        ctaName: "Order Now",
-        ctaLink: "/services/order/semen-shipment",
-        disclaimer: "Shipment availability depends on region."
-      },
-      // Add more services...
-    ]
-  },
-  // Add more categories...
-];
+interface ServicesListProps {
+    page: number;
+    pageSize: number;
+    onTotalItemsChange: (total: number) => void;
+}
 
-const ServicesList: React.FC = () => {
-  return (
-    <div>
-      {services.map((serviceCategory) => (
-        <div key={serviceCategory.category}>
-          <CategoryHeader>{serviceCategory.category}</CategoryHeader>
-          <ServiceListContainer>
-            {serviceCategory.items.map((service, index) => (
-              <ServiceCard
-                key={index}
-                name={service.name}
-                description={service.description}
-                price={service.price}
-                availability={service.availability}
-                ctaName={service.ctaName}
-                ctaLink={service.ctaLink}
-                disclaimer={service.disclaimer}
-              />
-            ))}
-          </ServiceListContainer>
+const ServicesList: React.FC<ServicesListProps> = ({ page, pageSize, onTotalItemsChange }) => {
+    const { data: services, isLoading, error } = useServices(page, pageSize);
+
+    useEffect(() => {
+        if (services) {
+            onTotalItemsChange(services.length);
+        }
+    }, [services, onTotalItemsChange]);
+
+    if (isLoading) return <p>Loading services...</p>;
+    if (error) return <p>Error loading services.</p>;
+
+    const groupedServices = services?.reduce((acc: Record<string, typeof services>, service) => {
+        const category = service.category?.name || 'Uncategorized';
+        acc[category] = acc[category] ? [...acc[category], service] : [service];
+        return acc;
+    }, {});
+
+    return (
+        <div>
+            {groupedServices &&
+                Object.keys(groupedServices).map((category) => (
+                    <div key={category}>
+                        <CategoryHeader>{category}</CategoryHeader>
+                        <ServiceListContainer>
+                            {groupedServices[category].map((service) => (
+                                <ServiceCard
+                                    key={service.id}
+                                    name={service.name}
+                                    description={service.description}
+                                    price={service.price || ''}
+                                    availability={service.availability}
+                                    ctaName={service.cta_name || 'Learn More'}
+                                    ctaLink={service.cta_link || '#'}
+                                    disclaimer={service.disclaimer}
+                                />
+                            ))}
+                        </ServiceListContainer>
+                    </div>
+                ))}
         </div>
-      ))}
-    </div>
-  );
+    );
 };
 
 export default ServicesList;

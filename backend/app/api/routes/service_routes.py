@@ -2,13 +2,15 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.schemas import ServiceStatus, ShippingType, TagCreate, TagResponse, ServiceCategoryCreate, ServiceCategoryResponse, ShippingInfo, ServiceCreate, ServiceResponse, ServiceListResponse
+from app.schemas import ServiceStatus, ShippingType, TagCreate, TagResponse, ServiceCategoryCreate, \
+    ServiceCategoryResponse, ShippingInfo, ServiceCreate, ServiceResponse, ServiceListResponse
 from app.services import ServicesService
 from app.core import get_database_session
 from app.utils import NotFoundError
 
 service_router = APIRouter()
 services_service = ServicesService()
+
 
 # Routes for Tags
 @service_router.get("/tags", response_model=List[TagResponse])
@@ -60,6 +62,7 @@ async def delete_tag(tag_id: int, db: AsyncSession = Depends(get_database_sessio
     await services_service.delete_tag(tag_id, db)
     return
 
+
 @service_router.get("/categories", response_model=List[ServiceCategoryResponse])
 async def get_all_categories(db: AsyncSession = Depends(get_database_session)):
     """Route to get all categories."""
@@ -109,63 +112,15 @@ async def delete_category(category_id: int, db: AsyncSession = Depends(get_datab
     await services_service.delete_category(category_id, db)
     return
 
-# @service_router.get("/shipping-info/{service_id}", response_model=ShippingInfo)
-# async def get_shipping_info_by_service_id(service_id: int, db: AsyncSession = Depends(get_database_session)):
-#     """Route to get shipping information for a specific service."""
-#     shipping_info = await services_service.get_shipping_info_by_service_id(service_id, db)
-#     if not shipping_info:
-#         raise NotFoundError(name="Shipping Info", message=f"No shipping information found for service ID {service_id}")
-#     return shipping_info
-#
-#
-# @service_router.get("/shipping-info", response_model=List[ShippingInfo])
-# async def get_all_shipping_info_options(db: AsyncSession = Depends(get_database_session)):
-#     """Route to get all available shipping options."""
-#     shipping_info_options = await services_service.get_shipping_info_options(db)
-#     return shipping_info_options
-#
-#
-# @service_router.post("/shipping-info", response_model=ShippingInfo)
-# async def create_shipping_info(
-#     shipping_info_create: ShippingInfoCreate, db: AsyncSession = Depends(get_database_session)
-# ):
-#     """Route to create new shipping information."""
-#     try:
-#         new_shipping_info = await services_service.create_shipping_info(shipping_info_create, db)
-#         return new_shipping_info
-#     except Exception as e:
-#         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
-#
-#
-# @service_router.put("/shipping-info/{shipping_info_id}", response_model=ShippingInfo)
-# async def update_shipping_info(
-#     shipping_info_id: int, shipping_info_update: ShippingInfoCreate, db: AsyncSession = Depends(get_database_session)
-# ):
-#     """Route to update existing shipping information."""
-#     shipping_info = await services_service.update_shipping_info(shipping_info_id, shipping_info_update, db)
-#     if not shipping_info:
-#         raise NotFoundError(name="Shipping Info", message=f"Shipping information with id {shipping_info_id} not found")
-#     return shipping_info
-#
-#
-# @service_router.delete("/shipping-info/{shipping_info_id}", status_code=status.HTTP_204_NO_CONTENT)
-# async def delete_shipping_info(shipping_info_id: int, db: AsyncSession = Depends(get_database_session)):
-#     """Route to delete shipping information."""
-#     shipping_info = await services_service.get_shipping_info_by_service_id(shipping_info_id, db)
-#     if not shipping_info:
-#         raise NotFoundError(name="Shipping Info", message=f"Shipping information with id {shipping_info_id} not found")
-#
-#     await services_service.delete_shipping_info(shipping_info_id, db)
-#     return
 
-@service_router.get("/services", response_model=ServiceListResponse)
+@service_router.get("/", response_model=ServiceListResponse)
 async def get_all_services(db: AsyncSession = Depends(get_database_session)):
     """Route to get a list of all services."""
     services = await services_service.get_all_services(db)
     return services
 
 
-@service_router.get("/services/{service_id}", response_model=ServiceResponse)
+@service_router.get("/{service_id}", response_model=ServiceResponse)
 async def get_service_by_id(service_id: int, db: AsyncSession = Depends(get_database_session)):
     """Route to get a specific service by ID."""
     service = await services_service.get_service_by_id(service_id, db)
@@ -174,7 +129,7 @@ async def get_service_by_id(service_id: int, db: AsyncSession = Depends(get_data
     return service
 
 
-@service_router.get("/services/category/{category_id}", response_model=ServiceListResponse)
+@service_router.get("/category/{category_id}", response_model=ServiceListResponse)
 async def get_services_by_category(category_id: int, db: AsyncSession = Depends(get_database_session)):
     """Route to get services by category ID."""
     services = await services_service.get_services_by_category(category_id, db)
@@ -183,7 +138,7 @@ async def get_services_by_category(category_id: int, db: AsyncSession = Depends(
     return services
 
 
-@service_router.get("/services/tag/{tag_id}", response_model=ServiceListResponse)
+@service_router.get("/tag/{tag_id}", response_model=ServiceListResponse)
 async def get_services_by_tag(tag_id: int, db: AsyncSession = Depends(get_database_session)):
     """Route to get services by tag ID."""
     services = await services_service.get_services_by_tag(tag_id, db)
@@ -192,7 +147,7 @@ async def get_services_by_tag(tag_id: int, db: AsyncSession = Depends(get_databa
     return services
 
 
-@service_router.post("/services", response_model=ServiceResponse)
+@service_router.post("/", response_model=ServiceResponse)
 async def create_service(
     service_create: ServiceCreate, db: AsyncSession = Depends(get_database_session)
 ):
@@ -204,7 +159,7 @@ async def create_service(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
-@service_router.put("/services/{service_id}", response_model=ServiceResponse)
+@service_router.put("/{service_id}", response_model=ServiceResponse)
 async def update_service(
     service_id: int, service_update: ServiceCreate, db: AsyncSession = Depends(get_database_session)
 ):
@@ -215,7 +170,7 @@ async def update_service(
     return service
 
 
-@service_router.delete("/services/{service_id}", status_code=status.HTTP_204_NO_CONTENT)
+@service_router.delete("/{service_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_service(service_id: int, db: AsyncSession = Depends(get_database_session)):
     """Route to delete a service by ID."""
     service = await services_service.get_service_by_id(service_id, db)
