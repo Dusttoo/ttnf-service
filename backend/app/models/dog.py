@@ -16,6 +16,7 @@ class StatusEnum(enum.Enum):
     stud = "Available For Stud"
     retired = "Retired"
     active = "Active"
+    abkc_champion = "ABKC Champion"
 
 
 class HealthInfo(Base):
