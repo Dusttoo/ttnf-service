@@ -5,7 +5,10 @@ from sqlalchemy import pool
 from alembic import context
 from app.core.config import settings
 from app.core.database import Base
-from app.models import *  # Import your models
+from app.models import Breeding, Dog, Photo, HealthInfo, StatusEnum, GenderEnum, Production, dog_production_link
+from app.models import Litter, litter_puppies, User, NavLink, Page, AnnouncementType, Announcement, CarouselImage
+from app.models import WebsiteSettings, ServiceStatus, ShippingType, Tag, ServiceCategory, Service, service_tags
+from app.models import WaitlistEntry
 
 # this is the Alembic Config object, which provides access to the values within the .ini file in use.
 config = context.config

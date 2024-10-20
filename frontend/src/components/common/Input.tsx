@@ -9,6 +9,7 @@ interface InputProps {
   label?: string;
   width?: string;
   id?: string;
+  required?: boolean;
 }
 
 const StyledInputWrapper = styled.div`
@@ -21,6 +22,11 @@ const StyledLabel = styled.label`
   margin-bottom: 0.5rem;
   font-weight: bold;
   color: ${(props) => props.theme.colors.text};
+`;
+
+const RequiredAsterisk = styled.span`
+  color: ${(props) => props.theme.colors.error}; // Styled for the asterisk
+  margin-left: 4px;
 `;
 
 const StyledInput = styled.input<Partial<InputProps>>`
@@ -38,10 +44,16 @@ const Input: React.FC<InputProps> = ({
   label,
   width,
   id,
+  required = false,
 }) => {
   return (
     <StyledInputWrapper>
-      {label && <StyledLabel htmlFor={id}>{label}</StyledLabel>}
+      {label && (
+        <StyledLabel htmlFor={id}>
+          {label}
+          {required && <RequiredAsterisk>*</RequiredAsterisk>}
+        </StyledLabel>
+      )}
       <StyledInput
         id={id}
         type={type}
@@ -49,6 +61,7 @@ const Input: React.FC<InputProps> = ({
         onChange={onChange}
         placeholder={placeholder}
         width={width}
+        required={required}
       />
     </StyledInputWrapper>
   );

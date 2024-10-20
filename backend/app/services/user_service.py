@@ -19,34 +19,27 @@ class UserService:
         return result.scalars().first()
 
     async def create_or_update_user(self, user_data: dict, db: AsyncSession):
-        """Create or update a user based on the React Bricks data."""
         query = select(User).filter(User.email == user_data["email"])
         result = await db.execute(query)
         user = result.scalars().first()
 
         if user:
-            # Update existing user
-            user.username = user_data["email"]  # or user_data['username'] if available
+            user.username = user_data["username"] if "username" in user_data else user_data["email"]
+            user.email = user_data["email"]
             user.first_name = user_data["firstName"]
             user.last_name = user_data["lastName"]
-            user.company = user_data.get("company")
-            user.avatar_url = user_data.get("avatarUrl")
-            user.role = user_data.get("role", "user")
         else:
             # Create a new user
             user = User(
-                username=user_data["email"],  # or user_data['username'] if available
+                username=user_data["username"] if "username" in user_data else user_data["email"],
                 email=user_data["email"],
                 first_name=user_data["firstName"],
                 last_name=user_data["lastName"],
-                company=user_data.get("company"),
-                avatar_url=user_data.get("avatarUrl"),
-                role=user_data.get("role", "user"),
             )
-            user.set_password("default_password")  # Set a default password
+            user.set_password(user_data["password"])
 
             db.add(user)
 
         await db.commit()
         await db.refresh(user)
-        return UserSchema.from_orm(user)
+        return UserSchema.model_validate(user)

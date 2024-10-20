@@ -16,8 +16,10 @@ from app.schemas import (
     ServiceCategoryResponse,
     ServiceResponse,
     ServiceListResponse,
-    ServiceStatus)
-from app.models import Dog, Litter, Breeding, Production, NavLink, Announcement, Page, Tag, ServiceCategory, Service
+    ServiceStatus,
+    WaitlistResponse)
+from app.models import Dog, Litter, Breeding, Production, NavLink, Announcement, Page, Tag, ServiceCategory, Service, \
+    WaitlistEntry
 import json
 from typing import Union, Dict, Any, List
 import logging
@@ -44,6 +46,7 @@ def convert_to_dog_schema(dog: Dog) -> DogSchema:
         parent_male_id=dog.parent_male_id,
         parent_female_id=dog.parent_female_id,
         is_production=dog.is_production,
+        is_retired=dog.is_retired,
         health_infos=dog.health_infos,
         photos=dog.photos,
         productions=[convert_to_production_schema(prod) for prod in dog.productions],
@@ -119,8 +122,8 @@ def convert_to_production_schema(production: Production) -> ProductionSchema:
         dam_id=production.dam_id,
     )
 
-def convert_to_navigation_schema(navigation: NavLink) -> NavLinkSchema:
 
+def convert_to_navigation_schema(navigation: NavLink) -> NavLinkSchema:
     return NavLinkSchema(
         id=navigation.id,
         title=navigation.title,
@@ -129,6 +132,7 @@ def convert_to_navigation_schema(navigation: NavLink) -> NavLinkSchema:
         parent_id=navigation.parent_id,
         position=navigation.position,
     )
+
 
 def convert_to_page_schema(page: Union[Page, dict]) -> PageSchema:
     content = page["content"] if isinstance(page, dict) else page.content
@@ -205,20 +209,25 @@ def convert_to_page_schema(page: Union[Page, dict]) -> PageSchema:
         status=page["status"] if isinstance(page, dict) else page.status,
         is_locked=page["is_locked"] if isinstance(page, dict) else page.is_locked,
         tags=page["tags"] if isinstance(page, dict) else page.tags,
-        created_at=page["created_at"] if isinstance(page, dict) else (page.created_at.isoformat() if page.created_at else None),
-        published_at=page["published_at"] if isinstance(page, dict) else (page.published_at.isoformat() if page.published_at else None),
+        created_at=page["created_at"] if isinstance(page, dict) else (
+            page.created_at.isoformat() if page.created_at else None),
+        published_at=page["published_at"] if isinstance(page, dict) else (
+            page.published_at.isoformat() if page.published_at else None),
         language=page["language"] if isinstance(page, dict) else page.language,
         translations=translations,
-        updated_at=page["updated_at"] if isinstance(page, dict) else (page.updated_at.isoformat() if page.updated_at else None),
+        updated_at=page["updated_at"] if isinstance(page, dict) else (
+            page.updated_at.isoformat() if page.updated_at else None),
         announcements=announcements,
         carousel_images=carousel_images
     )
+
 
 def convert_to_tag_schema(tag: Tag) -> TagResponse:
     return TagResponse(
         id=tag.id,
         name=tag.name,
     )
+
 
 def convert_to_service_category_schema(category: ServiceCategory) -> ServiceCategoryResponse:
     return ServiceCategoryResponse(
@@ -227,6 +236,7 @@ def convert_to_service_category_schema(category: ServiceCategory) -> ServiceCate
         display=category.display,
         position=category.position,
     )
+
 
 def convert_to_service_schema(service: Service) -> ServiceResponse:
     # shipping_info = None
@@ -255,7 +265,24 @@ def convert_to_service_schema(service: Service) -> ServiceResponse:
         category=convert_to_service_category_schema(service.category) if service.category else None,
     )
 
+
 def convert_to_service_list_schema(services: List[Service]) -> ServiceListResponse:
     return ServiceListResponse(
         services=[convert_to_service_schema(service) for service in services]
+    )
+
+
+def convert_to_waitlist_schema(waitlist_entry: WaitlistEntry) -> WaitlistResponse:
+    return WaitlistResponse(
+        id=waitlist_entry.id,
+        name=waitlist_entry.name,
+        email=waitlist_entry.email,
+        phone=waitlist_entry.phone,
+        gender_preference=waitlist_entry.gender_preference,
+        color_preference=waitlist_entry.color_preference,
+        sires=[convert_to_dog_schema(sire) for sire in waitlist_entry.sires] if waitlist_entry.sires else [],
+        dams=[convert_to_dog_schema(dam) for dam in waitlist_entry.dams] if waitlist_entry.dams else [],
+        breeding_id=waitlist_entry.breeding_id,
+        additional_info=waitlist_entry.additional_info,
+        created_at=datetime.now(),
     )

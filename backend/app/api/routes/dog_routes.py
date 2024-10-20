@@ -20,7 +20,6 @@ from app.services import DogService
 
 logger = logging.getLogger(__name__)
 
-
 dog_router = APIRouter()
 dog_svc = DogService()
 
@@ -45,8 +44,8 @@ async def get_dogs_filtered(
     owned: Optional[str] = Query(None),
     sire: Optional[int] = Query(None),
     dam: Optional[int] = Query(None),
-    page: int = 1,
-    page_size: int = 10,
+    page: Optional[int] = Query(None),
+    page_size: Optional[int] = Query(None),
     db: AsyncSession = Depends(get_database_session),
 ):
     try:
