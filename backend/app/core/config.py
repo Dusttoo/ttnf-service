@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     redis_port: int
     redis_db: str
     redis_password: str
+    env: str
 
     class Config:
         env_file = ".env"

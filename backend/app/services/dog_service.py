@@ -72,7 +72,7 @@ class DogService:
                 "total_count": total_count,
             }
             await redis_client.set(
-                cache_key, json.dumps(data), ex=3600
+                cache_key, json.dumps(data, cls=DateTimeEncoder), ex=3600
             )  # Cache for 1 hour
             return data
         except SQLAlchemyError as e:

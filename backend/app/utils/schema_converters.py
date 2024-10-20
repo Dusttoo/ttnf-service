@@ -16,8 +16,9 @@ from app.schemas import (
     ServiceCategoryResponse,
     ServiceResponse,
     ServiceListResponse,
-    ServiceStatus)
-from app.models import Dog, Litter, Breeding, Production, NavLink, Announcement, Page, Tag, ServiceCategory, Service
+    ServiceStatus,
+WaitlistResponse)
+from app.models import Dog, Litter, Breeding, Production, NavLink, Announcement, Page, Tag, ServiceCategory, Service, WaitlistEntry
 import json
 from typing import Union, Dict, Any, List
 import logging
@@ -258,4 +259,19 @@ def convert_to_service_schema(service: Service) -> ServiceResponse:
 def convert_to_service_list_schema(services: List[Service]) -> ServiceListResponse:
     return ServiceListResponse(
         services=[convert_to_service_schema(service) for service in services]
+    )
+
+def convert_to_waitlist_schema(waitlist_entry: WaitlistEntry) -> WaitlistResponse:
+    return WaitlistResponse(
+        id=waitlist_entry.id,
+        name=waitlist_entry.name,
+        email=waitlist_entry.email,
+        phone=waitlist_entry.phone,
+        gender_preference=waitlist_entry.gender_preference,
+        color_preference=waitlist_entry.color_preference,
+        sire_id=waitlist_entry.sire_id,
+        dam_id=waitlist_entry.dam_id,
+        breeding_id=waitlist_entry.breeding_id,
+        additional_info=waitlist_entry.additional_info,
+        created_at=datetime.now(),
     )

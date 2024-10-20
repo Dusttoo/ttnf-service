@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, ForeignKey, Date, String
 from sqlalchemy.orm import relationship
 from app.core.database import Base
 
+
 # Need to add a way to add an un-owned parent
 # Should also add pedigree link
 class Breeding(Base):
@@ -19,4 +20,5 @@ class Breeding(Base):
         "Dog", foreign_keys=[male_dog_id], backref="breedings_as_male"
     )
     litters = relationship("Litter", back_populates="breeding")
+    waitlist_entries = relationship("WaitlistEntry", back_populates="breeding")
     

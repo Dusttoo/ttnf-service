@@ -13,11 +13,39 @@ from opencensus.ext.fastapi.fastapi_middleware import FastAPIMiddleware
 from opencensus.trace.samplers import ProbabilitySampler
 import time
 
+
 def create_application() -> FastAPI:
     application = FastAPI(title=settings.project_name)
+
+    # Setup routes and error handlers
     setup_routes(application)
     setup_error_handlers(application)
+
+    if application.openapi_schema:
+        return application.openapi_schema
+
+    openapi_schema = application.openapi()  # Generate the OpenAPI schema once
+
+    # Add security schemes for OAuth2PasswordBearer
+    openapi_schema["components"]["securitySchemes"] = {
+        "OAuth2PasswordBearer": {
+            "type": "oauth2",
+            "flows": {
+                "password": {
+                    "tokenUrl": "/api/v1/auth/token",
+                    "scopes": {}
+                }
+            }
+        }
+    }
+
+    # Optionally apply security globally
+    openapi_schema["security"] = [{"OAuth2PasswordBearer": []}]
+
+    application.openapi_schema = openapi_schema  # Cache the OpenAPI schema
+
     return application
+
 
 app = create_application()
 
@@ -47,6 +75,7 @@ logger.addHandler(
 exporter = AzureExporter(connection_string=f"InstrumentationKey={INSTRUMENTATION_KEY}")
 sampler = ProbabilitySampler(1.0)
 FastAPIMiddleware(app, exporter=exporter, sampler=sampler)
+
 
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
@@ -88,7 +117,8 @@ async def log_requests(request: Request, call_next):
                 except UnicodeDecodeError:
                     logger.warning(f"[{request_id}] Could not decode response body, possibly binary data.")
 
-            return Response(content=response_body, status_code=response.status_code, headers=dict(response.headers), media_type=response.media_type)
+            return Response(content=response_body, status_code=response.status_code, headers=dict(response.headers),
+                            media_type=response.media_type)
         else:
             return response
 
@@ -98,6 +128,7 @@ async def log_requests(request: Request, call_next):
     except Exception as exc:
         logger.error(f"[{request_id}] Unexpected error: {exc}", exc_info=True)
         raise
+
 
 @app.get("/")
 async def root():

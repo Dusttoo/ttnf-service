@@ -7,3 +7,4 @@ from app.models.page import Page, AnnouncementType, Announcement, CarouselImage
 from app.models.navigation import NavLink
 from app.models.website_settings import WebsiteSettings
 from app.models.services import ServiceStatus, ShippingType, Tag, ServiceCategory, Service, service_tags
+from app.models.waitlist_entry import WaitlistEntry
