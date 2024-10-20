@@ -9,9 +9,15 @@ import DOMPurify from 'dompurify';
 import ImageCarousel from '../components/common/ImageCarousel';
 import AnnouncementSection from '../components/common/Announcement';
 import { ImageCarouselSettings, WebsiteSettings } from '../api/types/core';
-import ErrorComponent from "../components/common/Error";
+import ErrorComponent from '../components/common/Error';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faDna, faRibbon, faSuitcaseMedical } from '@fortawesome/free-solid-svg-icons';
+import {
+  faDna,
+  faRibbon,
+  faSuitcaseMedical,
+} from '@fortawesome/free-solid-svg-icons';
+import CTAButton from '../components/common/CTAButton';
+import WaitlistModal from '../components/waitlist/WaitlistModal';
 
 const HomePageContainer = styled.div`
   display: flex;
@@ -57,21 +63,6 @@ const HeroText = styled.div`
 
   @media (max-width: 768px) {
     padding-right: 0;
-  }
-`;
-
-const CTAButton = styled.button`
-  background-color: ${(props) => props.theme.colors.accent};
-  color: #fff;
-  padding: 1rem 2rem;
-  font-size: 1.2rem;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-
-  &:hover {
-    background-color: ${(props) => props.theme.colors.primary};
   }
 `;
 
@@ -159,6 +150,7 @@ const HomePage: React.FC = () => {
   const [page, setPage] = useState<Page | null>(null);
   const [settings, setSettings] = useState<WebsiteSettings | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [isModalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -179,8 +171,8 @@ const HomePage: React.FC = () => {
   }, []);
 
   if (loading) return <LoadingSpinner />;
-  if (!page) return <ErrorComponent message={"Content not found"} />;
-  if (!settings) return <ErrorComponent message={"Error loading settings"} />;
+  if (!page) return <ErrorComponent message={'Content not found'} />;
+  if (!settings) return <ErrorComponent message={'Error loading settings'} />;
 
   const sanitizedContent = DOMPurify.sanitize(page.content);
   const carouselImages = page?.customValues?.heroContent?.carouselImages || [];
@@ -192,23 +184,44 @@ const HomePage: React.FC = () => {
 
   return (
     <HomePageContainer>
-        {/* Announcements */}
-        {announcements && <AnnouncementSection title="Latest Announcements" announcements={announcements} />}
+      {/* Announcements */}
+      {announcements && (
+        <AnnouncementSection
+          title="Latest Announcements"
+          announcements={announcements}
+        />
+      )}
 
       {/* Hero Section */}
       <HeroSection>
         <HeroText>
           <h1>Discover Our Amazing French Bulldogs</h1>
-          <p>Breeding top-notch quality, temperament, and beauty into every French Bulldog.</p>
-          <CTAButton>Explore Our Services</CTAButton>
+          <p>
+            Breeding top-notch quality, temperament, and beauty into every
+            French Bulldog.
+          </p>
+          <CTAButton
+            label="Explore our services"
+            onClick={() => console.log('add router')}
+          />
+          <CTAButton label="Join Waitlist" onClick={() => setModalOpen(true)} />
           <HomePageHeader
             title={page.name}
             lastUpdated={settings.updatedAt}
-            introduction={page.customValues?.introductionText || "Welcome to Texas Top Notch Frenchies!"}
-                />
+            introduction={
+              page.customValues?.introductionText ||
+              'Welcome to Texas Top Notch Frenchies!'
+            }
+          />
         </HeroText>
         <HeroImage>
-            {carouselImages && <ImageCarousel images={carouselImages} width={"300px"} settings={carouselSettings} />}
+          {carouselImages && (
+            <ImageCarousel
+              images={carouselImages}
+              width={'300px'}
+              settings={carouselSettings}
+            />
+          )}
         </HeroImage>
       </HeroSection>
 
@@ -230,11 +243,13 @@ const HomePage: React.FC = () => {
         </IconBox>
       </IconSection>
 
-
       {/* Main Content */}
       <ContentContainer>
         <AboutSection dangerouslySetInnerHTML={{ __html: sanitizedContent }} />
       </ContentContainer>
+
+      {/* Waitlist Modal */}
+      <WaitlistModal isOpen={isModalOpen} onClose={() => setModalOpen(false)} />
     </HomePageContainer>
   );
 };

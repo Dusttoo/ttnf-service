@@ -1,0 +1,65 @@
+import axiosWithTimeout from './axiosInstance';
+import {
+  WaitlistEntry,
+  WaitlistCreate,
+  WaitlistUpdate,
+} from './types/waitlist';
+
+export const fetchWaitlistEntries = async (page: number, pageSize: number) => {
+  const response = await axiosWithTimeout.get<{
+    items: WaitlistEntry[];
+    total_count: number;
+  }>(`/waitlist?page=${page}&page_size=${pageSize}`);
+  return response.data;
+};
+
+export const fetchWaitlistEntryById = async (id: number) => {
+  const response = await axiosWithTimeout.get<WaitlistEntry>(`/waitlist/${id}`);
+  return response.data;
+};
+
+export const createWaitlistEntry = async (waitlistEntry: WaitlistCreate) => {
+  const response = await axiosWithTimeout.post<WaitlistEntry>(
+    '/waitlist',
+    waitlistEntry
+  );
+  return response.data;
+};
+
+export const updateWaitlistEntry = async (
+  id: number,
+  waitlistEntry: WaitlistUpdate
+) => {
+  const response = await axiosWithTimeout.put<WaitlistEntry>(
+    `/waitlist/${id}`,
+    waitlistEntry
+  );
+  return response.data;
+};
+
+export const deleteWaitlistEntry = async (id: number) => {
+  const response = await axiosWithTimeout.delete(`/waitlist/${id}`);
+  return response.data;
+};
+
+export const filterWaitlistEntries = async ({
+  sireId,
+  damId,
+  color,
+  page = 1,
+  pageSize = 10,
+}: {
+  sireId?: number;
+  damId?: number;
+  color?: string;
+  page?: number;
+  pageSize?: number;
+}) => {
+  const response = await axiosWithTimeout.get<{
+    items: WaitlistEntry[];
+    total_count: number;
+  }>(
+    `/waitlist/filter?page=${page}&page_size=${pageSize}&sire_id=${sireId}&dam_id=${damId}&color=${color}`
+  );
+  return response.data;
+};
