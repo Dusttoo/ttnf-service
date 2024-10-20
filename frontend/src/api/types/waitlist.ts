@@ -7,8 +7,8 @@ export interface WaitlistEntry {
   phone?: string;
   gender_preference?: GenderEnum;
   color_preference?: string;
-  sire_id?: number;
-  dam_id?: number;
+  sires?: number[];
+  dams?: number[];
   additional_info?: string;
   breeding_id?: number;
 }
@@ -19,8 +19,8 @@ export interface WaitlistCreate {
   phone?: string;
   gender_preference?: GenderEnum;
   color_preference?: string;
-  sire_id?: number;
-  dam_id?: number;
+  sire_ids?: number[];
+  dam_ids?: number[];
   additional_info?: string;
 }
 
@@ -30,7 +30,7 @@ export interface WaitlistUpdate {
   phone?: string;
   gender_preference?: GenderEnum;
   color_preference?: string;
-  sire_id?: number;
-  dam_id?: number;
+  sire_ids?: number[];
+  dam_ids?: number[];
   additional_info?: string;
 }

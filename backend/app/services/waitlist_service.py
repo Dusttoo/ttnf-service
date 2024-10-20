@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 from app.models import WaitlistEntry, Dog, Breeding
-from app.schemas import WaitlistCreate, WaitlistUpdate
+from app.schemas import WaitlistCreate, WaitlistUpdate, WaitlistResponse
 from app.utils.schema_converters import convert_to_waitlist_schema
 
 logger = logging.getLogger(__name__)
@@ -19,13 +19,52 @@ class WaitlistService:
     # Public method to create a new waitlist entry
     async def create_waitlist_entry(
         self, waitlist_data: WaitlistCreate, db: AsyncSession
-    ) -> WaitlistEntry:
+    ) -> WaitlistResponse:
         try:
-            new_entry = WaitlistEntry(**waitlist_data.dict())
+            new_entry = WaitlistEntry(
+                name=waitlist_data.name,
+                email=waitlist_data.email,
+                phone=waitlist_data.phone,
+                gender_preference=waitlist_data.gender_preference,
+                color_preference=waitlist_data.color_preference,
+                additional_info=waitlist_data.additional_info,
+            )
+
+            # Load the related sires and dams if provided
+            if waitlist_data.sire_ids:
+                sires = await db.execute(select(Dog).filter(Dog.id.in_(waitlist_data.sire_ids)))
+                new_entry.sires = sires.scalars().all()
+
+            if waitlist_data.dam_ids:
+                dams = await db.execute(select(Dog).filter(Dog.id.in_(waitlist_data.dam_ids)))
+                new_entry.dams = dams.scalars().all()
+
             db.add(new_entry)
             await db.commit()
-            await db.refresh(new_entry)
-            return convert_to_waitlist_schema(new_entry)
+
+            # Manually query the newly created entry with selectinload to fetch related entities
+            result = await db.execute(
+                select(WaitlistEntry)
+                .filter(WaitlistEntry.id == new_entry.id)
+                .options(
+                    selectinload(WaitlistEntry.sires).options(
+                        selectinload(Dog.health_infos),
+                        selectinload(Dog.photos),
+                        selectinload(Dog.productions),
+                        selectinload(Dog.children),
+                    ),
+                    selectinload(WaitlistEntry.dams).options(
+                        selectinload(Dog.health_infos),
+                        selectinload(Dog.photos),
+                        selectinload(Dog.productions),
+                        selectinload(Dog.children),
+                    ),
+                    selectinload(WaitlistEntry.breeding)
+                )
+            )
+            refreshed_entry = result.scalars().first()
+
+            return convert_to_waitlist_schema(refreshed_entry)
         except SQLAlchemyError as e:
             logger.error(f"Error in create_waitlist_entry: {e}", exc_info=True)
             raise HTTPException(status_code=500, detail="Could not create waitlist entry")
@@ -36,7 +75,21 @@ class WaitlistService:
     ) -> Dict[str, any]:
         try:
             offset = (page - 1) * page_size
-            query = select(WaitlistEntry).offset(offset).limit(page_size)
+            query = select(WaitlistEntry).offset(offset).limit(page_size).options(
+                selectinload(WaitlistEntry.sires).options(
+                    selectinload(Dog.health_infos),
+                    selectinload(Dog.photos),
+                    selectinload(Dog.productions),
+                    selectinload(Dog.children),
+                ),
+                selectinload(WaitlistEntry.dams).options(
+                    selectinload(Dog.health_infos),
+                    selectinload(Dog.photos),
+                    selectinload(Dog.productions),
+                    selectinload(Dog.children),
+                ),
+                selectinload(WaitlistEntry.breeding),
+            )
             result = await db.execute(query)
             entries = result.scalars().all()
 
@@ -55,16 +108,26 @@ class WaitlistService:
     # Public method to get a specific waitlist entry by ID
     async def get_waitlist_entry_by_id(
         self, entry_id: int, db: AsyncSession
-    ) -> Optional[WaitlistEntry]:
+    ) -> Optional[WaitlistResponse]:
         try:
             result = await db.execute(
                 select(WaitlistEntry)
+                .filter(WaitlistEntry.id == entry_id)
                 .options(
-                    selectinload(WaitlistEntry.sire),
-                    selectinload(WaitlistEntry.dam),
+                    selectinload(WaitlistEntry.sires).options(
+                        selectinload(Dog.health_infos),
+                        selectinload(Dog.photos),
+                        selectinload(Dog.productions),
+                        selectinload(Dog.children),
+                    ),
+                    selectinload(WaitlistEntry.dams).options(
+                        selectinload(Dog.health_infos),
+                        selectinload(Dog.photos),
+                        selectinload(Dog.productions),
+                        selectinload(Dog.children),
+                    ),
                     selectinload(WaitlistEntry.breeding),
                 )
-                .filter(WaitlistEntry.id == entry_id)
             )
             entry = result.scalars().first()
             if entry:
@@ -78,16 +141,48 @@ class WaitlistService:
     # Admin method to update a waitlist entry
     async def update_waitlist_entry(
         self, entry_id: int, waitlist_data: WaitlistUpdate, db: AsyncSession
-    ) -> Optional[WaitlistEntry]:
+    ) -> Optional[WaitlistResponse]:
         try:
             result = await db.execute(select(WaitlistEntry).filter(WaitlistEntry.id == entry_id))
             entry = result.scalars().first()
+
             if entry:
+                # Update the entry with new values
                 for var, value in waitlist_data.dict(exclude_unset=True).items():
-                    setattr(entry, var, value)
+                    if var == "sire_ids":
+                        sires = await db.execute(select(Dog).filter(Dog.id.in_(value)))
+                        entry.sires = sires.scalars().all()
+                    elif var == "dam_ids":
+                        dams = await db.execute(select(Dog).filter(Dog.id.in_(value)))
+                        entry.dams = dams.scalars().all()
+                    else:
+                        setattr(entry, var, value)
+
                 await db.commit()
-                await db.refresh(entry)
-                return convert_to_waitlist_schema(entry)
+
+                # Manually query the updated entry with selectinload to fetch related entities
+                result = await db.execute(
+                    select(WaitlistEntry)
+                    .filter(WaitlistEntry.id == entry.id)
+                    .options(
+                        selectinload(WaitlistEntry.sires).options(
+                            selectinload(Dog.health_infos),
+                            selectinload(Dog.photos),
+                            selectinload(Dog.productions),
+                            selectinload(Dog.children),
+                        ),
+                        selectinload(WaitlistEntry.dams).options(
+                            selectinload(Dog.health_infos),
+                            selectinload(Dog.photos),
+                            selectinload(Dog.productions),
+                            selectinload(Dog.children),
+                        ),
+                        selectinload(WaitlistEntry.breeding)
+                    )
+                )
+                refreshed_entry = result.scalars().first()
+
+                return convert_to_waitlist_schema(refreshed_entry)
             else:
                 raise HTTPException(status_code=404, detail="Waitlist entry not found")
         except SQLAlchemyError as e:
@@ -99,6 +194,7 @@ class WaitlistService:
         try:
             result = await db.execute(select(WaitlistEntry).filter(WaitlistEntry.id == entry_id))
             entry = result.scalars().first()
+
             if entry:
                 await db.delete(entry)
                 await db.commit()
@@ -109,25 +205,43 @@ class WaitlistService:
             logger.error(f"Error in delete_waitlist_entry: {e}", exc_info=True)
             raise HTTPException(status_code=500, detail="Could not delete waitlist entry")
 
+    # Method to get filtered waitlist entries
     async def get_filtered_waitlist_entries(
         self,
         db: AsyncSession,
-        sire_id: Optional[int] = None,
-        dam_id: Optional[int] = None,
+        sire_ids: Optional[List[int]] = None,
+        dam_ids: Optional[List[int]] = None,
         color: Optional[str] = None,
         page: int = 1,
         page_size: int = 10
-    ) -> List[WaitlistEntry]:
+    ) -> List[WaitlistResponse]:
         try:
             query = select(WaitlistEntry).filter(
                 and_(
-                    WaitlistEntry.sire_id == sire_id if sire_id else True,
-                    WaitlistEntry.dam_id == dam_id if dam_id else True,
                     WaitlistEntry.color_preference == color if color else True,
                 )
+            ).options(
+                selectinload(WaitlistEntry.sires).options(
+                    selectinload(Dog.health_infos),
+                    selectinload(Dog.photos),
+                    selectinload(Dog.productions),
+                    selectinload(Dog.children),
+                ),
+                selectinload(WaitlistEntry.dams).options(
+                    selectinload(Dog.health_infos),
+                    selectinload(Dog.photos),
+                    selectinload(Dog.productions),
+                    selectinload(Dog.children),
+                ),
+                selectinload(WaitlistEntry.breeding),
             )
 
-            # Apply pagination
+            if sire_ids:
+                query = query.filter(WaitlistEntry.sires.any(Dog.id.in_(sire_ids)))
+
+            if dam_ids:
+                query = query.filter(WaitlistEntry.dams.any(Dog.id.in_(dam_ids)))
+
             offset = (page - 1) * page_size
             query = query.offset(offset).limit(page_size)
 

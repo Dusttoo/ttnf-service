@@ -25,7 +25,6 @@ export const createWaitlistEntry = async (waitlistEntry: WaitlistCreate) => {
   );
   return response.data;
 };
-
 export const updateWaitlistEntry = async (
   id: number,
   waitlistEntry: WaitlistUpdate
@@ -43,14 +42,14 @@ export const deleteWaitlistEntry = async (id: number) => {
 };
 
 export const filterWaitlistEntries = async ({
-  sireId,
-  damId,
+  sire_ids,
+  dam_ids,
   color,
   page = 1,
   pageSize = 10,
 }: {
-  sireId?: number;
-  damId?: number;
+  sire_ids?: number[];
+  dam_ids?: number[];
   color?: string;
   page?: number;
   pageSize?: number;
@@ -59,7 +58,7 @@ export const filterWaitlistEntries = async ({
     items: WaitlistEntry[];
     total_count: number;
   }>(
-    `/waitlist/filter?page=${page}&page_size=${pageSize}&sire_id=${sireId}&dam_id=${damId}&color=${color}`
+    `/waitlist/filter?page=${page}&page_size=${pageSize}&sire_ids=${sire_ids?.join(',')}&dam_ids=${dam_ids?.join(',')}&color=${color}`
   );
   return response.data;
 };
