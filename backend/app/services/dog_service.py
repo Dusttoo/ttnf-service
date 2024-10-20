@@ -410,8 +410,8 @@ class DogService:
         self,
         db: AsyncSession,
         filters: Dict[str, Optional[Union[str, int]]],
-        page: int,
-        page_size: int,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
     ) -> Dict[str, any]:
         try:
             redis = await get_redis_client()
@@ -433,65 +433,41 @@ class DogService:
                 if filters.get("gender"):
                     query = query.filter(Dog.gender == filters["gender"].lower())
 
-                    mapped_statuses = []
-                    if filters.get("status"):
-                        statuses = [status.lower() for status in filters["status"]]
-                        if "active" in statuses:
-                            query = query.filter(
-                                (Dog.status == None)
-                                | (
-                                    ~Dog.status.in_(
-                                        [StatusEnum.retired, StatusEnum.sold]
-                                    )
-                                )
-                            )
-                            statuses = [
-                                status for status in statuses if status != "active"
-                            ]
-                        if statuses:
-                            mapped_statuses = statuses
-                            query = query.filter(Dog.status.in_(mapped_statuses))
+                mapped_statuses = []
+                if filters.get("status"):
+                    statuses = [status.lower() for status in filters["status"]]
+                    if "active" in statuses:
+                        query = query.filter(
+                            (Dog.status == None)
+                            | (~Dog.status.in_([StatusEnum.retired, StatusEnum.sold]))
+                        )
+                        statuses = [status for status in statuses if status != "active"]
+                    if statuses:
+                        mapped_statuses = statuses
+                        query = query.filter(Dog.status.in_(mapped_statuses))
 
                 if filters.get("owned"):
-                    query = query.filter(
-                        Dog.kennel_own == (filters["owned"].lower() == "true")
-                    )
+                    query = query.filter(Dog.kennel_own == (filters["owned"].lower() == "true"))
                 if filters.get("sire"):
                     query = query.filter(Dog.parent_male_id == filters["sire"])
                 if filters.get("dam"):
                     query = query.filter(Dog.parent_female_id == filters["dam"])
 
-                offset = (page - 1) * page_size
-                query = query.offset(offset).limit(page_size)
+                # Only apply pagination if page and page_size are provided
+                if page is not None and page_size is not None:
+                    offset = (page - 1) * page_size
+                    query = query.offset(offset).limit(page_size)
+
                 result = await db.execute(query)
                 dogs = result.scalars().all()
 
+                # Calculate total count (no need for pagination here)
                 total_query = select(func.count(Dog.id)).filter(
-                    (
-                        (Dog.gender == filters["gender"].lower())
-                        if filters.get("gender")
-                        else True
-                    ),
-                    (
-                        Dog.status.in_(mapped_statuses)
-                        if filters.get("status") and statuses
-                        else True
-                    ),
-                    (
-                        (Dog.kennel_own == (filters["owned"].lower() == "true"))
-                        if filters.get("owned")
-                        else True
-                    ),
-                    (
-                        (Dog.parent_male_id == filters["sire"])
-                        if filters.get("sire")
-                        else True
-                    ),
-                    (
-                        (Dog.parent_female_id == filters["dam"])
-                        if filters.get("dam")
-                        else True
-                    ),
+                    (Dog.gender == filters["gender"].lower()) if filters.get("gender") else True,
+                    Dog.status.in_(mapped_statuses) if filters.get("status") and statuses else True,
+                    (Dog.kennel_own == (filters["owned"].lower() == "true")) if filters.get("owned") else True,
+                    (Dog.parent_male_id == filters["sire"]) if filters.get("sire") else True,
+                    (Dog.parent_female_id == filters["dam"]) if filters.get("dam") else True,
                 )
                 total_result = await db.execute(total_query)
                 total_count = total_result.scalar_one()
@@ -501,9 +477,7 @@ class DogService:
                     "total_count": total_count,
                 }
 
-                await redis.set(
-                    cache_key, json.dumps(dogs_data, cls=DateTimeEncoder), ex=3600
-                )
+                await redis.set(cache_key, json.dumps(dogs_data, cls=DateTimeEncoder), ex=3600)
 
             return {
                 "items": [DogSchema(**dog_data) for dog_data in dogs_data["items"]],

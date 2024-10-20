@@ -9,6 +9,19 @@ import SuccessMessage from '../common/SuccessMessage';
 import Button from '../common/form/Button';
 import { useFilteredDogs } from '../../hooks/useDog';
 import { Dog } from '../../api/types/dog';
+import styled from 'styled-components';
+import { StatusEnum } from '../../api/types/core';
+
+const Asterisk = styled.span`
+  color: ${(props) => props.theme.colors.error};
+  margin-left: 2px;
+`;
+
+const RequiredNote = styled.p`
+  font-size: 0.9rem;
+  color: ${(props) => props.theme.colors.textMuted};
+  margin-bottom: 1rem;
+`;
 
 interface WaitlistFormProps {
   onSubmit: (data: WaitlistCreate) => Promise<void>;
@@ -33,13 +46,9 @@ const WaitlistForm: React.FC<WaitlistFormProps> = ({
   const [selectedDams, setSelectedDams] = useState<number[]>([]);
   const [success, setSuccess] = useState(false);
 
-  const { data: siresData, isLoading: siresLoading } = useFilteredDogs({
-    gender: GenderEnum.Male,
-  });
-  const { data: damsData, isLoading: damsLoading } = useFilteredDogs({
-    gender: GenderEnum.Female,
-  });
-
+  const { data: siresData } = useFilteredDogs({ gender: GenderEnum.Male });
+  const { data: damsData } = useFilteredDogs({ gender: GenderEnum.Female });
+  console.log(siresData);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -67,17 +76,24 @@ const WaitlistForm: React.FC<WaitlistFormProps> = ({
     />
   ) : (
     <form onSubmit={handleSubmit}>
+      {/* Note about required fields */}
+      <RequiredNote>
+        Fields marked with <Asterisk>*</Asterisk> are required.
+      </RequiredNote>
+
       <Input
         type="text"
         value={name}
         onChange={(e) => setName(e.target.value)}
         label="Name"
+        required={true}
       />
       <Input
         type="email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         label="Email"
+        required={true}
       />
       <Input
         type="text"
@@ -108,29 +124,33 @@ const WaitlistForm: React.FC<WaitlistFormProps> = ({
         label="Additional Information"
       />
 
-      {/* MultiSelect for Sires */}
+      {/* MultiSelect for Sires (filtering out retired sires) */}
       <MultiSelect
         name="sires"
         label="Select Sires"
         options={
-          siresData?.items.map((sire: Dog) => ({
-            label: sire.name,
-            value: sire.id,
-          })) || []
+          siresData?.items
+            .filter((sire: Dog) => sire.status !== StatusEnum.Retired)
+            .map((sire: Dog) => ({
+              label: sire.name,
+              value: sire.id,
+            })) || []
         }
         selectedValues={selectedSires}
         onChange={setSelectedSires}
       />
 
-      {/* MultiSelect for Dams */}
+      {/* MultiSelect for Dams (filtering out retired dams) */}
       <MultiSelect
         name="dams"
         label="Select Dams"
         options={
-          damsData?.items.map((dam: Dog) => ({
-            label: dam.name,
-            value: dam.id,
-          })) || []
+          damsData?.items
+            .filter((dam: Dog) => dam.status !== StatusEnum.Retired)
+            .map((dam: Dog) => ({
+              label: dam.name,
+              value: dam.id,
+            })) || []
         }
         selectedValues={selectedDams}
         onChange={setSelectedDams}

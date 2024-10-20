@@ -72,15 +72,25 @@ const SuccessButton = styled.button`
 
 interface SuccessMessageProps {
   message: string;
+  detail?: string;
   onClose?: () => void;
 }
 
-const SuccessMessage: React.FC<SuccessMessageProps> = ({ message, onClose }) => {
+const SuccessMessage: React.FC<SuccessMessageProps> = ({
+  message,
+  detail,
+  onClose,
+}) => {
   return (
     <SuccessContainer>
       <SuccessIcon />
       <SuccessMessageText>{message}</SuccessMessageText>
-      <SuccessDetails>Your operation was successful!</SuccessDetails>
+      {detail ? (
+        <SuccessDetails>{detail}</SuccessDetails>
+      ) : (
+        <SuccessDetails>Your operation was successful!</SuccessDetails>
+      )}
+
       {onClose && <SuccessButton onClick={onClose}>Close</SuccessButton>}
     </SuccessContainer>
   );

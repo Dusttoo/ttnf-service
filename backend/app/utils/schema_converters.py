@@ -46,6 +46,7 @@ def convert_to_dog_schema(dog: Dog) -> DogSchema:
         parent_male_id=dog.parent_male_id,
         parent_female_id=dog.parent_female_id,
         is_production=dog.is_production,
+        is_retired=dog.is_retired,
         health_infos=dog.health_infos,
         photos=dog.photos,
         productions=[convert_to_production_schema(prod) for prod in dog.productions],
