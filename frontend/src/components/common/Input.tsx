@@ -2,14 +2,15 @@ import React from 'react';
 import styled from 'styled-components';
 
 interface InputProps {
-  type: string;
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  placeholder?: string;
-  label?: string;
-  width?: string;
-  id?: string;
-  required?: boolean;
+    type: string;
+    value: string;
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    placeholder?: string;
+    label?: string;
+    width?: string;
+    id?: string;
+    required?: boolean;
+    error?: string;
 }
 
 const StyledInputWrapper = styled.div`
@@ -31,40 +32,50 @@ const RequiredAsterisk = styled.span`
 
 const StyledInput = styled.input<Partial<InputProps>>`
   padding: 10px;
-  border: 1px solid ${(props) => props.theme.colors.primary};
+  border: 1px solid ${(props) =>
+    props.error ? props.theme.colors.error : props.theme.colors.primary}; // Red border for error
   border-radius: 4px;
   width: ${(props) => props.width || '100%'};
 `;
 
+const ErrorMessage = styled.span`
+  color: ${(props) => props.theme.colors.error}; // Styled for error message
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+`;
+
 const Input: React.FC<InputProps> = ({
-  type,
-  value,
-  onChange,
-  placeholder,
-  label,
-  width,
-  id,
-  required = false,
-}) => {
-  return (
-    <StyledInputWrapper>
-      {label && (
-        <StyledLabel htmlFor={id}>
-          {label}
-          {required && <RequiredAsterisk>*</RequiredAsterisk>}
-        </StyledLabel>
-      )}
-      <StyledInput
-        id={id}
-        type={type}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        width={width}
-        required={required}
-      />
-    </StyledInputWrapper>
-  );
+                                         type,
+                                         value,
+                                         onChange,
+                                         placeholder,
+                                         label,
+                                         width,
+                                         id,
+                                         required = false,
+                                         error,
+                                     }) => {
+    return (
+        <StyledInputWrapper>
+            {label && (
+                <StyledLabel htmlFor={id}>
+                    {label}
+                    {required && <RequiredAsterisk>*</RequiredAsterisk>}
+                </StyledLabel>
+            )}
+            <StyledInput
+                id={id}
+                type={type}
+                value={value}
+                onChange={onChange}
+                placeholder={placeholder}
+                width={width}
+                required={required}
+                error={error}
+            />
+            {error && <ErrorMessage>{error}</ErrorMessage>} {/* Displaying the error message */}
+        </StyledInputWrapper>
+    );
 };
 
 export default Input;

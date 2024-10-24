@@ -11,6 +11,9 @@ import { useFilteredDogs } from '../../hooks/useDog';
 import { Dog } from '../../api/types/dog';
 import styled from 'styled-components';
 import { StatusEnum } from '../../api/types/core';
+import { validateForm } from '../../services/validationService';
+import { waitlistFormSchema } from '../../schemas/waitlistValidationSchema';
+import { formatPhoneNumber } from '../../utils/formatters';
 
 const Asterisk = styled.span`
   color: ${(props) => props.theme.colors.error};
@@ -24,143 +27,156 @@ const RequiredNote = styled.p`
 `;
 
 interface WaitlistFormProps {
-  onSubmit: (data: WaitlistCreate) => Promise<void>;
-  onSuccess: () => void;
-  onClose: () => void;
+    onSubmit: (data: WaitlistCreate) => Promise<void>;
+    onSuccess: () => void;
+    onClose: () => void;
 }
 
 const WaitlistForm: React.FC<WaitlistFormProps> = ({
-  onSubmit,
-  onSuccess,
-  onClose,
-}) => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [genderPreference, setGenderPreference] = useState<
-    GenderEnum | undefined
-  >(undefined);
-  const [colorPreference, setColorPreference] = useState('');
-  const [additionalInfo, setAdditionalInfo] = useState('');
-  const [selectedSires, setSelectedSires] = useState<number[]>([]);
-  const [selectedDams, setSelectedDams] = useState<number[]>([]);
-  const [success, setSuccess] = useState(false);
+                                                       onSubmit,
+                                                       onSuccess,
+                                                       onClose,
+                                                   }) => {
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [phone, setPhone] = useState('');
+    const [genderPreference, setGenderPreference] = useState<GenderEnum | undefined>(undefined);
+    const [colorPreference, setColorPreference] = useState('');
+    const [additionalInfo, setAdditionalInfo] = useState('');
+    const [selectedSires, setSelectedSires] = useState<number[]>([]);
+    const [selectedDams, setSelectedDams] = useState<number[]>([]);
+    const [errors, setErrors] = useState<Record<string, string>>({});
+    const [success, setSuccess] = useState(false);
 
-  const { data: siresData } = useFilteredDogs({ gender: GenderEnum.Male });
-  const { data: damsData } = useFilteredDogs({ gender: GenderEnum.Female });
+    const { data: siresData } = useFilteredDogs({ gender: GenderEnum.Male });
+    const { data: damsData } = useFilteredDogs({ gender: GenderEnum.Female });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await onSubmit({
-        name,
-        email,
-        phone,
-        gender_preference: genderPreference,
-        color_preference: colorPreference,
-        additional_info: additionalInfo,
-        sire_ids: selectedSires,
-        dam_ids: selectedDams,
-      });
-      setSuccess(true);
-      onSuccess();
-    } catch (error) {
-      console.error('Failed to submit waitlist entry', error);
-    }
-  };
+    const formatPhoneNumberInput = (value: string) => {
+        const cleaned = value.replace(/\D/g, ''); // Remove non-numeric characters
+        if (cleaned.length <= 3) return cleaned;
+        if (cleaned.length <= 6) return `${cleaned.slice(0, 3)}-${cleaned.slice(3)}`;
+        return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 6)}-${cleaned.slice(6, 10)}`;
+    };
 
-  return success ? (
-    <SuccessMessage
-      message="Waitlist entry created successfully!"
-      onClose={onClose}
-    />
-  ) : (
-    <form onSubmit={handleSubmit}>
-      {/* Note about required fields */}
-      <RequiredNote>
-        Fields marked with <Asterisk>*</Asterisk> are required.
-      </RequiredNote>
+    const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const formattedPhone = formatPhoneNumberInput(e.target.value);
+        setPhone(formattedPhone);
+    };
 
-      <Input
-        type="text"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        label="Name"
-        required={true}
-      />
-      <Input
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        label="Email"
-        required={true}
-      />
-      <Input
-        type="text"
-        value={phone}
-        onChange={(e) => setPhone(e.target.value)}
-        label="Phone"
-      />
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
 
-      <Checkbox
-        label="Male"
-        checked={genderPreference === GenderEnum.Male}
-        onChange={() => setGenderPreference(GenderEnum.Male)}
-      />
-      <Checkbox
-        label="Female"
-        checked={genderPreference === GenderEnum.Female}
-        onChange={() => setGenderPreference(GenderEnum.Female)}
-      />
-      <Input
-        type="text"
-        value={colorPreference}
-        onChange={(e) => setColorPreference(e.target.value)}
-        label="Color Preference"
-      />
-      <Textarea
-        value={additionalInfo}
-        onChange={(e) => setAdditionalInfo(e.target.value)}
-        label="Additional Information"
-      />
+        const formValues = {
+            name,
+            email,
+            phone,
+            genderPreference,
+            colorPreference,
+            additionalInfo,
+            sire_ids: selectedSires,
+            dam_ids: selectedDams,
+        };
 
-      {/* MultiSelect for Sires (filtering out retired sires) */}
-      <MultiSelect
-        name="sires"
-        label="Select Sires"
-        options={
-          siresData?.items
-            .filter((sire: Dog) => sire.status !== StatusEnum.Retired)
-            .map((sire: Dog) => ({
-              label: sire.name,
-              value: sire.id,
-            })) || []
+        const { isValid, errors } = await validateForm(formValues, waitlistFormSchema);
+        if (!isValid) {
+            setErrors(errors);
+            return;
         }
-        selectedValues={selectedSires}
-        onChange={setSelectedSires}
-      />
 
-      {/* MultiSelect for Dams (filtering out retired dams) */}
-      <MultiSelect
-        name="dams"
-        label="Select Dams"
-        options={
-          damsData?.items
-            .filter((dam: Dog) => dam.status !== StatusEnum.Retired)
-            .map((dam: Dog) => ({
-              label: dam.name,
-              value: dam.id,
-            })) || []
+        try {
+            await onSubmit(formValues);
+            setSuccess(true);
+            onSuccess();
+        } catch (error) {
+            console.error('Failed to submit waitlist entry', error);
         }
-        selectedValues={selectedDams}
-        onChange={setSelectedDams}
-      />
+    };
 
-      <Button variant="primary" type="submit">
-        Submit
-      </Button>
-    </form>
-  );
+    return success ? (
+        <SuccessMessage message="Waitlist entry created successfully!" onClose={onClose} />
+    ) : (
+        <form onSubmit={handleSubmit}>
+            <RequiredNote>
+                Fields marked with <Asterisk>*</Asterisk> are required.
+            </RequiredNote>
+
+            <Input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                label="Name"
+                error={errors.name}
+            />
+            <Input
+                type="text"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                label="Email"
+                error={errors.email}
+            />
+            <Input
+                type="text"
+                value={phone}
+                onChange={handlePhoneChange}
+                label="Phone"
+                error={errors.phone}
+            />
+
+            <Checkbox
+                label="Male"
+                checked={genderPreference === GenderEnum.Male}
+                onChange={() => setGenderPreference(GenderEnum.Male)}
+            />
+            <Checkbox
+                label="Female"
+                checked={genderPreference === GenderEnum.Female}
+                onChange={() => setGenderPreference(GenderEnum.Female)}
+            />
+            <Input
+                type="text"
+                value={colorPreference}
+                onChange={(e) => setColorPreference(e.target.value)}
+                label="Color Preference"
+                error={errors.colorPreference}
+            />
+            <Textarea
+                value={additionalInfo}
+                onChange={(e) => setAdditionalInfo(e.target.value)}
+                label="Additional Information"
+                error={errors.additionalInfo}
+            />
+
+            <MultiSelect
+                name="sires"
+                label="Select Sires"
+                options={
+                    siresData?.items
+                        .filter((sire: Dog) => sire.status !== StatusEnum.Retired)
+                        .map((sire: Dog) => ({ label: sire.name, value: sire.id })) || []
+                }
+                selectedValues={selectedSires}
+                onChange={setSelectedSires}
+                error={errors.sire_ids}
+            />
+
+            <MultiSelect
+                name="dams"
+                label="Select Dams"
+                options={
+                    damsData?.items
+                        .filter((dam: Dog) => dam.status !== StatusEnum.Retired)
+                        .map((dam: Dog) => ({ label: dam.name, value: dam.id })) || []
+                }
+                selectedValues={selectedDams}
+                onChange={setSelectedDams}
+                error={errors.dam_ids}
+            />
+
+            <Button variant="primary" type="submit">
+                Submit
+            </Button>
+        </form>
+    );
 };
 
 export default WaitlistForm;
