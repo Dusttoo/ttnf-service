@@ -48,7 +48,7 @@ const WaitlistForm: React.FC<WaitlistFormProps> = ({
 
   const { data: siresData } = useFilteredDogs({ gender: GenderEnum.Male });
   const { data: damsData } = useFilteredDogs({ gender: GenderEnum.Female });
-  console.log(siresData);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {

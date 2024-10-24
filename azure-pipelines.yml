@@ -15,7 +15,7 @@ stages:
       - job: BuildBackend
         steps:
           - checkout: self
-          
+
           - task: Docker@2
             inputs:
               containerRegistry: 'ttnfdockerservice'
@@ -48,6 +48,7 @@ stages:
               buildArguments: |
                 REACT_APP_BACKEND_URL=$(REACT_APP_BACKEND_URL)
                 REACT_APP_TINYMCE_API_KEY=$(REACT_APP_TINYMCE_API_KEY)
+                REACT_APP_ENV=prod
               tags: |
                 $(Build.BuildId)
 

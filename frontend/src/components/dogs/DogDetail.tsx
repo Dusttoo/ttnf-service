@@ -54,7 +54,6 @@ const DogDetailPage: React.FC = () => {
       if (name) {
         const id = searchParams.get('id') || '0';
         const data = await getDogById(parseInt(id));
-        console.log('data: ', data);
         setDog(data);
       }
     };

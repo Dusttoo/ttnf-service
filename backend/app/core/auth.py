@@ -30,7 +30,6 @@ async def verify_token(token: str, credentials_exception, db: AsyncSession) -> i
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username = payload.get("sub")
-        print(f"Decoded username: {username}")  # Debugging
         if not username:
             raise credentials_exception
     except JWTError:
@@ -38,9 +37,10 @@ async def verify_token(token: str, credentials_exception, db: AsyncSession) -> i
 
     # Fetch user by username
     user = await user_service.get_user_by_username(username, db)
+    print('User: ', user)
     if not user:
         raise credentials_exception
-    return user.id
+    return user
 
 
 # Authentication function (check username and password)
@@ -62,29 +62,28 @@ async def get_current_user(
     token: str = Security(oauth2_scheme),
     db: AsyncSession = Depends(get_database_session),
 ):
+    print(f'Token: {token}')
+
     credentials_exception = HTTPException(
         status_code=401,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-
     if not token:
         token = request.cookies.get("access_token")
         if not token:
-            return credentials_exception
+            raise credentials_exception
 
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-
         username = payload.get("sub")
         if username is None:
-            return credentials_exception
-
+            raise credentials_exception
     except JWTError:
-        return credentials_exception
+        raise credentials_exception
 
     user = await user_service.get_user_by_username(username, db)
     if user is None:
-        return credentials_exception
+        raise credentials_exception
 
     return user

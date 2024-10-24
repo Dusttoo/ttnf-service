@@ -123,8 +123,6 @@ const DogList: React.FC<{ defaultGender?: GenderEnum | undefined, owned?: boolea
     itemsPerPage
   );
 
-  console.log("loading: ", effectiveStatus)
-
   const handlePageChange = (page: number, newItemsPerPage: number) => {
     setCurrentPage(page);
     setItemsPerPage(newItemsPerPage);

@@ -2,7 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 import { RootState } from '../store';
 
 const initialState = {
-    isLoading: false,
+    isLoading: true,
 };
 
 const loadingSlice = createSlice({

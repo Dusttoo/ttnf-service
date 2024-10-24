@@ -1,21 +1,30 @@
-import React, { Suspense } from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import PublicRoutes from "./routes/PublicRoutes";
-import PrivateRoutes from "./routes/PrivateRoutes";
-import { ThemeProvider } from "styled-components";
-import { theme } from "./theme/theme";
-import LoadingSpinner from "./components/common/LoadingSpinner";
+import React, { useEffect, Suspense } from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import PublicRoutes from './routes/PublicRoutes';
+import PrivateRoutes from './routes/PrivateRoutes';
+import { ThemeProvider } from 'styled-components';
+import { theme } from './theme/theme';
+import LoadingSpinner from './components/common/LoadingSpinner';
+import { useDispatch } from 'react-redux';
+import { validateSession } from './store/authSlice';
+import { AppDispatch } from './store';
 
 const App: React.FC = () => {
+  const dispatch = useDispatch<AppDispatch>();
+
+  useEffect(() => {
+    dispatch(validateSession());
+  }, [dispatch]);
+
   return (
     <Suspense fallback={<LoadingSpinner />}>
       <ThemeProvider theme={theme}>
-          <Router>
-            <Routes>
-              <Route path="/admin/*" element={<PrivateRoutes />} />
-              <Route path="/*" element={<PublicRoutes />} />
-            </Routes>
-          </Router>
+        <Router>
+          <Routes>
+            <Route path="/admin/*" element={<PrivateRoutes />} />
+            <Route path="/*" element={<PublicRoutes />} />
+          </Routes>
+        </Router>
       </ThemeProvider>
     </Suspense>
   );

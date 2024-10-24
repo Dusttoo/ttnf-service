@@ -7,6 +7,7 @@ from app.core import (
     get_database_session,
     get_current_user,
 )
+from app.core.auth import verify_token
 from app.schemas import UserSchema
 from app.services.user_service import UserService
 from app.core.config import settings
@@ -40,7 +41,6 @@ async def login_for_access_token(
 
     access_token = create_access_token(data={"sub": user.username})
     max_age = 24 * 3600
-    print(f'Development: {settings.env}')
     user_agent = request.headers.get("User-Agent", "")
     if "Mozilla" in user_agent:
         response.set_cookie(
@@ -49,9 +49,10 @@ async def login_for_access_token(
             httponly=True,
             max_age=max_age,
             expires=max_age,
-            secure=True if not settings.env == "development" else False,
-            samesite="strict",
+            secure=True,
+            samesite="strict" if not settings.env == "development" else "none",
         )
+
         return {
             "message": "Login successful (cookie-based authentication)",
             "user": UserSchema.model_validate(user),
@@ -67,13 +68,30 @@ async def login_for_access_token(
 
 @auth_router.get("/validate-session", tags=["Authentication"])
 async def validate_session(
-    user: UserSchema = Depends(get_current_user),
+    request: Request,  # To access cookies
     db: AsyncSession = Depends(get_database_session),
 ):
     """
     Validates the current session using the JWT token.
     """
-    return await user_service.get_user(user.id, db)
+
+    credentials_exception = HTTPException(
+        status_code=401,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
+    # Try to extract token from Authorization header or cookie
+    token = request.cookies.get("access_token")
+    if not token:
+        token = request.headers.get("Authorization")
+        if token and token.startswith("Bearer "):
+            token = token[7:]
+        else:
+            raise credentials_exception
+
+    user = await verify_token(token, credentials_exception, db)
+    return user
 
 
 @auth_router.post("/logout", tags=["Authentication"])

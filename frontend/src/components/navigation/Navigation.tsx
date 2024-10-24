@@ -11,7 +11,7 @@ const Navigation: React.FC = () => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const mobileMenuRef = useRef<HTMLDivElement>(null);
     const dispatch: AppDispatch = useDispatch();
-    console.log(links)
+
     useEffect(() => {
         dispatch(fetchNavLinks());
     }, [dispatch]);
