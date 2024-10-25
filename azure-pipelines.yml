@@ -19,7 +19,7 @@ stages:
           - task: Docker@2
             inputs:
               containerRegistry: 'ttnfdockerservice'
-              repository: 'backend'  
+              repository: 'backend-dev'  
               command: 'buildAndPush'
               Dockerfile: 'backend/Dockerfile'
               tags: |
@@ -42,7 +42,7 @@ stages:
           - task: Docker@2
             inputs:
               containerRegistry: 'ttnfdockerservice'
-              repository: 'frontend' 
+              repository: 'frontend-dev' 
               command: 'buildAndPush'
               Dockerfile: 'frontend/Dockerfile'
               buildArguments: |
