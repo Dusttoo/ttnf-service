@@ -1,5 +1,5 @@
 import logging
-from typing import List
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -13,6 +13,7 @@ from app.schemas import (
     ProductionCreate,
     ProductionUpdate,
     UserSchema,
+    GenderEnum
 )
 from app.services import ProductionService
 
@@ -24,9 +25,15 @@ production_svc = ProductionService()
 
 @production_router.get("/", response_model=PaginatedResponse[Production])
 async def get_all_productions(
-    page: int = 1, page_size: int = 10, db: AsyncSession = Depends(get_database_session)
+    page: int = 1,
+    page_size: int = 10,
+    gender: Optional[GenderEnum] = None,
+    sire: Optional[int] = None,
+    dam: Optional[int] = None,
+    db: AsyncSession = Depends(get_database_session)
 ):
-    response = await production_svc.get_all_productions(page, page_size, db)
+    response = await production_svc.get_all_productions(page, page_size, db, gender, sire, dam)
+    print(response)
     return response
 
 

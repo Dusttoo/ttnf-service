@@ -111,7 +111,9 @@ const FilterComponent: React.FC<FilterProps> = ({
   sire = undefined,
   dam = undefined,
   color = '',
+  gender = undefined,
   isGenderDisabled = false,
+  isStatusDisabled = false,
   isColorDisabled = true,
   isDamDisabled = true,
   isSireDisabled = true,
@@ -119,6 +121,7 @@ const FilterComponent: React.FC<FilterProps> = ({
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedFilters, setSelectedFilters] = useState<SelectedFilters>({
     status,
+    gender,
     sire,
     dam,
     color,
@@ -130,7 +133,10 @@ const FilterComponent: React.FC<FilterProps> = ({
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setShowDropdown(false);
       }
     };
@@ -144,19 +150,30 @@ const FilterComponent: React.FC<FilterProps> = ({
     const newStatus: StatusEnum[] = selectedFilters.status!.includes(value)
       ? selectedFilters.status!.filter((status) => status !== value)
       : [...selectedFilters.status!, value];
-    setSelectedFilters((prevFilters) => ({ ...prevFilters, status: newStatus }));
+    setSelectedFilters((prevFilters) => ({
+      ...prevFilters,
+      status: newStatus,
+    }));
     onStatusChange && onStatusChange(newStatus);
   };
 
   const handleClearAll = () => {
-    setSelectedFilters({ status: [], sire: undefined, dam: undefined, color: '' });
+    setSelectedFilters({
+      status: [],
+      sire: undefined,
+      dam: undefined,
+      color: '',
+    });
     onStatusChange && onStatusChange([]);
     onSireChange && onSireChange(undefined);
     onDamChange && onDamChange(undefined);
     onColorChange && onColorChange('');
   };
 
-  const handleDropdownChange = (e: React.ChangeEvent<HTMLSelectElement>, type: 'sire' | 'dam') => {
+  const handleDropdownChange = (
+    e: React.ChangeEvent<HTMLSelectElement>,
+    type: 'sire' | 'dam'
+  ) => {
     const selectedDogId = parseInt(e.target.value, 10);
     if (type === 'sire') {
       const selectedSire = dogs.find((dog: Dog) => dog.id === selectedDogId);
@@ -168,13 +185,28 @@ const FilterComponent: React.FC<FilterProps> = ({
   };
 
   const handleSireChange = (sire?: Dog) => {
-    setSelectedFilters((prevFilters) => ({ ...prevFilters, sire: sire ? { id: sire.id } : undefined }));
+    setSelectedFilters((prevFilters) => ({
+      ...prevFilters,
+      sire: sire ? { id: sire.id } : undefined,
+    }));
     onSireChange && onSireChange(sire);
   };
 
   const handleDamChange = (dam?: Dog) => {
-    setSelectedFilters((prevFilters) => ({ ...prevFilters, dam: dam ? { id: dam.id } : undefined }));
+    setSelectedFilters((prevFilters) => ({
+      ...prevFilters,
+      dam: dam ? { id: dam.id } : undefined,
+    }));
     onDamChange && onDamChange(dam);
+  };
+
+  const handleGenderChange = (selectedGender: GenderEnum) => {
+    setSelectedFilters((prevFilters) => ({
+      ...prevFilters,
+      gender:
+        prevFilters.gender === selectedGender ? undefined : selectedGender,
+    }));
+    onGenderChange && onGenderChange(selectedGender);
   };
 
   const handleApplyFilters = () => {
@@ -189,20 +221,22 @@ const FilterComponent: React.FC<FilterProps> = ({
 
       <DropdownContent show={showDropdown}>
         {/* Status Section */}
-        <Section>
-          <SectionTitle>Status</SectionTitle>
-          {Object.values(StatusEnum).map((statusOption) => (
-            <CheckboxContainer key={statusOption}>
-              <Checkbox
-                type="checkbox"
-                value={statusOption}
-                checked={selectedFilters.status!.includes(statusOption)}
-                onChange={() => handleCheckboxChange(statusOption)}
-              />
-              <label>{statusOption}</label>
-            </CheckboxContainer>
-          ))}
-        </Section>
+        {!isStatusDisabled && (
+          <Section>
+            <SectionTitle>Status</SectionTitle>
+            {Object.values(StatusEnum).map((statusOption) => (
+              <CheckboxContainer key={statusOption}>
+                <Checkbox
+                  type="checkbox"
+                  value={statusOption}
+                  checked={selectedFilters.status!.includes(statusOption)}
+                  onChange={() => handleCheckboxChange(statusOption)}
+                />
+                <label>{statusOption}</label>
+              </CheckboxContainer>
+            ))}
+          </Section>
+        )}
 
         {/* Conditionally render Gender section */}
         {!isGenderDisabled && (
@@ -212,7 +246,7 @@ const FilterComponent: React.FC<FilterProps> = ({
               <Checkbox
                 type="checkbox"
                 checked={selectedFilters.gender === GenderEnum.Male}
-                onChange={() => onGenderChange && onGenderChange(GenderEnum.Male)}
+                onChange={() => handleGenderChange(GenderEnum.Male)}
               />
               <label>Male</label>
             </CheckboxContainer>
@@ -220,7 +254,7 @@ const FilterComponent: React.FC<FilterProps> = ({
               <Checkbox
                 type="checkbox"
                 checked={selectedFilters.gender === GenderEnum.Female}
-                onChange={() => onGenderChange && onGenderChange(GenderEnum.Female)}
+                onChange={() => handleGenderChange(GenderEnum.Female)}
               />
               <label>Female</label>
             </CheckboxContainer>
@@ -237,11 +271,13 @@ const FilterComponent: React.FC<FilterProps> = ({
               onChange={(e) => handleDropdownChange(e, 'sire')}
             >
               <option value="">Select Sire</option>
-              {dogs.filter((dog: Dog) => dog.gender.toLowerCase() === 'male').map((dog: Dog) => (
-                <option key={dog.id} value={dog.id}>
-                  {dog.name}
-                </option>
-              ))}
+              {dogs
+                .filter((dog: Dog) => dog.gender.toLowerCase() === 'male')
+                .map((dog: Dog) => (
+                  <option key={dog.id} value={dog.id}>
+                    {dog.name}
+                  </option>
+                ))}
             </InputSelect>
           </Section>
         )}
@@ -256,11 +292,13 @@ const FilterComponent: React.FC<FilterProps> = ({
               onChange={(e) => handleDropdownChange(e, 'dam')}
             >
               <option value="">Select Dam</option>
-              {dogs.filter((dog: Dog) => dog.gender.toLowerCase() === 'female').map((dog: Dog) => (
-                <option key={dog.id} value={dog.id}>
-                  {dog.name}
-                </option>
-              ))}
+              {dogs
+                .filter((dog: Dog) => dog.gender.toLowerCase() === 'female')
+                .map((dog: Dog) => (
+                  <option key={dog.id} value={dog.id}>
+                    {dog.name}
+                  </option>
+                ))}
             </InputSelect>
           </Section>
         )}

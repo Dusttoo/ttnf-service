@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from app.core.config import settings
 from app.core.database import get_database_session
-from app.models import User
+from app.models.user import User
 from app.services.user_service import UserService
 
 SECRET_KEY = settings.secret_key
@@ -69,20 +69,26 @@ async def get_current_user(
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
+    print(token)
     if not token:
         token = request.cookies.get("access_token")
+        print(token)
         if not token:
             raise credentials_exception
 
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username = payload.get("sub")
+        print(username)
+
         if username is None:
             raise credentials_exception
     except JWTError:
         raise credentials_exception
 
     user = await user_service.get_user_by_username(username, db)
+    print(user)
+
     if user is None:
         raise credentials_exception
 

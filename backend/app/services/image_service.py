@@ -2,6 +2,8 @@ from azure.storage.blob import BlobServiceClient
 from fastapi import UploadFile
 from app.core.config import settings
 from typing import Tuple
+import os
+import uuid
 
 connect_str = settings.azure_storage_connection_string
 container_name = settings.azure_storage_container_name
@@ -12,11 +14,18 @@ container_client = blob_service_client.get_container_client(container_name)
 
 class MediaService:
     @staticmethod
-    async def upload_media(file: UploadFile, media_type: str) -> Tuple[str, str]:
-        blob_client = container_client.get_blob_client(file.filename)
+    async def upload_media(file: UploadFile, context: dict) -> Tuple[str, str]:
+        path_structure = "/".join(
+            [str(context.get(key, '')).replace(" ", "-").lower() for key in context.keys() if context[key]])
+
+        unique_filename = f"{context.get('name', 'file')}-{uuid.uuid4()}{os.path.splitext(file.filename)[1]}"
+        blob_path = f"{path_structure}/{unique_filename}"
+
+        blob_client = container_client.get_blob_client(blob_path)
         content = await file.read()
         blob_client.upload_blob(content, overwrite=True)
-        return blob_client.url, file.filename
+
+        return blob_client.url, blob_path
 
     @staticmethod
     def get_media_url(filename: str) -> str:
@@ -25,10 +34,8 @@ class MediaService:
 
     @staticmethod
     async def process_image(file: UploadFile) -> dict:
-        # Placeholder for image processing logic (e.g., extracting dimensions)
         return {"width": 1920, "height": 1080}
 
     @staticmethod
     async def process_video(file: UploadFile) -> dict:
-        # Placeholder for video processing logic (e.g., extracting duration)
         return {"duration": 3600}

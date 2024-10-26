@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { GenderEnum, StatusEnum } from '../../../../api/types/core';
-import { DogCreate, DogUpdate } from '../../../../api/types/dog'
+import { DogCreate, DogUpdate } from '../../../../api/types/dog';
 import { uploadImage } from '../../../../api/imageApi';
 import { StatusBadge } from '../../../common/StatusBadge';
 import ImageUpload from '../../../common/ImageUpload';
@@ -100,13 +100,13 @@ interface DogFormProps {
 }
 
 const DogForm: React.FC<DogFormProps> = ({
-    onClose,
-    dogId,
-    title = 'Add New Dog',
-    redirect = '/admin/dashboard/dogs',
-    defaultValues = {},
-    onDogCreated,
-}) => {
+                                             onClose,
+                                             dogId,
+                                             title = 'Add New Dog',
+                                             redirect = '/admin/dashboard/dogs',
+                                             defaultValues = {},
+                                             onDogCreated,
+                                         }) => {
     const navigate = useNavigate();
     const { data: dog } = useDog(Number(dogId));
     const createDogMutation = useCreateDog();
@@ -116,7 +116,7 @@ const DogForm: React.FC<DogFormProps> = ({
         name: '',
         dob: '',
         gender: '' as GenderEnum,
-        status: undefined, // Use undefined instead of an empty string
+        status: undefined,
         color: '',
         description: '',
         profilePhoto: '',
@@ -183,7 +183,7 @@ const DogForm: React.FC<DogFormProps> = ({
         const updatedFormState = {
             ...formState,
             profilePhoto: profilePhotoUrl,
-            photos: galleryPhotoUrls.map(url => ({ photo_url: url, alt: `${formState.name}'s photo` }))
+            photos: galleryPhotoUrls.map(url => ({ photo_url: url, alt: `${formState.name}'s photo` })),
         };
 
         if (dogId) {
@@ -261,11 +261,18 @@ const DogForm: React.FC<DogFormProps> = ({
                     <option value={GenderEnum.Female}>{GenderEnum.Female}</option>
                 </Dropdown>
                 <div ref={dropdownRef}>
-                    <DropdownButton onClick={(e) => { e.stopPropagation(); e.preventDefault(); setShowDropdown(!showDropdown); }}>
+                    <DropdownButton onClick={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        setShowDropdown(!showDropdown);
+                    }}>
                         {formState.status ? (
                             <StatusBadge color="#E76F00">
                                 {formState.status}
-                                <span onClick={(e) => { e.stopPropagation(); setFormState((prevState) => ({ ...prevState, status: undefined })); }}>
+                                <span onClick={(e) => {
+                                    e.stopPropagation();
+                                    setFormState((prevState) => ({ ...prevState, status: undefined }));
+                                }}>
                                     &#x2715;
                                 </span>
                             </StatusBadge>
@@ -292,8 +299,14 @@ const DogForm: React.FC<DogFormProps> = ({
                 <ParentSelector
                     sireId={formState.parentMaleId}
                     damId={formState.parentFemaleId}
-                    onSireChange={(e) => setFormState((prevState) => ({ ...prevState, parentMaleId: Number(e.target.value) }))}
-                    onDamChange={(e) => setFormState((prevState) => ({ ...prevState, parentFemaleId: Number(e.target.value) }))}
+                    onSireChange={(e) => setFormState((prevState) => ({
+                        ...prevState,
+                        parentMaleId: Number(e.target.value),
+                    }))}
+                    onDamChange={(e) => setFormState((prevState) => ({
+                        ...prevState,
+                        parentFemaleId: Number(e.target.value),
+                    }))}
                 />
                 {formState.status === StatusEnum.Available && (
                     <Input
@@ -306,7 +319,8 @@ const DogForm: React.FC<DogFormProps> = ({
                 )}
                 <InputGroup>
                     <p>Select 1 profile image</p>
-                    <ImageUpload maxImages={1} onImagesChange={handleProfilePhotoChange} initialImages={formState.profilePhoto ? [formState.profilePhoto] : []} />
+                    <ImageUpload maxImages={1} onImagesChange={handleProfilePhotoChange}
+                                 initialImages={formState.profilePhoto ? [formState.profilePhoto] : []} />
                 </InputGroup>
                 <InputGroup>
                     <p>Select up to five gallery images</p>
@@ -319,5 +333,5 @@ const DogForm: React.FC<DogFormProps> = ({
             </Form>
         </FormContainer>
     );
-}
+};
 export default DogForm;

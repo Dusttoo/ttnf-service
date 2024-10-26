@@ -118,6 +118,7 @@ export interface Production {
   id: number;
   name: string;
   dob?: string;
+  description?: string;
   profilePhoto: string;
   owner?: string;
   parentMaleId?: number;
@@ -162,6 +163,7 @@ export interface FilterProps {
   dam?: { id: number };
   color?: string;
   isGenderDisabled?: boolean;
+  isStatusDisabled?: boolean;
   isSireDisabled?: boolean;
   isDamDisabled?: boolean;
   isColorDisabled?: boolean;

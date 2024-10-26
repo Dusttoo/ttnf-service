@@ -39,7 +39,8 @@ const ServicePrice = styled.p`
 
 const ServiceAvailability = styled.p<ServiceAvailabilityProps>`
   font-size: 0.9rem;
-  color: ${(props) => (props.available ? props.theme.colors.secondary : props.theme.colors.error)};
+  color: ${(props) =>
+    props.available ? props.theme.colors.secondary : props.theme.colors.error};
 `;
 
 const CTAButton = styled.a`
@@ -52,6 +53,7 @@ const CTAButton = styled.a`
   display: inline-block;
   cursor: pointer;
   margin-top: 1rem;
+  margin-right: 1rem;
   transition: background-color 0.3s ease;
 
   &:hover {
@@ -76,7 +78,15 @@ interface ServiceCardProps {
   disclaimer?: string;
 }
 
-const ServiceCard: React.FC<ServiceCardProps> = ({ name, description, price, availability, ctaName, ctaLink, disclaimer }) => {
+const ServiceCard: React.FC<ServiceCardProps> = ({
+  name,
+  description,
+  price,
+  availability,
+  ctaName,
+  ctaLink,
+  disclaimer,
+}) => {
   return (
     <CardContainer>
       <ServiceTitle>{name}</ServiceTitle>

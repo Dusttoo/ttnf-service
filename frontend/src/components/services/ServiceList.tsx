@@ -2,70 +2,88 @@ import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { useServices } from '../../hooks/useService';
 import ServiceCard from './ServiceCard';
+import Accordion from '../common/Accordion';
+
+const ServicesWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 2rem;
+  box-sizing: border-box;
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+`;
+
+const ServicesSection = styled.div`
+  flex: 1;
+  background-color: ${(props) => props.theme.colors.secondaryBackground};
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  min-height: 100%;
+  overflow: visible;
+`;
 
 const ServiceListContainer = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 2rem;
   padding: 2rem;
-  background-color: ${(props) => props.theme.colors.secondaryBackground};
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    padding: 1rem;
+    gap: 1rem;
+  }
 `;
 
-const CategoryHeader = styled.h2`
-  font-family: ${(props) => props.theme.fonts.secondary};
-  color: ${(props) => props.theme.colors.secondary};
-  text-align: center;
-  margin: 2rem 0;
-`;
+const ServicesList: React.FC = () => {
+  const { data: services, isLoading, error } = useServices();
 
-interface ServicesListProps {
-    page: number;
-    pageSize: number;
-    onTotalItemsChange: (total: number) => void;
-}
+  if (isLoading) return <p>Loading services...</p>;
+  if (error) return <p>Error loading services.</p>;
 
-const ServicesList: React.FC<ServicesListProps> = ({ page, pageSize, onTotalItemsChange }) => {
-    const { data: services, isLoading, error } = useServices(page, pageSize);
+  const groupedServices = services?.reduce(
+    (acc: Record<string, typeof services>, service) => {
+      const category = service.category?.name || 'Uncategorized';
+      acc[category] = acc[category] ? [...acc[category], service] : [service];
+      return acc;
+    },
+    {}
+  );
 
-    useEffect(() => {
-        if (services) {
-            onTotalItemsChange(services.length);
-        }
-    }, [services, onTotalItemsChange]);
+  const categories = Object.keys(groupedServices || {});
 
-    if (isLoading) return <p>Loading services...</p>;
-    if (error) return <p>Error loading services.</p>;
-
-    const groupedServices = services?.reduce((acc: Record<string, typeof services>, service) => {
-        const category = service.category?.name || 'Uncategorized';
-        acc[category] = acc[category] ? [...acc[category], service] : [service];
-        return acc;
-    }, {});
-
-    return (
-        <div>
-            {groupedServices &&
-                Object.keys(groupedServices).map((category) => (
-                    <div key={category}>
-                        <CategoryHeader>{category}</CategoryHeader>
-                        <ServiceListContainer>
-                            {groupedServices[category].map((service) => (
-                                <ServiceCard
-                                    key={service.id}
-                                    name={service.name}
-                                    description={service.description}
-                                    price={service.price || ''}
-                                    availability={service.availability}
-                                    ctaName={service.cta_name || 'Learn More'}
-                                    ctaLink={service.cta_link || '#'}
-                                    disclaimer={service.disclaimer}
-                                />
-                            ))}
-                        </ServiceListContainer>
-                    </div>
-                ))}
-        </div>
-    );
+  return (
+    <ServicesWrapper>
+      <ServicesSection>
+        {groupedServices &&
+          categories.map((category, index) => (
+            <div key={category} id={category}>
+              {/* Open the first accordion by default */}
+              <Accordion title={category} defaultOpen={index === 0}>
+                <ServiceListContainer>
+                  {groupedServices[category].map((service) => (
+                    <ServiceCard
+                      key={service.id}
+                      name={service.name}
+                      description={service.description}
+                      price={service.price || ''}
+                      availability={service.availability}
+                      ctaName={service.cta_name || 'Learn More'}
+                      ctaLink={service.cta_link || '#'}
+                      disclaimer={service.disclaimer}
+                    />
+                  ))}
+                </ServiceListContainer>
+              </Accordion>
+            </div>
+          ))}
+      </ServicesSection>
+    </ServicesWrapper>
+  );
 };
 
 export default ServicesList;

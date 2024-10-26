@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { useProductions, useDeleteProduction } from '../../../../hooks/useProduction';
+import {
+  useProductions,
+  useDeleteProduction,
+} from '../../../../hooks/useProduction';
 import Pagination from '../../../common/Pagination';
 import GlobalModal from '../../../common/Modal';
 import ProductionForm from './ProductionForm';
 import LoadingSpinner from '../../../common/LoadingSpinner';
-import NoResults from "../../../common/NoResults";
+import NoResults from '../../../common/NoResults';
+import { Production } from '../../../../api/types/dog';
 
 const ListWrapper = styled.div`
   display: flex;
@@ -106,74 +110,91 @@ const PaginationWrapper = styled.div`
 `;
 
 const AdminProductionList: React.FC = () => {
-    const [page, setPage] = useState(1);
-    const [pageSize, setPageSize] = useState(10);
-    const { data, isLoading } = useProductions(page, pageSize);
-    const deleteProduction = useDeleteProduction();
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [modalContent, setModalContent] = useState<React.ReactNode>(null);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const { data, isLoading } = useProductions({}, page, pageSize);
+  const deleteProduction = useDeleteProduction();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalContent, setModalContent] = useState<React.ReactNode>(null);
 
-    const handlePageChange = (newPage: number, newItemsPerPage: number) => {
-        setPage(newPage);
-        setPageSize(newItemsPerPage);
-    };
+  const handlePageChange = (newPage: number, newItemsPerPage: number) => {
+    setPage(newPage);
+    setPageSize(newItemsPerPage);
+  };
 
-    const handleEdit = (productionId: number) => {
-        setModalContent(<ProductionForm onClose={() => setIsModalOpen(false)} productionId={productionId} />);
-        setIsModalOpen(true);
-    };
-
-    const handleDelete = (productionId: number) => {
-        if (window.confirm('Are you sure you want to delete this production?')) {
-            deleteProduction.mutate(productionId);
-        }
-    };
-
-    const handleAddNewProduction = () => {
-        setModalContent(<ProductionForm onClose={() => setIsModalOpen(false)} />);
-        setIsModalOpen(true);
-    };
-
-    return (
-        <ListWrapper>
-            <AddNewProductionButton onClick={handleAddNewProduction}>Add New Production</AddNewProductionButton>
-            {isLoading ? (
-                <LoadingSpinner/>
-            ) : (
-                <>
-                    {data && data?.items.length > 0 ? (
-                        <ListContainer>
-                            {data.items.map((production) => (
-                                <ProductionCard key={production.id}>
-                                    <ProductionImage src={production.profilePhoto} alt={production.name} />
-                                    <ProductionName>{production.name}</ProductionName>
-                                    <ButtonContainer>
-                                        <Button onClick={() => handleEdit(production.id)}>Edit</Button>
-                                        <Button onClick={() => handleDelete(production.id)}>Delete</Button>
-                                    </ButtonContainer>
-                                </ProductionCard>
-                            ))}
-                        </ListContainer>
-                    ) : (
-                        <NoResults message={"No productions found."} description={"Try adding a production"} />
-                    )}
-                    <PaginationWrapper>
-                        {data?.totalCount !== undefined && (
-                            <Pagination
-                                totalItems={data.totalCount}
-                                currentPage={page}
-                                itemsPerPage={pageSize}
-                                onPageChange={handlePageChange}
-                            />
-                        )}
-                    </PaginationWrapper>
-                </>
-            )}
-            <GlobalModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-                {modalContent}
-            </GlobalModal>
-        </ListWrapper>
+  const handleEdit = (productionId: number) => {
+    setModalContent(
+      <ProductionForm
+        onClose={() => setIsModalOpen(false)}
+        productionId={productionId}
+      />
     );
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = (productionId: number) => {
+    if (window.confirm('Are you sure you want to delete this production?')) {
+      deleteProduction.mutate(productionId);
+    }
+  };
+
+  const handleAddNewProduction = () => {
+    setModalContent(<ProductionForm onClose={() => setIsModalOpen(false)} />);
+    setIsModalOpen(true);
+  };
+
+  return (
+    <ListWrapper>
+      <AddNewProductionButton onClick={handleAddNewProduction}>
+        Add New Production
+      </AddNewProductionButton>
+      {isLoading ? (
+        <LoadingSpinner />
+      ) : (
+        <>
+          {data && data?.items.length > 0 ? (
+            <ListContainer>
+              {data.items.map((production: Production) => (
+                <ProductionCard key={production.id}>
+                  <ProductionImage
+                    src={production.profilePhoto}
+                    alt={production.name}
+                  />
+                  <ProductionName>{production.name}</ProductionName>
+                  <ButtonContainer>
+                    <Button onClick={() => handleEdit(production.id)}>
+                      Edit
+                    </Button>
+                    <Button onClick={() => handleDelete(production.id)}>
+                      Delete
+                    </Button>
+                  </ButtonContainer>
+                </ProductionCard>
+              ))}
+            </ListContainer>
+          ) : (
+            <NoResults
+              message={'No productions found.'}
+              description={'Try adding a production'}
+            />
+          )}
+          <PaginationWrapper>
+            {data?.totalCount !== undefined && (
+              <Pagination
+                totalItems={data.totalCount}
+                currentPage={page}
+                itemsPerPage={pageSize}
+                onPageChange={handlePageChange}
+              />
+            )}
+          </PaginationWrapper>
+        </>
+      )}
+      <GlobalModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        {modalContent}
+      </GlobalModal>
+    </ListWrapper>
+  );
 };
 
 export default AdminProductionList;

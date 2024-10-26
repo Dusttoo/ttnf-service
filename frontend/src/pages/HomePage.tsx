@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import HomePageHeader from '../components/landing/Header';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { getPageBySlug } from '../api/pageApi';
-import { Page } from '../api/types/page';
+import { Page, HeroContent } from '../api/types/page';
 import { fetchWebsiteSettings } from '../api/utilsApi';
 import DOMPurify from 'dompurify';
 import ImageCarousel from '../components/common/ImageCarousel';
@@ -59,6 +60,13 @@ const HeroText = styled.div`
     font-size: 1.2rem;
     color: ${(props) => props.theme.colors.text};
     margin-bottom: 2rem;
+  }
+
+  .cta-buttons {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
   }
 
   @media (max-width: 768px) {
@@ -149,8 +157,11 @@ const SectionIcon = styled(FontAwesomeIcon)`
 const HomePage: React.FC = () => {
   const [page, setPage] = useState<Page | null>(null);
   const [settings, setSettings] = useState<WebsiteSettings | null>(null);
+  const [heroContent, setHeroContent] = useState<HeroContent | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [isModalOpen, setModalOpen] = useState(false);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -161,6 +172,17 @@ const HomePage: React.FC = () => {
         ]);
         setPage(fetchedPage);
         setSettings(fetchedSettings);
+        setHeroContent(
+          fetchedPage?.customValues?.heroContent || {
+            title: 'Welcome!',
+            description:
+              'Breeding top-notch quality, temperament, and beauty into every French Bulldog.',
+            ctaText: 'Explore our services',
+            introductionText: 'Healthy bulldogs',
+            carouselSpeed: 8000,
+            carouselImages: [],
+          }
+        );
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -175,17 +197,17 @@ const HomePage: React.FC = () => {
   if (!settings) return <ErrorComponent message={'Error loading settings'} />;
 
   const sanitizedContent = DOMPurify.sanitize(page.content);
-  const carouselImages = page?.customValues?.heroContent?.carouselImages || [];
+  const carouselImages = heroContent?.carouselImages || [];
   const announcements = page.announcements || [];
 
   const carouselSettings: ImageCarouselSettings = {
-    autoplaySpeed: page?.customValues?.heroContent?.carouselSpeed || 8000,
+    autoplaySpeed: heroContent?.carouselSpeed || 8000,
   };
 
   return (
     <HomePageContainer>
       {/* Announcements */}
-      {announcements && (
+      {announcements.length > 0 && (
         <AnnouncementSection
           title="Latest Announcements"
           announcements={announcements}
@@ -195,16 +217,21 @@ const HomePage: React.FC = () => {
       {/* Hero Section */}
       <HeroSection>
         <HeroText>
-          <h1>Discover Our Amazing French Bulldogs</h1>
+          <h1>{heroContent?.title || 'Welcome!'}</h1>
           <p>
-            Breeding top-notch quality, temperament, and beauty into every
-            French Bulldog.
+            {heroContent?.description ||
+              'Breeding top-notch quality, temperament, and beauty into every French Bulldog.'}
           </p>
-          <CTAButton
-            label="Explore our services"
-            onClick={() => console.log('add router')}
-          />
-          <CTAButton label="Join Waitlist" onClick={() => setModalOpen(true)} />
+          <div className="cta-buttons">
+            <CTAButton
+              label="Explore our services"
+              onClick={() => navigate('/services')}
+            />
+            <CTAButton
+              label="Join Waitlist"
+              onClick={() => setModalOpen(true)}
+            />
+          </div>
           <HomePageHeader
             title={page.name}
             lastUpdated={settings.updatedAt}
@@ -215,7 +242,7 @@ const HomePage: React.FC = () => {
           />
         </HeroText>
         <HeroImage>
-          {carouselImages && (
+          {carouselImages.length > 0 && (
             <ImageCarousel
               images={carouselImages}
               width={'300px'}
@@ -229,12 +256,10 @@ const HomePage: React.FC = () => {
       <IconSection>
         <IconBox>
           <SectionIcon icon={faDna} />
-
           <p>High-Quality Breeding</p>
         </IconBox>
         <IconBox>
           <SectionIcon icon={faRibbon} />
-
           <p>Champion Bloodlines</p>
         </IconBox>
         <IconBox>
