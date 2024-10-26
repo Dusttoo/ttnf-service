@@ -19,7 +19,7 @@ stages:
           - task: Docker@2
             inputs:
               containerRegistry: 'ttnfdockerservice'
-              repository: 'backend'  
+              repository: 'backend-dev'  
               command: 'buildAndPush'
               Dockerfile: 'backend/Dockerfile'
               tags: |
@@ -28,8 +28,8 @@ stages:
           - task: AzureWebAppContainer@1
             inputs:
               azureSubscription: 'ttnfconnect' 
-              appName: 'ttnfapi'  
-              containers: 'ttnfregistry.azurecr.io/backend:$(Build.BuildId)'  
+              appName: 'ttnf-api-dev'  
+              containers: 'ttnfregistry.azurecr.io/backend-dev:$(Build.BuildId)'  
 
   - stage: BuildAndDeployFrontend
     jobs:
@@ -42,7 +42,7 @@ stages:
           - task: Docker@2
             inputs:
               containerRegistry: 'ttnfdockerservice'
-              repository: 'frontend' 
+              repository: 'frontend-dev' 
               command: 'buildAndPush'
               Dockerfile: 'frontend/Dockerfile'
               buildArguments: |
@@ -55,5 +55,5 @@ stages:
           - task: AzureWebAppContainer@1
             inputs:
               azureSubscription: 'ttnfconnect'  
-              appName: 'ttnfpub'  
-              containers: 'ttnfregistry.azurecr.io/frontend:$(Build.BuildId)'  
+              appName: 'ttnf-dev'  
+              containers: 'ttnfregistry.azurecr.io/frontend-dev:$(Build.BuildId)'  
