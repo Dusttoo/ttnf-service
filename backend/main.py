@@ -135,3 +135,8 @@ async def log_requests(request: Request, call_next):
 @app.get("/")
 async def root():
     return {"message": "Welcome to the API"}
+
+
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy"}
