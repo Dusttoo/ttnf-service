@@ -57,6 +57,7 @@ class DogService:
                     selectinload(Dog.productions),
                     selectinload(Dog.children),
                 )
+                .order_by(Dog.dob.asc().nulls_last())
                 .offset(offset)
                 .limit(page_size)
             )
@@ -73,7 +74,7 @@ class DogService:
             }
             await redis_client.set(
                 cache_key, json.dumps(data, cls=DateTimeEncoder), ex=3600
-            )  # Cache for 1 hour
+            )
             return data
         except SQLAlchemyError as e:
             logger.error(f"Error in get_all_dogs: {e}", exc_info=True)
@@ -428,7 +429,7 @@ class DogService:
                     selectinload(Dog.photos),
                     selectinload(Dog.productions),
                     selectinload(Dog.children),
-                )
+                ).order_by(Dog.dob.asc().nulls_last())
 
                 if filters.get("gender"):
                     query = query.filter(Dog.gender == filters["gender"].lower())

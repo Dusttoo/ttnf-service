@@ -6,54 +6,57 @@ interface ServiceAvailabilityProps {
 }
 
 const CardContainer = styled.div`
-  background-color: ${(props) => props.theme.colors.neutralBackground};
+  background-color: ${(props) => props.theme.colors.cardBackground};
   border: 2px solid ${(props) => props.theme.colors.primary};
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2); /* Stronger shadow for depth */
   padding: 1.5rem;
+  margin-bottom: 1.5rem;
   text-align: left;
   transition: transform 0.3s ease;
 
   &:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
   }
 `;
 
 const ServiceTitle = styled.h3`
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   color: ${(props) => props.theme.colors.primary};
+  margin-bottom: 0.75rem;
 `;
 
 const ServiceDescription = styled.p`
   font-size: 1rem;
-  color: ${(props) => props.theme.colors.secondary};
-  margin: 0.5rem 0;
+  color: ${(props) => props.theme.colors.textSecondary};
+  margin: 0.5rem 0 1rem;
 `;
 
 const ServicePrice = styled.p`
-  font-size: 1.1rem;
-  color: ${(props) => props.theme.colors.accent};
+  font-size: 1.2rem;
+  color: ${(props) => props.theme.colors.text};
   font-weight: bold;
+  margin: 0.5rem 0;
 `;
 
 const ServiceAvailability = styled.p<ServiceAvailabilityProps>`
-  font-size: 0.9rem;
+  font-size: 1rem;
   color: ${(props) =>
-    props.available ? props.theme.colors.secondary : props.theme.colors.error};
+    props.available ? props.theme.colors.primary : props.theme.colors.error};
+  margin: 0.5rem 0;
 `;
 
 const CTAButton = styled.a`
   background-color: ${(props) => props.theme.colors.primary};
   color: ${(props) => props.theme.colors.white};
-  padding: 0.5rem 1rem;
+  padding: 0.6rem 1.2rem;
   border: none;
   border-radius: 4px;
   text-decoration: none;
   display: inline-block;
   cursor: pointer;
   margin-top: 1rem;
-  margin-right: 1rem;
   transition: background-color 0.3s ease;
 
   &:hover {
@@ -62,8 +65,8 @@ const CTAButton = styled.a`
 `;
 
 const Disclaimer = styled.p`
-  font-size: 0.8rem;
-  color: ${(props) => props.theme.colors.secondary};
+  font-size: 0.9rem;
+  color: ${(props) => props.theme.colors.textSecondary};
   margin-top: 1rem;
   font-style: italic;
 `;

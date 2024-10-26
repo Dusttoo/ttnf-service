@@ -13,7 +13,7 @@ const DogDetailContainer = styled.div`
   margin: auto;
   background-color: ${(props) => props.theme.colors.secondaryBackground};
   border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 `;
 
 const Header = styled.h1`
@@ -33,6 +33,7 @@ const Image = styled.img`
   border-radius: 8px;
   object-fit: cover;
   margin-bottom: 1rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 `;
 
 const Detail = styled.p`
@@ -45,10 +46,20 @@ const Section = styled.div`
   margin-bottom: 1.5rem;
 `;
 
+const PedigreeLink = styled.a`
+  color: ${(props) => props.theme.colors.accent};
+  font-weight: bold;
+  text-decoration: underline;
+  &:hover {
+    color: ${(props) => props.theme.colors.primary};
+  }
+`;
+
 const DogDetailPage: React.FC = () => {
   const { name } = useParams<{ name: string }>();
   const [searchParams] = useSearchParams();
   const [dog, setDog] = useState<Dog | null>(null);
+
   useEffect(() => {
     const fetchDog = async () => {
       if (name) {
@@ -64,16 +75,16 @@ const DogDetailPage: React.FC = () => {
 
   const getStatusColor = (status: string): string => {
     switch (status) {
-      case 'available':
-        return 'green';
-      case 'sold':
-        return 'gray';
-      case 'stud':
-        return 'blue';
-      case 'retired':
-        return 'red';
+      case 'Available For Stud':
+        return '#28a745'; // green
+      case 'Sold':
+        return '#6c757d'; // gray
+      case 'Stud':
+        return '#007bff'; // blue
+      case 'Retired':
+        return '#dc3545'; // red
       default:
-        return 'black';
+        return "#E0E0E0";
     }
   };
 
@@ -86,7 +97,7 @@ const DogDetailPage: React.FC = () => {
       <Section>
         {dog.status && (
           <StatusBadge color={getStatusColor(dog.status)}>
-            {dog.status}
+            {dog.status.charAt(0).toUpperCase() + dog.status.slice(1)}
           </StatusBadge>
         )}
         <Detail>
@@ -113,13 +124,13 @@ const DogDetailPage: React.FC = () => {
         </Detail>
         {dog.pedigreeLink && (
           <Detail>
-            <a
+            <PedigreeLink
               href={dog.pedigreeLink}
               target="_blank"
               rel="noopener noreferrer"
             >
               Pedigree Link
-            </a>
+            </PedigreeLink>
           </Detail>
         )}
         <ImageGallery images={dog.photos} />

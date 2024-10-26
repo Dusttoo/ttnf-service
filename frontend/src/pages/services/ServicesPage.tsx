@@ -2,10 +2,15 @@ import React from 'react';
 import ServicesList from '../../components/services/ServiceList';
 import styled from 'styled-components';
 
+const PageContainer = styled.div`
+  background-color: ${(props) => props.theme.colors.secondary};
+  padding: 2rem;
+  border-radius: 8px;
+`;
+
 const IntroductionSection = styled.div`
   text-align: center;
   padding: 2rem;
-  background-color: ${(props) => props.theme.colors.neutralBackground};
   border-radius: 8px;
   margin-bottom: 2rem;
 `;
@@ -13,6 +18,7 @@ const IntroductionSection = styled.div`
 const Title = styled.h1`
   font-size: 2.5rem;
   color: ${(props) => props.theme.colors.primary};
+  font-family: ${(props) => props.theme.fonts.secondary};
 `;
 
 const Tagline = styled.p`
@@ -23,12 +29,14 @@ const Tagline = styled.p`
 
 const Description = styled.p`
   font-size: 1.1rem;
-  color: ${(props) => props.theme.colors.secondary};
+  color: ${(props) => props.theme.colors.textSecondary};
+  max-width: 800px;
+  margin: 0 auto;
 `;
 
 const ServicesPage: React.FC = () => {
   return (
-    <div>
+    <PageContainer>
       <IntroductionSection>
         <Title>Our Services</Title>
         <Tagline>Comprehensive care tailored for your pets' needs</Tagline>
@@ -39,7 +47,7 @@ const ServicesPage: React.FC = () => {
         </Description>
       </IntroductionSection>
       <ServicesList />
-    </div>
+    </PageContainer>
   );
 };
 

@@ -11,7 +11,7 @@ const NoResultsContainer = styled.div`
   padding: 2rem;
   text-align: center;
   color: ${(props) => props.theme.colors.primary};
-  background-color: ${(props) => props.theme.colors.background};
+  background-color: ${(props) => props.theme.colors.cardBackground};
   border: 1px solid ${(props) => props.theme.colors.border};
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);

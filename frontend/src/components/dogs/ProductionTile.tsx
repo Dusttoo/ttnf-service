@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { Production } from '../../api/types/dog';
 
 const TileContainer = styled.div`
-  background-color: ${(props) => props.theme.colors.secondaryBackground};
+  background-color: ${(props) => props.theme.colors.cardBackground};
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   overflow: hidden;

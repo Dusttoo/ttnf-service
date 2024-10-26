@@ -36,9 +36,9 @@ const HeroSection = styled.div`
   justify-content: space-between;
   align-items: center;
   padding: 4rem 2rem;
-  background: ${(props) => props.theme.colors.primaryLight};
+  background: ${(props) => props.theme.colors.neutralBackground};
   border-radius: 20px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 
   @media (max-width: 768px) {
     flex-direction: column;
@@ -52,7 +52,7 @@ const HeroText = styled.div`
 
   h1 {
     font-size: 3rem;
-    color: ${(props) => props.theme.colors.primaryDark};
+    color: ${(props) => props.theme.colors.white};
     margin-bottom: 1rem;
   }
 
@@ -89,6 +89,9 @@ const IconSection = styled.div`
   width: 100%;
   max-width: 1200px;
   margin: 2rem 0;
+  background-color: ${(props) => props.theme.colors.secondaryBackground};
+  padding: 1.5rem;
+  border-radius: 10px;
 
   @media (max-width: 768px) {
     flex-direction: column;
@@ -110,7 +113,7 @@ const IconBox = styled.div`
 
   p {
     font-size: 1rem;
-    color: ${(props) => props.theme.colors.textMuted};
+    color: ${(props) => props.theme.colors.text};
   }
 `;
 
@@ -139,13 +142,21 @@ const AboutSection = styled.section`
   flex: 1;
   padding: 2rem;
   margin-left: 2rem;
-  background-color: ${(props) => props.theme.colors.secondaryBackground};
+  background-color: ${(props) => props.theme.colors.cardBackground}; // Darker card background
   border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 
   @media (max-width: 768px) {
     margin-left: 0;
     margin-top: 2rem;
+  }
+
+  h2 {
+    color: ${(props) => props.theme.colors.white}; // Lightened for readability
+  }
+
+  p {
+    color: ${(props) => props.theme.colors.textSecondary}; // Use secondary text color for less emphasis
   }
 `;
 

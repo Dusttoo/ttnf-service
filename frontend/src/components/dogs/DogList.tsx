@@ -100,7 +100,7 @@ const DogList: React.FC<{
   owned?: boolean;
 }> = ({ defaultGender, owned }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [itemsPerPage, setItemsPerPage] = useState(100);
   const [selectedTab, setSelectedTab] = useState<'active' | 'retired'>(
     'active'
   );

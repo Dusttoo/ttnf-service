@@ -7,7 +7,7 @@ import { StatusBadge } from '../common/StatusBadge';
 import { LinkComponent } from '../common/Link';
 
 const Tile = styled.div`
-  background-color: ${(props) => props.theme.colors.secondaryBackground};
+  background-color: ${(props) => props.theme.colors.cardBackground};
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   overflow: hidden;
@@ -35,13 +35,13 @@ const Tile = styled.div`
 const ImageContainer = styled.div`
   width: 100%;
   height: 0;
-  padding-top: 56.25%; /* This maintains a 16:9 aspect ratio (you can adjust for other ratios) */
+  padding-top: 56.25%;
   position: relative;
   overflow: hidden;
   border-radius: 8px 8px 0 0;
 
   @media (max-width: 768px) {
-    padding-top: 75%; /* For mobile screens, adjust aspect ratio to be taller if needed */
+    padding-top: 75%;
   }
 `;
 
@@ -124,16 +124,16 @@ const Description = styled(Detail)`
 const DogTile: React.FC<{ dog: Dog }> = ({ dog }) => {
   const getStatusColor = (status: string): string => {
     switch (status) {
-      case 'available':
-        return 'green';
-      case 'sold':
-        return 'gray';
-      case 'stud':
-        return 'blue';
-      case 'retired':
-        return 'red';
+      case 'Available For Stud':
+        return '#28a745'; // green
+      case 'Sold':
+        return '#6c757d'; // gray
+      case 'Stud':
+        return '#007bff'; // blue
+      case 'Retired':
+        return '#dc3545'; // red
       default:
-        return 'black';
+        return "#E0E0E0";
     }
   };
   const slug = dog.gender === GenderEnum.Male ? 'males' : 'females'

@@ -19,7 +19,8 @@ const FilterContainer = styled.div`
 `;
 
 const DropdownButton = styled.button`
-  background-color: white;
+  background-color: ${(props) => props.theme.colors.secondaryBackground};
+  color: ${(props) => props.theme.colors.text};
   border: 1px solid ${(props) => props.theme.colors.primary};
   border-radius: 4px;
   padding: 0.5rem 1rem;
@@ -29,14 +30,20 @@ const DropdownButton = styled.button`
   justify-content: space-between;
   width: 100%;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s;
+
+  &:hover {
+    background-color: ${(props) => props.theme.colors.primary};
+    color: ${(props) => props.theme.colors.white};
+  }
 `;
 
 const DropdownContent = styled.div<{ show: boolean }>`
   display: ${(props) => (props.show ? 'block' : 'none')};
   position: absolute;
-  background-color: white;
+  background-color: ${(props) => props.theme.colors.neutralBackground};
   border-radius: 12px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
   padding: 1rem;
   z-index: 1;
   width: 100%;
@@ -61,19 +68,57 @@ const CheckboxContainer = styled.div`
   gap: 0.5rem;
 `;
 
-const Checkbox = styled.input`
-  margin-right: 0.5rem;
-  width: 16px;
-  height: 16px;
-  accent-color: ${(props) => props.theme.colors.primary};
+const CheckboxLabel = styled.label`
+  font-size: 1rem;
+  color: ${(props) => props.theme.colors.textSecondary};
+  font-weight: 500;
+`;
+
+const StyledCheckbox = styled.input`
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  background-color: ${(props) => props.theme.colors.neutralBackground};
+  border: 2px solid ${(props) => props.theme.colors.primary};
+  border-radius: 4px;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:checked {
+    background-color: ${(props) => props.theme.colors.primary};
+    border-color: ${(props) => props.theme.colors.primary};
+  }
+
+  &:checked::after {
+    content: '✔';
+    color: ${(props) => props.theme.colors.white};
+    font-size: 12px;
+    position: absolute;
+  }
+
+  &:hover {
+    background-color: ${(props) => props.theme.colors.primaryLight};
+  }
 `;
 
 const InputSelect = styled.select`
   padding: 0.5rem;
   width: 100%;
   border-radius: 4px;
-  border: 1px solid ${(props) => props.theme.colors.border};
+  border: 1px solid ${(props) => props.theme.colors.primary};
+  background-color: ${(props) => props.theme.colors.secondaryBackground};
+  color: ${(props) => props.theme.colors.text};
+  transition: background-color 0.3s, color 0.3s;
+
+  &:hover {
+    background-color: ${(props) => props.theme.colors.primary};
+    color: ${(props) => props.theme.colors.white};
+  }
 `;
+
 const ButtonContainer = styled.div`
   display: flex;
   justify-content: space-between;
@@ -97,8 +142,12 @@ const ApplyButton = styled.button`
   font-weight: 600;
   border-radius: 4px;
   cursor: pointer;
-  text-align: center;
   border: none;
+  transition: background-color 0.3s;
+
+  &:hover {
+    background-color: ${(props) => props.theme.colors.accent};
+  }
 `;
 
 const FilterComponent: React.FC<FilterProps> = ({
@@ -226,13 +275,13 @@ const FilterComponent: React.FC<FilterProps> = ({
             <SectionTitle>Status</SectionTitle>
             {Object.values(StatusEnum).map((statusOption) => (
               <CheckboxContainer key={statusOption}>
-                <Checkbox
+                <StyledCheckbox
                   type="checkbox"
                   value={statusOption}
                   checked={selectedFilters.status!.includes(statusOption)}
                   onChange={() => handleCheckboxChange(statusOption)}
                 />
-                <label>{statusOption}</label>
+                <CheckboxLabel>{statusOption}</CheckboxLabel>
               </CheckboxContainer>
             ))}
           </Section>
@@ -243,20 +292,20 @@ const FilterComponent: React.FC<FilterProps> = ({
           <Section>
             <SectionTitle>Gender</SectionTitle>
             <CheckboxContainer>
-              <Checkbox
+              <StyledCheckbox
                 type="checkbox"
                 checked={selectedFilters.gender === GenderEnum.Male}
                 onChange={() => handleGenderChange(GenderEnum.Male)}
               />
-              <label>Male</label>
+              <CheckboxLabel>Male</CheckboxLabel>
             </CheckboxContainer>
             <CheckboxContainer>
-              <Checkbox
+              <StyledCheckbox
                 type="checkbox"
                 checked={selectedFilters.gender === GenderEnum.Female}
                 onChange={() => handleGenderChange(GenderEnum.Female)}
               />
-              <label>Female</label>
+              <CheckboxLabel>Female</CheckboxLabel>
             </CheckboxContainer>
           </Section>
         )}

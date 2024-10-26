@@ -6,7 +6,7 @@ export const GlobalStyle = createGlobalStyle`
     margin: 0;
     font-family: ${(props) => props.theme.fonts.primary};
     background-color: ${(props) => props.theme.colors.neutralBackground};
-    color: ${(props) => props.theme.colors.secondary};
+    color: ${(props) => props.theme.colors.text};
     height: 100%;
     font-family: 'Roboto', sans-serif;
   }

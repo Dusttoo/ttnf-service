@@ -10,17 +10,24 @@ const PaginationContainer = styled.div`
 `;
 
 const PageButton = styled.button<{ active?: boolean }>`
-  background-color: ${(props) => (props.active ? props.theme.colors.primary : 'white')};
-  color: ${(props) => (props.active ? 'white' : props.theme.colors.primary)};
+  background-color: ${(props) => (props.active ? props.theme.colors.primary : props.theme.colors.secondaryBackground)};
+  color: ${(props) => (props.active ? props.theme.colors.white : props.theme.colors.text)};
   border: 1px solid ${(props) => props.theme.colors.primary};
   border-radius: 4px;
   margin: 0 0.25rem;
   padding: 0.5rem 0.75rem;
   cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
 
   &:hover {
-    background-color: ${(props) => props.theme.colors.primaryLight};
-    color: white;
+    background-color: ${(props) => props.theme.colors.primary};
+    color: ${(props) => props.theme.colors.white};
+  }
+
+  &:disabled {
+    background-color: ${(props) => props.theme.colors.secondaryBackground};
+    color: ${(props) => props.theme.colors.textSecondary};
+    cursor: not-allowed;
   }
 `;
 
@@ -29,6 +36,15 @@ const Select = styled.select`
   padding: 0.5rem;
   border-radius: 4px;
   border: 1px solid ${(props) => props.theme.colors.primary};
+  background-color: ${(props) => props.theme.colors.secondaryBackground};
+  color: ${(props) => props.theme.colors.text};
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+
+  &:hover {
+    background-color: ${(props) => props.theme.colors.primaryLight};
+    color: ${(props) => props.theme.colors.white};
+  }
 `;
 
 interface PaginationProps {
@@ -44,7 +60,7 @@ const Pagination: React.FC<PaginationProps> = ({
     totalItems,
     currentPage,
     itemsPerPage,
-    itemsPerPageOptions = [5, 10, 15, 20],
+    itemsPerPageOptions = [5, 10, 15, 20, 100],
     scrollToTop = true,
     onPageChange,
 }) => {
@@ -58,7 +74,7 @@ const Pagination: React.FC<PaginationProps> = ({
         if (pageNumber > 0 && pageNumber <= totalPages) {
             onPageChange(pageNumber, itemsPerPage);
             if (scrollToTop) {
-                window.scrollTo(0, 0)
+                window.scrollTo(0, 0);
             }
         }
     };

@@ -1,13 +1,16 @@
 export const theme = {
     colors: {
         primary: "#E76F00", // Primary Color (Orange)
-        secondary: "#2D2D2D", // Secondary Color (Black)
+        secondary: "#2D2D2D", // Secondary Color (Dark Background)
         accent: "#a84824", // Accent Color (Light Orange)
-        neutralBackground: "#FDFDFD", // Neutral Background (Off-White)
-        secondaryBackground: "#F0F0F0", // Secondary Background (Light Grey)
+        neutralBackground: "#1F1F1F", // Dark Neutral Background for the main sections
+        secondaryBackground: "#393939", // Slightly lighter background for content containers
+        cardBackground: "#4A4A4A",
         white: "#F8F9EE", // White
         black: "#000000", // Black
-        error: '#FF4C4C',
+        text: "#E0E0E0", // Light grey for text to enhance readability
+        textSecondary: "#A0A0A0", // Dimmed text for less important text areas
+        error: '#FF4C4C', // Error color
     },
     fonts: {
         primary: "Roboto, Arial, sans-serif", // Primary Font
@@ -16,22 +19,23 @@ export const theme = {
     ui: {
         button: {
             primary: {
-                background: "#E76F00",
-                color: "#F8F9EE",
+                background: "#E76F00", // Keep the bright primary button
+                color: "#F8F9EE", // Light text for contrast
             },
             secondary: {
-                background: "#F9AA33",
-                color: "#2D2D2D",
+                background: "#393939", // Darker secondary button background
+                color: "#E0E0E0", // Light text color for accessibility
             },
         },
         input: {
-            background: "#FDFDFD",
-            border: "#E76F00",
+            background: "#393939", // Darker input background
+            border: "#E76F00", // Orange border to make inputs stand out
+            color: "#E0E0E0", // Light text color for input readability
         },
         nav: {
-            background: "#2D2D2D",
-            color: "#F8F9EE",
-            hover: "#E76F00",
+            background: "#2D2D2D", // Dark navigation background
+            color: "#F8F9EE", // Light text in nav links
+            hover: "#E76F00", // Hover color for interaction feedback
         },
     },
 };

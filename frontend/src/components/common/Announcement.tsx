@@ -7,10 +7,10 @@ import {formatDate} from '../../utils/dates'
 import DOMPurify from 'dompurify';
 
 const AnnouncementContainer = styled.div`
-  background: linear-gradient(135deg, ${(props) => props.theme.colors.secondaryBackground} 0%, ${(props) => props.theme.colors.primaryLight} 100%);
+  background: ${(props) => props.theme.colors.secondaryBackground};
   border: 2px solid ${(props) => props.theme.colors.primary};
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   margin: 2rem 0;
   padding: 2rem;
   transition: transform 0.2s ease;
@@ -18,7 +18,7 @@ const AnnouncementContainer = styled.div`
 
   &:hover {
     transform: translateY(-5px);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
   }
 `;
 
@@ -31,14 +31,14 @@ const AnnouncementHeader = styled.div`
 
 const AnnouncementTitle = styled.h3`
   font-size: 20px;
-  color: ${(props) => props.theme.colors.primaryDark};
+  color: ${(props) => props.theme.colors.text};
   font-weight: bold;
   margin: 0;
 `;
 
 const ToggleIcon = styled.div`
   font-size: 20px;
-  color: ${(props) => props.theme.colors.text};
+  color: ${(props) => props.theme.colors.textSecondary};
 `;
 
 const AnnouncementList = styled.ul`
@@ -50,14 +50,10 @@ const AnnouncementList = styled.ul`
 const AnnouncementItem = styled.li`
   padding: 1.5rem;
   margin-bottom: 1rem;
-  background-color: ${(props) => props.theme.colors.lightBackground};
+  background-color: ${(props) => props.theme.colors.cardBackground};
   border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
   transition: background-color 0.2s ease;
-
-  &:hover {
-    background-color: ${(props) => props.theme.colors.secondaryLight};
-  }
 
   &:last-child {
     margin-bottom: 0;
@@ -72,13 +68,17 @@ const AnnouncementDetails = styled.div`
 
 const DateText = styled.span`
   font-size: 14px;
-  color: ${(props) => props.theme.colors.textLight};
+  color: ${(props) => props.theme.colors.textSecondary};
+`;
+
+const AnnouncementTitleText = styled.strong`
+  color: ${(props) => props.theme.colors.textSecondary};
 `;
 
 const AnnouncementMessage = styled.div`
   font-size: 16px;
   margin: 0.5rem 0;
-  color: ${(props) => props.theme.colors.text};
+  color: ${(props) => props.theme.colors.textSecondary};
 `;
 
 const HtmlAnnouncementMessage: React.FC<{ content: string }> = ({ content }) => (
@@ -98,8 +98,6 @@ const AnnouncementSection: React.FC<AnnouncementProps> = ({ announcements, title
   const toggleVisibility = () => {
     setIsVisible((prevState) => !prevState);
   };
-
-  console.log(announcements)
 
   const getIcon = (category?: AnnouncementCategory) => {
     switch (category) {
@@ -132,7 +130,7 @@ const AnnouncementSection: React.FC<AnnouncementProps> = ({ announcements, title
               <AnnouncementDetails>
                 <div>
                   <AnnouncementIcon icon={getIcon(announcement.category)} />
-                  <strong>{announcement.title}</strong>
+                  <AnnouncementTitleText>{announcement.title}</AnnouncementTitleText>
                 </div>
                 <DateText>{formatDate(announcement.date)}</DateText>
               </AnnouncementDetails>
