@@ -15,6 +15,8 @@ class Settings(BaseSettings):
     redis_db: str
     redis_password: str
     env: str
+    acs_email_connection_string: str
+    acs_sender_email: str
 
     class Config:
         env_file = ".env"

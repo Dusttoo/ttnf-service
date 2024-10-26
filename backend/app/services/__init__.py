@@ -9,3 +9,5 @@ from app.services.page_service import PageService
 from app.services.navigation_service import NavigationService
 from app.services.services_service import ServicesService
 from app.services.waitlist_service import WaitlistService
+from app.services.contact_service import ContactService
+from app.services.email_service import AzureEmailService

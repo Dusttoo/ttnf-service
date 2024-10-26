@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronDown, faChevronUp, faPaw, faBullhorn, faDog, faBasketShopping, faCircleInfo } from '@fortawesome/free-solid-svg-icons';
 import { AnnouncementCategory, Announcement, AnnouncementProps } from '../../api/types/core';
 import {formatDate} from '../../utils/dates'
+import DOMPurify from 'dompurify';
 
 const AnnouncementContainer = styled.div`
   background: linear-gradient(135deg, ${(props) => props.theme.colors.secondaryBackground} 0%, ${(props) => props.theme.colors.primaryLight} 100%);
@@ -74,11 +75,17 @@ const DateText = styled.span`
   color: ${(props) => props.theme.colors.textLight};
 `;
 
-const AnnouncementMessage = styled.p`
+const AnnouncementMessage = styled.div`
   font-size: 16px;
   margin: 0.5rem 0;
   color: ${(props) => props.theme.colors.text};
 `;
+
+const HtmlAnnouncementMessage: React.FC<{ content: string }> = ({ content }) => (
+  <AnnouncementMessage
+    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content) }}
+  />
+);
 
 const AnnouncementIcon = styled(FontAwesomeIcon)`
   margin-right: 10px;
@@ -91,6 +98,8 @@ const AnnouncementSection: React.FC<AnnouncementProps> = ({ announcements, title
   const toggleVisibility = () => {
     setIsVisible((prevState) => !prevState);
   };
+
+  console.log(announcements)
 
   const getIcon = (category?: AnnouncementCategory) => {
     switch (category) {
@@ -127,7 +136,7 @@ const AnnouncementSection: React.FC<AnnouncementProps> = ({ announcements, title
                 </div>
                 <DateText>{formatDate(announcement.date)}</DateText>
               </AnnouncementDetails>
-              <AnnouncementMessage>{announcement.message}</AnnouncementMessage>
+              <HtmlAnnouncementMessage content={announcement.message} />
             </AnnouncementItem>
           ))}
         </AnnouncementList>

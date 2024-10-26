@@ -260,7 +260,7 @@ const HomePage: React.FC = () => {
         </IconBox>
         <IconBox>
           <SectionIcon icon={faRibbon} />
-          <p>Champion Bloodlines</p>
+          <p>Excellent Temperament</p>
         </IconBox>
         <IconBox>
           <SectionIcon icon={faSuitcaseMedical} />
