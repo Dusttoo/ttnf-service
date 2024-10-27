@@ -55,8 +55,7 @@ origins = [
     "http://0.0.0.0:3000/",
     "https://0.0.0.0:3000/",
     "https://texastopnotchfrenchies.com",
-    "https://dev.texastopnotchfrenchies.com",
-    "https://ttnfpub.azurewebsites.net"
+    "https://dev.texastopnotchfrenchies.com"
 ]
 
 app.add_middleware(
