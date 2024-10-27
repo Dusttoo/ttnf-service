@@ -1,5 +1,6 @@
 from pydantic_settings import BaseSettings
-from typing import List
+from typing import List, Optional
+from pydantic import Field
 
 
 class Settings(BaseSettings):
@@ -18,18 +19,17 @@ class Settings(BaseSettings):
     env: str
     acs_email_connection_string: str
     acs_sender_email: str
-    acs_recipient_emails: List[str]
+    acs_recipient_emails: Optional[str] = Field(default=None)
 
     class Config:
         env_file = ".env"
 
-    @classmethod
-    def parse_comma_separated_emails(cls, v: str) -> List[str]:
-        return v.split(",") if v else []
-
-    _validators = {
-        'acs_recipient_emails': parse_comma_separated_emails,
-    }
+    @property
+    def parsed_recipient_emails(self) -> List[str]:
+        # Returns a list of recipient emails
+        if self.acs_recipient_emails:
+            return [email.strip() for email in self.acs_recipient_emails.split(",")]
+        return []
 
 
 settings = Settings()
