@@ -74,7 +74,7 @@ stages:
     dependsOn: ApprovalGate
     jobs:
       - deployment: DeployBackendProd
-        environment: 'Production'  # Set environment here at the deployment level
+        environment: 'Production'
         strategy:
           runOnce:
             deploy:
@@ -87,8 +87,8 @@ stages:
                     containerRegistry: 'ttnfdockerservice'
                     repository: 'backend-dev'
                     command: 'tag'
-                    imageName: 'backend-dev:$(Build.BuildId)-dev'
-                    targetImageName: 'backend:prod'
+                    imageName: 'ttnfregistry.azurecr.io/backend-dev:$(Build.BuildId)-dev'  # Source image
+                    targetImageName: 'ttnfregistry.azurecr.io/backend:prod'                # Target image
 
                 - task: Docker@2
                   displayName: 'Push Backend Image to Production'
@@ -96,7 +96,7 @@ stages:
                     containerRegistry: 'ttnfdockerservice'
                     repository: 'backend'
                     command: 'push'
-                    imageName: 'backend:prod'
+                    imageName: 'ttnfregistry.azurecr.io/backend:prod'
 
                 - task: AzureWebAppContainer@1
                   inputs:
@@ -105,7 +105,7 @@ stages:
                     containers: 'ttnfregistry.azurecr.io/backend:prod'
 
       - deployment: DeployFrontendProd
-        environment: 'Production'  # Set environment here at the deployment level
+        environment: 'Production'
         strategy:
           runOnce:
             deploy:
@@ -118,8 +118,8 @@ stages:
                     containerRegistry: 'ttnfdockerservice'
                     repository: 'frontend-dev'
                     command: 'tag'
-                    imageName: 'frontend-dev:$(Build.BuildId)-dev'
-                    targetImageName: 'frontend:prod'
+                    imageName: 'ttnfregistry.azurecr.io/frontend-dev:$(Build.BuildId)-dev'  # Source image
+                    targetImageName: 'ttnfregistry.azurecr.io/frontend:prod'                 # Target image
 
                 - task: Docker@2
                   displayName: 'Push Frontend Image to Production'
@@ -127,7 +127,7 @@ stages:
                     containerRegistry: 'ttnfdockerservice'
                     repository: 'frontend'
                     command: 'push'
-                    imageName: 'frontend:prod'
+                    imageName: 'ttnfregistry.azurecr.io/frontend:prod'
 
                 - task: AzureWebAppContainer@1
                   inputs:
