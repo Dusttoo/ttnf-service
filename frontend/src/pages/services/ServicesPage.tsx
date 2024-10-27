@@ -6,7 +6,14 @@ const PageContainer = styled.div`
   background-color: ${(props) => props.theme.colors.secondary};
   padding: 2rem;
   border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  max-width: 1200px;  /* Center the content and allow it to expand */
+  margin: auto;
 `;
+
 
 const IntroductionSection = styled.div`
   text-align: center;
@@ -35,20 +42,20 @@ const Description = styled.p`
 `;
 
 const ServicesPage: React.FC = () => {
-  return (
-    <PageContainer>
-      <IntroductionSection>
-        <Title>Our Services</Title>
-        <Tagline>Comprehensive care tailored for your pets' needs</Tagline>
-        <Description>
-          At Texas Top Notch Frenchies, we provide a range of services including
-          reproductive health, vaccinations, microchipping, and nutrition.
-          Explore our offerings below to find the best solutions for your pet.
-        </Description>
-      </IntroductionSection>
-      <ServicesList />
-    </PageContainer>
-  );
+    return (
+        <PageContainer>
+            <IntroductionSection>
+                <Title>Our Services</Title>
+                <Tagline>Comprehensive care tailored for your pets' needs</Tagline>
+                <Description>
+                    At Texas Top Notch Frenchies, we provide a range of services including
+                    reproductive health, vaccinations, microchipping, and nutrition.
+                    Explore our offerings below to find the best solutions for your pet.
+                </Description>
+            </IntroductionSection>
+            <ServicesList />
+        </PageContainer>
+    );
 };
 
 export default ServicesPage;

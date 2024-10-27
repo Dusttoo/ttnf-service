@@ -82,20 +82,21 @@ stages:
                 - checkout: self
 
                 - task: Docker@2
+                  displayName: 'Tag Backend Image for Production'
                   inputs:
                     containerRegistry: 'ttnfdockerservice'
                     repository: 'backend-dev'
                     command: 'tag'
-                    imageName: 'ttnfregistry.azurecr.io/backend-dev:$(Build.BuildId)-dev'
-                    targetImageName: 'ttnfregistry.azurecr.io/backend:prod'
-                    tags: 'prod'
+                    imageName: 'backend-dev:$(Build.BuildId)-dev'
+                    targetImageName: 'backend:prod'
 
                 - task: Docker@2
+                  displayName: 'Push Backend Image to Production'
                   inputs:
                     containerRegistry: 'ttnfdockerservice'
                     repository: 'backend'
                     command: 'push'
-                    imageName: 'ttnfregistry.azurecr.io/backend:prod'
+                    imageName: 'backend:prod'
 
                 - task: AzureWebAppContainer@1
                   inputs:
@@ -112,20 +113,21 @@ stages:
                 - checkout: self
 
                 - task: Docker@2
+                  displayName: 'Tag Frontend Image for Production'
                   inputs:
                     containerRegistry: 'ttnfdockerservice'
                     repository: 'frontend-dev'
                     command: 'tag'
-                    imageName: 'ttnfregistry.azurecr.io/frontend-dev:$(Build.BuildId)-dev'
-                    targetImageName: 'ttnfregistry.azurecr.io/frontend:prod'
-                    tags: 'prod'
+                    imageName: 'frontend-dev:$(Build.BuildId)-dev'
+                    targetImageName: 'frontend:prod'
 
                 - task: Docker@2
+                  displayName: 'Push Frontend Image to Production'
                   inputs:
                     containerRegistry: 'ttnfdockerservice'
                     repository: 'frontend'
                     command: 'push'
-                    imageName: 'ttnfregistry.azurecr.io/frontend:prod'
+                    imageName: 'frontend:prod'
 
                 - task: AzureWebAppContainer@1
                   inputs:

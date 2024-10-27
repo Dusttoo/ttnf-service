@@ -7,6 +7,10 @@ const AccordionContainer = styled.div`
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   background-color: ${(props) => props.theme.colors.secondaryBackground};
+
+  @media (max-width: 768px) {
+    margin: 0.5rem 0;  /* Reduce margin for more compact stacking */
+  }
 `;
 
 const AccordionHeader = styled.div`
@@ -25,6 +29,11 @@ const AccordionHeader = styled.div`
     background-color: ${(props) => props.theme.colors.accent};
     color: ${(props) => props.theme.colors.text};
   }
+
+  @media (max-width: 768px) {
+    padding: 0.8rem;  /* Reduce padding for mobile */
+    font-size: 0.9rem; /* Adjust font size for smaller screens */
+  }
 `;
 
 const AccordionContent = styled.div<{ isOpen: boolean }>`
@@ -37,32 +46,32 @@ const AccordionContent = styled.div<{ isOpen: boolean }>`
   border-radius: 0 0 8px 8px;
 
   @media (max-width: 768px) {
-    padding: ${(props) => (props.isOpen ? '0.5rem' : '0')};
+    padding: ${(props) => (props.isOpen ? '0.5rem' : '0')};  /* Compact padding for mobile */
   }
 `;
 
 interface AccordionProps {
-  title: string;
-  children: ReactNode;
-  defaultOpen?: boolean;
+    title: string;
+    children: ReactNode;
+    defaultOpen?: boolean;
 }
 
 const Accordion: React.FC<AccordionProps> = ({
-  title,
-  children,
-  defaultOpen = false,
-}) => {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
+                                                 title,
+                                                 children,
+                                                 defaultOpen = false,
+                                             }) => {
+    const [isOpen, setIsOpen] = useState(defaultOpen);
 
-  return (
-    <AccordionContainer>
-      <AccordionHeader onClick={() => setIsOpen(!isOpen)}>
-        <span>{title}</span>
-        <span>{isOpen ? '-' : '+'}</span>
-      </AccordionHeader>
-      <AccordionContent isOpen={isOpen}>{children}</AccordionContent>
-    </AccordionContainer>
-  );
+    return (
+        <AccordionContainer>
+            <AccordionHeader onClick={() => setIsOpen(!isOpen)}>
+                <span>{title}</span>
+                <span>{isOpen ? '-' : '+'}</span>
+            </AccordionHeader>
+            <AccordionContent isOpen={isOpen}>{children}</AccordionContent>
+        </AccordionContainer>
+    );
 };
 
 export default Accordion;

@@ -10,6 +10,8 @@ const ServicesWrapper = styled.div`
   flex-direction: column;
   gap: 2rem;
   padding: 2rem;
+  width: 100%;         /* Let it take full width */
+  max-width: 1000px;   /* Limit the max width */
   box-sizing: border-box;
 
   @media (max-width: 768px) {
@@ -59,30 +61,30 @@ const ServicesList: React.FC = () => {
 
     return (
         <ServicesWrapper>
-            <ServicesSection>
-                {groupedServices &&
-                    categories.map((category, index) => (
-                        <div key={category} id={category}>
-                            {/* Open the first accordion by default */}
-                            <Accordion title={category} defaultOpen={index === 0}>
-                                <ServiceListContainer>
-                                    {groupedServices[category].map((service) => (
-                                        <ServiceCard
-                                            key={service.id}
-                                            name={service.name}
-                                            description={service.description}
-                                            price={service.price || ''}
-                                            availability={service.availability}
-                                            ctaName={service.cta_name || 'Learn More'}
-                                            ctaLink={service.cta_link || '#'}
-                                            disclaimer={service.disclaimer}
-                                        />
-                                    ))}
-                                </ServiceListContainer>
-                            </Accordion>
-                        </div>
-                    ))}
-            </ServicesSection>
+            {/*<ServicesSection>*/}
+            {groupedServices &&
+                categories.map((category, index) => (
+                    <div key={category} id={category}>
+                        {/* Open the first accordion by default */}
+                        <Accordion title={category} defaultOpen={index === 0}>
+                            <ServiceListContainer>
+                                {groupedServices[category].map((service) => (
+                                    <ServiceCard
+                                        key={service.id}
+                                        name={service.name}
+                                        description={service.description}
+                                        price={service.price || ''}
+                                        availability={service.availability}
+                                        ctaName={service.cta_name || 'Learn More'}
+                                        ctaLink={service.cta_link || '#'}
+                                        disclaimer={service.disclaimer}
+                                    />
+                                ))}
+                            </ServiceListContainer>
+                        </Accordion>
+                    </div>
+                ))}
+            {/*</ServicesSection>*/}
         </ServicesWrapper>
     );
 };
