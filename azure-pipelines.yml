@@ -81,14 +81,9 @@ stages:
               steps:
                 - checkout: self
 
-                - task: Docker@2
+                - script: |
+                    docker tag ttnfregistry.azurecr.io/backend-dev:$(Build.BuildId)-dev ttnfregistry.azurecr.io/backend:prod
                   displayName: 'Tag Backend Image for Production'
-                  inputs:
-                    containerRegistry: 'ttnfdockerservice'
-                    repository: 'backend-dev'
-                    command: 'tag'
-                    imageName: 'ttnfregistry.azurecr.io/backend-dev:$(Build.BuildId)-dev'  # Source image
-                    targetImageName: 'ttnfregistry.azurecr.io/backend:prod'                # Target image
 
                 - task: Docker@2
                   displayName: 'Push Backend Image to Production'
@@ -112,14 +107,9 @@ stages:
               steps:
                 - checkout: self
 
-                - task: Docker@2
+                - script: |
+                    docker tag ttnfregistry.azurecr.io/frontend-dev:$(Build.BuildId)-dev ttnfregistry.azurecr.io/frontend:prod
                   displayName: 'Tag Frontend Image for Production'
-                  inputs:
-                    containerRegistry: 'ttnfdockerservice'
-                    repository: 'frontend-dev'
-                    command: 'tag'
-                    imageName: 'ttnfregistry.azurecr.io/frontend-dev:$(Build.BuildId)-dev'  # Source image
-                    targetImageName: 'ttnfregistry.azurecr.io/frontend:prod'                 # Target image
 
                 - task: Docker@2
                   displayName: 'Push Frontend Image to Production'
