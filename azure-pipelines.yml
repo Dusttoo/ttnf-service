@@ -85,27 +85,20 @@ stages:
                 - task: Docker@2
                   inputs:
                     command: 'login'
-                    containerRegistry: 'ttnfdockerservice'  # Ensure this is the ACR service connection
+                    containerRegistry: 'ttnfdockerservice'
 
                 # Pull, Tag, and Push Backend Image
                 - script: |
                     docker pull ttnfregistry.azurecr.io/backend-dev:$(Build.BuildId)-dev
-                    docker tag ttnfregistry.azurecr.io/backend-dev:$(Build.BuildId)-dev ttnfregistry.azurecr.io/backend:prod
-                  displayName: 'Tag and Pull Backend Image for Production'
-
-                - task: Docker@2
-                  displayName: 'Push Backend Image to Production'
-                  inputs:
-                    containerRegistry: 'ttnfdockerservice'
-                    repository: 'backend'
-                    command: 'push'
-                    imageName: 'ttnfregistry.azurecr.io/backend:prod'
+                    docker tag ttnfregistry.azurecr.io/backend-dev:$(Build.BuildId)-dev ttnfregistry.azurecr.io/backend:$(Build.BuildId)-prod
+                    docker push ttnfregistry.azurecr.io/backend:$(Build.BuildId)-prod
+                  displayName: 'Tag and Push Backend Image for Production'
 
                 - task: AzureWebAppContainer@1
                   inputs:
                     azureSubscription: 'ttnfconnect'
                     appName: 'ttnfapi'
-                    containers: 'ttnfregistry.azurecr.io/backend:prod'
+                    containers: 'ttnfregistry.azurecr.io/backend:$(Build.BuildId)-prod'
 
       - deployment: DeployFrontendProd
         environment: 'Production'
@@ -124,19 +117,12 @@ stages:
                 # Pull, Tag, and Push Frontend Image
                 - script: |
                     docker pull ttnfregistry.azurecr.io/frontend-dev:$(Build.BuildId)-dev
-                    docker tag ttnfregistry.azurecr.io/frontend-dev:$(Build.BuildId)-dev ttnfregistry.azurecr.io/frontend:prod
-                  displayName: 'Tag and Pull Frontend Image for Production'
-
-                - task: Docker@2
-                  displayName: 'Push Frontend Image to Production'
-                  inputs:
-                    containerRegistry: 'ttnfdockerservice'
-                    repository: 'frontend'
-                    command: 'push'
-                    imageName: 'ttnfregistry.azurecr.io/frontend:prod'
+                    docker tag ttnfregistry.azurecr.io/frontend-dev:$(Build.BuildId)-dev ttnfregistry.azurecr.io/frontend:$(Build.BuildId)-prod
+                    docker push ttnfregistry.azurecr.io/frontend:$(Build.BuildId)-prod
+                  displayName: 'Tag and Push Frontend Image for Production'
 
                 - task: AzureWebAppContainer@1
                   inputs:
                     azureSubscription: 'ttnfconnect'
                     appName: 'ttnfpub'
-                    containers: 'ttnfregistry.azurecr.io/frontend:prod'
+                    containers: 'ttnfregistry.azurecr.io/frontend:$(Build.BuildId)-prod'
