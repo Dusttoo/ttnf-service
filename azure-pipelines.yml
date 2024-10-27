@@ -85,10 +85,17 @@ stages:
                   inputs:
                     containerRegistry: 'ttnfdockerservice'
                     repository: 'backend-dev'
-                    command: 'tagAndPush'
-                    tags: 'prod'
+                    command: 'tag'
                     imageName: 'ttnfregistry.azurecr.io/backend-dev:$(Build.BuildId)-dev'
                     targetImageName: 'ttnfregistry.azurecr.io/backend:prod'
+                    tags: 'prod'
+
+                - task: Docker@2
+                  inputs:
+                    containerRegistry: 'ttnfdockerservice'
+                    repository: 'backend'
+                    command: 'push'
+                    imageName: 'ttnfregistry.azurecr.io/backend:prod'
 
                 - task: AzureWebAppContainer@1
                   inputs:
@@ -108,10 +115,17 @@ stages:
                   inputs:
                     containerRegistry: 'ttnfdockerservice'
                     repository: 'frontend-dev'
-                    command: 'tagAndPush'
-                    tags: 'prod'
+                    command: 'tag'
                     imageName: 'ttnfregistry.azurecr.io/frontend-dev:$(Build.BuildId)-dev'
                     targetImageName: 'ttnfregistry.azurecr.io/frontend:prod'
+                    tags: 'prod'
+
+                - task: Docker@2
+                  inputs:
+                    containerRegistry: 'ttnfdockerservice'
+                    repository: 'frontend'
+                    command: 'push'
+                    imageName: 'ttnfregistry.azurecr.io/frontend:prod'
 
                 - task: AzureWebAppContainer@1
                   inputs:
