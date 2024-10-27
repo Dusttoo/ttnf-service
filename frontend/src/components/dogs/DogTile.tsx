@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import { Dog } from '../../api/types/dog';
-import {GenderEnum} from '../../api/types/core'
+import { GenderEnum } from '../../api/types/core';
 import { StatusBadge } from '../common/StatusBadge';
 import { LinkComponent } from '../common/Link';
 
@@ -122,66 +122,68 @@ const Description = styled(Detail)`
 `;
 
 const DogTile: React.FC<{ dog: Dog }> = ({ dog }) => {
-  const getStatusColor = (status: string): string => {
-    switch (status) {
-      case 'Available For Stud':
-        return '#28a745'; // green
-      case 'Sold':
-        return '#6c757d'; // gray
-      case 'Stud':
-        return '#007bff'; // blue
-      case 'Retired':
-        return '#dc3545'; // red
-      default:
-        return "#E0E0E0";
-    }
-  };
-  const slug = dog.gender === GenderEnum.Male ? 'males' : 'females'
+    const getStatusColor = (status: string): string => {
+        switch (status) {
+            case 'Available For Stud':
+                return '#28a745'; // green
+            case 'Sold':
+                return '#6c757d'; // gray
+            case 'Stud':
+                return '#007bff'; // blue
+            case 'Retired':
+                return '#dc3545'; // red
+            default:
+                return '#E0E0E0';
+        }
+    };
+    const slug = dog.gender === GenderEnum.Male ? 'males' : 'females';
 
-  return (
-    <Tile>
-      <ImageContainer>
-        <LinkComponent
-          to={`/dogs/${dog.name.split(' ').join('-')}?id=${dog.id}`}
-        >
-          <Image src={dog.profilePhoto} alt={dog.name} />
-        </LinkComponent>
-      </ImageContainer>
-      <Info>
-        <div>
-          <Name>{dog.name}</Name>
-          {dog.dob && <Detail>DOB: {dog.dob}</Detail>}
-          {dog.color && <Detail>Color: {dog.color}</Detail>}
-          {dog.studFee && <Detail>Stud Fee: ${dog.studFee}</Detail>}
-          {dog.saleFee && <Detail>Sale Fee: ${dog.saleFee}</Detail>}
-          {dog.description && <Description>{dog.description}</Description>}
-          {dog.pedigreeLink && (
-            <Detail>
-              <LinkComponent
-                to={dog.pedigreeLink}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Pedigree Link
-              </LinkComponent>
-            </Detail>
-          )}
-          <ViewProfileLink
-            to={`/${slug}/${dog.name.split(' ').join('-')}?id=${dog.id}`}
-          >
-            View Profile
-          </ViewProfileLink>
-          {dog.status && (
-            <StatusContainer>
-              <StatusBadge color={getStatusColor(dog.status)}>
-                {dog.status}
-              </StatusBadge>
-            </StatusContainer>
-          )}
-        </div>
-      </Info>
-    </Tile>
-  );
+    return (
+        <Tile>
+            <ImageContainer>
+                <LinkComponent
+                    to={`/dogs/${dog.name.split(' ').join('-')}?id=${dog.id}`}
+                >
+                    <Image
+                        src={dog.profilePhoto ? dog.profilePhoto : 'https://ttnfas.blob.core.windows.net/ttnf/dogs/logo.af08c321461d0f484883.png'}
+                        alt={dog.name} />
+                </LinkComponent>
+            </ImageContainer>
+            <Info>
+                <div>
+                    <Name>{dog.name}</Name>
+                    {dog.dob && <Detail>DOB: {dog.dob}</Detail>}
+                    {dog.color && <Detail>Color: {dog.color}</Detail>}
+                    {dog.studFee && <Detail>Stud Fee: ${dog.studFee}</Detail>}
+                    {dog.saleFee && <Detail>Sale Fee: ${dog.saleFee}</Detail>}
+                    {dog.description && <Description>{dog.description}</Description>}
+                    {dog.pedigreeLink && (
+                        <Detail>
+                            <LinkComponent
+                                to={dog.pedigreeLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                Pedigree Link
+                            </LinkComponent>
+                        </Detail>
+                    )}
+                    <ViewProfileLink
+                        to={`/${slug}/${dog.name.split(' ').join('-')}?id=${dog.id}`}
+                    >
+                        View Profile
+                    </ViewProfileLink>
+                    {dog.status && (
+                        <StatusContainer>
+                            <StatusBadge color={getStatusColor(dog.status)}>
+                                {dog.status}
+                            </StatusBadge>
+                        </StatusContainer>
+                    )}
+                </div>
+            </Info>
+        </Tile>
+    );
 };
 
 export default DogTile;

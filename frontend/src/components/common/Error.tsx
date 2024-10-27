@@ -36,7 +36,7 @@ const ErrorMessage = styled.h1`
 `;
 
 const ErrorDetails = styled.p`
-  color: ${({ theme }) => theme.colors.secondary};
+  color: ${({ theme }) => theme.colors.textSecondary};
   font-family: ${({ theme }) => theme.fonts.secondary};
   font-size: 1.2rem;
   margin-bottom: 20px;
@@ -60,33 +60,33 @@ const RetryButton = styled.button`
   border-radius: 5px;
   cursor: pointer;
   font-family: ${({ theme }) => theme.fonts.primary};
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease, color 0.3s ease;
   animation: ${pulse} 1.5s infinite ease-in-out;
 
   &:hover {
-    background-color: ${({ theme }) => theme.ui.button.secondary.background};
-    color: ${({ theme }) => theme.ui.button.secondary.color};
+    background-color: ${({ theme }) => theme.colors.accent};
+    color: ${({ theme }) => theme.colors.white};
   }
 `;
 
 interface ErrorComponentProps {
-  message?: string;
-  onRetry?: () => void;
+    message?: string;
+    onRetry?: () => void;
 }
 
-const ErrorComponent: React.FC<ErrorComponentProps> = ({ message = "Oops! Something went wrong.", onRetry }) => {
-  return (
-    <ErrorContainer>
-      <ErrorIcon />
-      <ErrorMessage>{message}</ErrorMessage>
-      <ErrorDetails>Please try again later, or contact support if the problem persists.</ErrorDetails>
-      {onRetry && (
-        <RetryButton onClick={onRetry}>
-          Try Again
-        </RetryButton>
-      )}
-    </ErrorContainer>
-  );
+const ErrorComponent: React.FC<ErrorComponentProps> = ({ message = 'Oops! Something went wrong.', onRetry }) => {
+    return (
+        <ErrorContainer>
+            <ErrorIcon />
+            <ErrorMessage>{message}</ErrorMessage>
+            <ErrorDetails>Please try again later, or contact support if the problem persists.</ErrorDetails>
+            {onRetry && (
+                <RetryButton onClick={onRetry}>
+                    Try Again
+                </RetryButton>
+            )}
+        </ErrorContainer>
+    );
 };
 
 export default ErrorComponent;

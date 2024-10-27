@@ -37,41 +37,43 @@ const SocialMediaIcon = styled.a`
 `;
 
 interface HomePageHeaderProps {
-  title: string;
-  lastUpdated: string | undefined;
-  introduction: string;
+    title: string;
+    lastUpdated: string | undefined;
+    introduction: string;
 }
 
 const HomePageHeader: React.FC<HomePageHeaderProps> = ({ title, lastUpdated, introduction }) => {
-  const formattedDate = lastUpdated
-    ? new Date(lastUpdated).toString() !== 'Invalid Date'
-      ? new Date(lastUpdated).toLocaleDateString(undefined, {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-        })
-      : 'Invalid Date'
-    : 'N/A';
+    const formattedDate = lastUpdated
+        ? new Date(lastUpdated).toString() !== 'Invalid Date'
+            ? new Date(lastUpdated).toLocaleDateString(undefined, {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+            })
+            : 'Invalid Date'
+        : 'N/A';
 
-  return (
-    <HeaderContainer>
-      {/*<h1>{title}</h1>*/}
-      <LastUpdated>Last Updated: {formattedDate}</LastUpdated>
-      {/*<Introduction>{introduction}</Introduction>*/}
+    return (
+        <HeaderContainer>
+            {/*<h1>{title}</h1>*/}
+            <LastUpdated>Last Updated: {formattedDate}</LastUpdated>
+            {/*<Introduction>{introduction}</Introduction>*/}
 
-      <SocialMedia>
-        <SocialMediaIcon href="https://facebook.com" target="_blank" rel="noopener noreferrer">
-          <FontAwesomeIcon icon={faFacebook} />
-        </SocialMediaIcon>
-        <SocialMediaIcon href="https://instagram.com" target="_blank" rel="noopener noreferrer">
-          <FontAwesomeIcon icon={faInstagram} />
-        </SocialMediaIcon>
-        <SocialMediaIcon href="https://twitter.com" target="_blank" rel="noopener noreferrer">
-          <FontAwesomeIcon icon={faTwitter} />
-        </SocialMediaIcon>
-      </SocialMedia>
-    </HeaderContainer>
-  );
+            <SocialMedia>
+                <SocialMediaIcon href="https://www.facebook.com/@texastopnotchfrenchies" target="_blank"
+                                 rel="noopener noreferrer">
+                    <FontAwesomeIcon icon={faFacebook} />
+                </SocialMediaIcon>
+                <SocialMediaIcon href="https://www.instagram.com/texas_top_notch_frenchies/" target="_blank"
+                                 rel="noopener noreferrer">
+                    <FontAwesomeIcon icon={faInstagram} />
+                </SocialMediaIcon>
+                {/*<SocialMediaIcon href="https://twitter.com" target="_blank" rel="noopener noreferrer">*/}
+                {/*    <FontAwesomeIcon icon={faTwitter} />*/}
+                {/*</SocialMediaIcon>*/}
+            </SocialMedia>
+        </HeaderContainer>
+    );
 };
 
 export default HomePageHeader;

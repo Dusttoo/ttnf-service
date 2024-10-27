@@ -53,22 +53,24 @@ const ProductionDescription = styled.p`
 `;
 
 const ProductionTile: React.FC<{ production: Production }> = ({
-  production,
-}) => {
-  return (
-    <TileContainer>
-      <ProductionImage src={production.profilePhoto} alt={production.name} />
-      <ProductionName>{production.name}</ProductionName>
-      {production.description && (
-        <ProductionDescription>{production.description}</ProductionDescription>
-      )}
-      {production.dob && (
-        <ProductionDetails>
-          DOB: {new Date(production.dob).toLocaleDateString()}
-        </ProductionDetails>
-      )}
-    </TileContainer>
-  );
+                                                                  production,
+                                                              }) => {
+    return (
+        <TileContainer>
+            <ProductionImage
+                src={production.profilePhoto ? production.profilePhoto : 'https://ttnfas.blob.core.windows.net/ttnf/dogs/logo.af08c321461d0f484883.png'}
+                alt={production.name} />
+            <ProductionName>{production.name}</ProductionName>
+            {production.description && (
+                <ProductionDescription>{production.description}</ProductionDescription>
+            )}
+            {production.dob && (
+                <ProductionDetails>
+                    DOB: {new Date(production.dob).toLocaleDateString()}
+                </ProductionDetails>
+            )}
+        </TileContainer>
+    );
 };
 
 export default ProductionTile;

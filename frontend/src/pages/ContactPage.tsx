@@ -1,10 +1,12 @@
-import React from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState } from 'react';
 import DOMPurify from 'dompurify';
 import usePage from '../hooks/usePage';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import ErrorComponent from '../components/common/Error';
 import styled from 'styled-components';
+import { submitContactForm } from '../api/contact';
+import { contactValidationSchema } from '../schemas/contactValidationSchema';
+import { validateForm } from '../services/validationService';
 
 export const ContactContainer = styled.div`
     max-width: 800px;
@@ -93,15 +95,68 @@ export const SubmitButton = styled.button`
     }
 `;
 
-const ContactPage: React.FC<{ slug?: string }> = ({ slug }) => {
-    const { page, loading, error } = usePage(slug);
+const ErrorText = styled.p`
+    color: ${({ theme }) => theme.colors.error};
+    font-size: 0.9rem;
+    margin: 0;
+`;
 
+const ContactPage: React.FC = () => {
+    const { page, loading, error } = usePage('contact');
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [message, setMessage] = useState('');
+    const [statusMessage, setStatusMessage] = useState('');
+    const [errors, setErrors] = useState<Record<string, string>>({});
 
     if (loading) return <LoadingSpinner />;
     if (error) return <ErrorComponent message={error} />;
-    if (!page) return <ErrorComponent message={"Content not found"} />
+    if (!page) return <ErrorComponent message="Content not found" />;
 
     const sanitizedContent = DOMPurify.sanitize(page.content);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const values = { name, email, message };
+
+        const { isValid, errors } = await validateForm(values, contactValidationSchema);
+        if (!isValid) {
+            setErrors(errors);
+            return;
+        }
+
+        try {
+            await submitContactForm(values);
+            setStatusMessage('Your message has been sent successfully!');
+            setName('');
+            setEmail('');
+            setMessage('');
+            setErrors({});
+        } catch (error) {
+            setStatusMessage('Failed to send message. Please try again.');
+        }
+    };
+
+    const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setName(e.target.value);
+        if (errors.name) {
+            setErrors((prevErrors) => ({ ...prevErrors, name: '' }));
+        }
+    };
+
+    const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setEmail(e.target.value);
+        if (errors.email) {
+            setErrors((prevErrors) => ({ ...prevErrors, email: '' }));
+        }
+    };
+
+    const handleMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        setMessage(e.target.value);
+        if (errors.message) {
+            setErrors((prevErrors) => ({ ...prevErrors, message: '' }));
+        }
+    };
 
     return (
         <ContactContainer>
@@ -111,11 +166,36 @@ const ContactPage: React.FC<{ slug?: string }> = ({ slug }) => {
                 <h3>We’d love to hear from you!</h3>
                 <p>Please use the form below to reach out to us with any questions or inquiries.</p>
             </ContactInfo>
-            <ContactForm>
-                <InputField type="text" placeholder="Your Name" required />
-                <InputField type="email" placeholder="Your Email" required />
-                <TextArea placeholder="Your Message" rows={5} required />
-                <SubmitButton>Send Message</SubmitButton>
+            {statusMessage && <p>{statusMessage}</p>}
+            <ContactForm onSubmit={handleSubmit}>
+                <div>
+                    <InputField
+                        type="text"
+                        placeholder="Your Name"
+                        value={name}
+                        onChange={handleNameChange}
+                    />
+                    {errors.name && <ErrorText>{errors.name}</ErrorText>}
+                </div>
+                <div>
+                    <InputField
+                        type="email"
+                        placeholder="Your Email"
+                        value={email}
+                        onChange={handleEmailChange}
+                    />
+                    {errors.email && <ErrorText>{errors.email}</ErrorText>}
+                </div>
+                <div>
+                    <TextArea
+                        placeholder="Your Message"
+                        rows={5}
+                        value={message}
+                        onChange={handleMessageChange}
+                    />
+                    {errors.message && <ErrorText>{errors.message}</ErrorText>}
+                </div>
+                <SubmitButton type="submit">Send Message</SubmitButton>
             </ContactForm>
         </ContactContainer>
     );

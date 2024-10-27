@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings
+from typing import List
 
 
 class Settings(BaseSettings):
@@ -17,6 +18,7 @@ class Settings(BaseSettings):
     env: str
     acs_email_connection_string: str
     acs_sender_email: str
+    acs_recipient_emails: List[str]
 
     class Config:
         env_file = ".env"

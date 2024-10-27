@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { useServices } from '../../hooks/useService';
 import ServiceCard from './ServiceCard';
 import Accordion from '../common/Accordion';
+import LoadingSpinner from '../common/LoadingSpinner';
 
 const ServicesWrapper = styled.div`
   display: flex;
@@ -40,50 +41,50 @@ const ServiceListContainer = styled.div`
 `;
 
 const ServicesList: React.FC = () => {
-  const { data: services, isLoading, error } = useServices();
+    const { data: services, isLoading, error } = useServices();
 
-  if (isLoading) return <p>Loading services...</p>;
-  if (error) return <p>Error loading services.</p>;
+    if (isLoading) return <LoadingSpinner />;
+    if (error) return <p>Error loading services.</p>;
 
-  const groupedServices = services?.reduce(
-    (acc: Record<string, typeof services>, service) => {
-      const category = service.category?.name || 'Uncategorized';
-      acc[category] = acc[category] ? [...acc[category], service] : [service];
-      return acc;
-    },
-    {}
-  );
+    const groupedServices = services?.reduce(
+        (acc: Record<string, typeof services>, service) => {
+            const category = service.category?.name || 'Uncategorized';
+            acc[category] = acc[category] ? [...acc[category], service] : [service];
+            return acc;
+        },
+        {},
+    );
 
-  const categories = Object.keys(groupedServices || {});
+    const categories = Object.keys(groupedServices || {});
 
-  return (
-    <ServicesWrapper>
-      <ServicesSection>
-        {groupedServices &&
-          categories.map((category, index) => (
-            <div key={category} id={category}>
-              {/* Open the first accordion by default */}
-              <Accordion title={category} defaultOpen={index === 0}>
-                <ServiceListContainer>
-                  {groupedServices[category].map((service) => (
-                    <ServiceCard
-                      key={service.id}
-                      name={service.name}
-                      description={service.description}
-                      price={service.price || ''}
-                      availability={service.availability}
-                      ctaName={service.cta_name || 'Learn More'}
-                      ctaLink={service.cta_link || '#'}
-                      disclaimer={service.disclaimer}
-                    />
-                  ))}
-                </ServiceListContainer>
-              </Accordion>
-            </div>
-          ))}
-      </ServicesSection>
-    </ServicesWrapper>
-  );
+    return (
+        <ServicesWrapper>
+            <ServicesSection>
+                {groupedServices &&
+                    categories.map((category, index) => (
+                        <div key={category} id={category}>
+                            {/* Open the first accordion by default */}
+                            <Accordion title={category} defaultOpen={index === 0}>
+                                <ServiceListContainer>
+                                    {groupedServices[category].map((service) => (
+                                        <ServiceCard
+                                            key={service.id}
+                                            name={service.name}
+                                            description={service.description}
+                                            price={service.price || ''}
+                                            availability={service.availability}
+                                            ctaName={service.cta_name || 'Learn More'}
+                                            ctaLink={service.cta_link || '#'}
+                                            disclaimer={service.disclaimer}
+                                        />
+                                    ))}
+                                </ServiceListContainer>
+                            </Accordion>
+                        </div>
+                    ))}
+            </ServicesSection>
+        </ServicesWrapper>
+    );
 };
 
 export default ServicesList;
