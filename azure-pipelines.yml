@@ -82,8 +82,9 @@ stages:
                 - checkout: self
 
                 - script: |
+                    docker pull ttnfregistry.azurecr.io/backend-dev:$(Build.BuildId)-dev
                     docker tag ttnfregistry.azurecr.io/backend-dev:$(Build.BuildId)-dev ttnfregistry.azurecr.io/backend:prod
-                  displayName: 'Tag Backend Image for Production'
+                  displayName: 'Tag and Pull Backend Image for Production'
 
                 - task: Docker@2
                   displayName: 'Push Backend Image to Production'
@@ -108,8 +109,9 @@ stages:
                 - checkout: self
 
                 - script: |
+                    docker pull ttnfregistry.azurecr.io/frontend-dev:$(Build.BuildId)-dev
                     docker tag ttnfregistry.azurecr.io/frontend-dev:$(Build.BuildId)-dev ttnfregistry.azurecr.io/frontend:prod
-                  displayName: 'Tag Frontend Image for Production'
+                  displayName: 'Tag and Pull Frontend Image for Production'
 
                 - task: Docker@2
                   displayName: 'Push Frontend Image to Production'
