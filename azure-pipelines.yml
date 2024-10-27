@@ -73,42 +73,48 @@ stages:
   - stage: PromoteToProduction
     dependsOn: ApprovalGate
     jobs:
-      - job: DeployBackendProd
-        environment: 'Production'  # Environment is set here at the job level
-        steps:
-          - checkout: self
+      - deployment: DeployBackendProd
+        environment: 'Production'  # Set environment here at the deployment level
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
 
-          - task: Docker@2
-            inputs:
-              containerRegistry: 'ttnfdockerservice'
-              repository: 'backend-dev'
-              command: 'tagAndPush'
-              tags: 'prod'
-              imageName: 'ttnfregistry.azurecr.io/backend-dev:$(Build.BuildId)-dev'
-              targetImageName: 'ttnfregistry.azurecr.io/backend:prod'
+                - task: Docker@2
+                  inputs:
+                    containerRegistry: 'ttnfdockerservice'
+                    repository: 'backend-dev'
+                    command: 'tagAndPush'
+                    tags: 'prod'
+                    imageName: 'ttnfregistry.azurecr.io/backend-dev:$(Build.BuildId)-dev'
+                    targetImageName: 'ttnfregistry.azurecr.io/backend:prod'
 
-          - task: AzureWebAppContainer@1
-            inputs:
-              azureSubscription: 'ttnfconnect'
-              appName: 'ttnfapi'
-              containers: 'ttnfregistry.azurecr.io/backend:prod'
+                - task: AzureWebAppContainer@1
+                  inputs:
+                    azureSubscription: 'ttnfconnect'
+                    appName: 'ttnfapi'
+                    containers: 'ttnfregistry.azurecr.io/backend:prod'
 
-      - job: DeployFrontendProd
-        environment: 'Production'  # Environment is set here at the job level
-        steps:
-          - checkout: self
+      - deployment: DeployFrontendProd
+        environment: 'Production'  # Set environment here at the deployment level
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
 
-          - task: Docker@2
-            inputs:
-              containerRegistry: 'ttnfdockerservice'
-              repository: 'frontend-dev'
-              command: 'tagAndPush'
-              tags: 'prod'
-              imageName: 'ttnfregistry.azurecr.io/frontend-dev:$(Build.BuildId)-dev'
-              targetImageName: 'ttnfregistry.azurecr.io/frontend:prod'
+                - task: Docker@2
+                  inputs:
+                    containerRegistry: 'ttnfdockerservice'
+                    repository: 'frontend-dev'
+                    command: 'tagAndPush'
+                    tags: 'prod'
+                    imageName: 'ttnfregistry.azurecr.io/frontend-dev:$(Build.BuildId)-dev'
+                    targetImageName: 'ttnfregistry.azurecr.io/frontend:prod'
 
-          - task: AzureWebAppContainer@1
-            inputs:
-              azureSubscription: 'ttnfconnect'
-              appName: 'ttnfpub'
-              containers: 'ttnfregistry.azurecr.io/frontend:prod'
+                - task: AzureWebAppContainer@1
+                  inputs:
+                    azureSubscription: 'ttnfconnect'
+                    appName: 'ttnfpub'
+                    containers: 'ttnfregistry.azurecr.io/frontend:prod'
