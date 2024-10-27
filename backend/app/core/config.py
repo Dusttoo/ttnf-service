@@ -23,5 +23,13 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
 
+    @classmethod
+    def parse_comma_separated_emails(cls, v: str) -> List[str]:
+        return v.split(",") if v else []
+
+    _validators = {
+        'acs_recipient_emails': parse_comma_separated_emails,
+    }
+
 
 settings = Settings()
