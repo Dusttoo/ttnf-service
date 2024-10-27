@@ -69,13 +69,6 @@ stages:
           - task: ManualValidation@0
             inputs:
               instructions: 'Approve to promote to production'
-    environment:
-      name: "Production"
-      resourceType: "VirtualMachine"
-      approval:
-        approvals:
-          - approvers:
-              - email: "dusty.mumphrey@gmail.com"
 
   - stage: PromoteToProduction
     dependsOn: ApprovalGate
