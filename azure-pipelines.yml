@@ -72,9 +72,9 @@ stages:
 
   - stage: PromoteToProduction
     dependsOn: ApprovalGate
-    environment: 'Production'  # Reference the Production environment here
     jobs:
       - job: DeployBackendProd
+        environment: 'Production'  # Environment is set here at the job level
         steps:
           - checkout: self
 
@@ -94,6 +94,7 @@ stages:
               containers: 'ttnfregistry.azurecr.io/backend:prod'
 
       - job: DeployFrontendProd
+        environment: 'Production'  # Environment is set here at the job level
         steps:
           - checkout: self
 
