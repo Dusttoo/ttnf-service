@@ -6,11 +6,10 @@ trigger:
 pool:
   vmImage: 'ubuntu-latest'
 
-variables:
-  - group: ttnf
-
 stages:
   - stage: BuildAndDeployBackendDev
+    variables:
+      - group: ttnf-dev  # Use ttnf-dev for development environment
     jobs:
       - job: BuildBackend
         steps:
@@ -32,6 +31,8 @@ stages:
               containers: 'ttnfregistry.azurecr.io/backend-dev:$(Build.BuildId)-dev'
 
   - stage: BuildAndDeployFrontendDev
+    variables:
+      - group: ttnf-dev  # Use ttnf-dev for development environment
     jobs:
       - job: BuildFrontend
         steps:
@@ -71,6 +72,8 @@ stages:
               instructions: 'Approve to promote to production'
 
   - stage: PromoteToProduction
+    variables:
+      - group: ttnf  # Use ttnf for production environment
     dependsOn: ApprovalGate
     jobs:
       - deployment: DeployBackendProd
