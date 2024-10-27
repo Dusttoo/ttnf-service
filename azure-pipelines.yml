@@ -81,6 +81,13 @@ stages:
               steps:
                 - checkout: self
 
+                # Log in to ACR
+                - task: Docker@2
+                  inputs:
+                    command: 'login'
+                    containerRegistry: 'ttnfdockerservice'  # Ensure this is the ACR service connection
+
+                # Pull, Tag, and Push Backend Image
                 - script: |
                     docker pull ttnfregistry.azurecr.io/backend-dev:$(Build.BuildId)-dev
                     docker tag ttnfregistry.azurecr.io/backend-dev:$(Build.BuildId)-dev ttnfregistry.azurecr.io/backend:prod
@@ -108,6 +115,13 @@ stages:
               steps:
                 - checkout: self
 
+                # Log in to ACR
+                - task: Docker@2
+                  inputs:
+                    command: 'login'
+                    containerRegistry: 'ttnfdockerservice'
+
+                # Pull, Tag, and Push Frontend Image
                 - script: |
                     docker pull ttnfregistry.azurecr.io/frontend-dev:$(Build.BuildId)-dev
                     docker tag ttnfregistry.azurecr.io/frontend-dev:$(Build.BuildId)-dev ttnfregistry.azurecr.io/frontend:prod
