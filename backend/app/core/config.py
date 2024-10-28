@@ -19,17 +19,10 @@ class Settings(BaseSettings):
     env: str
     acs_email_connection_string: str
     acs_sender_email: str
-    acs_recipient_emails: Optional[str] = Field(default=None)
+    acs_recipient_email: str
 
     class Config:
         env_file = ".env"
-
-    @property
-    def parsed_recipient_emails(self) -> List[str]:
-        # Returns a list of recipient emails
-        if self.acs_recipient_emails:
-            return [email.strip() for email in self.acs_recipient_emails.split(",")]
-        return []
 
 
 settings = Settings()

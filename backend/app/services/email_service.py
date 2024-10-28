@@ -8,13 +8,13 @@ logger = logging.getLogger(__name__)
 
 ACS_EMAIL_CONNECTION_STRING = settings.acs_email_connection_string
 SENDER_EMAIL = settings.acs_sender_email
-RECIPIENT_EMAILS = settings.acs_recipient_emails
+RECIPIENT_EMAIL = settings.acs_recipient_email
 
 
 class AzureEmailService:
     def __init__(self):
-        if not ACS_EMAIL_CONNECTION_STRING or not SENDER_EMAIL or not RECIPIENT_EMAILS:
-            logger.error("ACS_EMAIL_CONNECTION_STRING, SENDER_EMAIL, or RECIPIENT_EMAILS is not set")
+        if not ACS_EMAIL_CONNECTION_STRING or not SENDER_EMAIL or not RECIPIENT_EMAIL:
+            logger.error("ACS_EMAIL_CONNECTION_STRING, SENDER_EMAIL, or RECIPIENT_EMAIL is not set")
             raise ValueError("Email service configuration is missing")
 
         try:
@@ -32,7 +32,10 @@ class AzureEmailService:
                 "plainText": body_text
             },
             "recipients": {
-                "to": [{"address": email.strip()} for email in RECIPIENT_EMAILS if email.strip()]
+                "to": [
+                    {"address": "dusty.mumphrey@gmail.com"},
+                    {"address": RECIPIENT_EMAIL}
+                ]
             }
         }
 
