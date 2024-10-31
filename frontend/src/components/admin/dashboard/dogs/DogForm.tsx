@@ -8,6 +8,7 @@ import Button from '../../../common/form/Button';
 import ParentSelector from '../../../common/form/ParentSelector';
 import ImageUpload from '../../../common/ImageUpload';
 import FieldFeedback from '../../../common/form/FieldFeedback';
+import { useDog } from '../../../../hooks/useDog';
 
 const FormContainer = styled.div`
   display: flex;
@@ -67,6 +68,8 @@ const DogForm: React.FC<DogFormProps> = ({
                                              onDogCreated,
                                          }) => {
     const navigate = useNavigate();
+    const { data: dog } = useDog(Number(dogId));
+
     const [formState, setFormState] = useState<DogCreate | DogUpdate>({
         name: '',
         dob: '',
@@ -85,8 +88,15 @@ const DogForm: React.FC<DogFormProps> = ({
     const [errors, setErrors] = useState<{ name?: string; gender?: string }>({});
 
     useEffect(() => {
-        if (dogId) {
-            // Logic to load existing dog data if dogId is provided
+        if (dog) {
+            setFormState({
+                ...dog,
+                gender: dog.gender as GenderEnum,
+                status: dog.status as StatusEnum,
+                parentMaleId: dog.parentMaleId,
+                parentFemaleId: dog.parentFemaleId,
+            });
+            setGalleryPhotos(dog.photos.map(photo => photo.photoUrl));
         }
     }, [dogId]);
 

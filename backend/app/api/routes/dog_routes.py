@@ -58,7 +58,9 @@ async def get_dogs_filtered(
             "dam": dam,
             "retired": retired
         }
+        print(f'Filters: {filters}')
         result = await dog_svc.get_dogs_filtered(db, filters, page, page_size)
+        print(f'Dogs: {result}')
         return result
     except HTTPException as e:
         raise HTTPException(status_code=500, detail=f"Internal Server Error: {e}")

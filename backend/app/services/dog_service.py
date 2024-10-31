@@ -454,9 +454,9 @@ class DogService:
                     query = query.filter(Dog.parent_male_id == filters["sire"])
                 if filters.get("dam"):
                     query = query.filter(Dog.parent_female_id == filters["dam"])
-                if "retired" in filters:
+                if "retired" in filters and filters["retired"] is not None:
                     query = query.filter(Dog.is_retired == filters["retired"])
-
+                print(filters["retired"])
                 print("Query: ", query)
                 # Only apply pagination if page and page_size are provided
                 if page is not None and page_size is not None:
