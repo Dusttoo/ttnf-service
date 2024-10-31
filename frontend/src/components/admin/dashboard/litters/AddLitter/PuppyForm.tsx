@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
-import { PuppyCreate} from '../../../../../api/types/breeding';
-import { GenderEnum, StatusEnum } from '../../../../../api/types/core'
+import { PuppyCreate } from '../../../../../api/types/breeding';
+import { GenderEnum, StatusEnum } from '../../../../../api/types/core';
 import ImageUpload from '../../../../common/ImageUpload';
 import { StatusBadge } from '../../../../common/StatusBadge';
 import Button from '../../../../common/form/Button';
@@ -14,7 +14,7 @@ const FormContainer = styled.div`
   flex-direction: column;
   gap: 1rem;
   padding: 2rem;
-  background-color: ${(props) => props.theme.colors.white};
+  background-color: ${(props) => props.theme.colors.secondaryBackground}; // Darker background for dark theme
   border-radius: 8px;
   width: 100%;
   max-width: 600px;
@@ -24,7 +24,7 @@ const FormContainer = styled.div`
 const FormTitle = styled.h2`
   font-family: ${(props) => props.theme.fonts.secondary};
   font-size: 1.5rem;
-  color: ${(props) => props.theme.colors.primary};
+  color: ${(props) => props.theme.colors.white}; // White for readability
   margin-bottom: 1rem;
 `;
 
@@ -37,6 +37,8 @@ const InputGroup = styled.div`
 const Input = styled.input`
   padding: 0.75rem;
   border: 1px solid ${(props) => props.theme.colors.primary};
+  background-color: ${(props) => props.theme.colors.secondaryBackground}; // Darker background
+  color: ${(props) => props.theme.colors.white}; // White text
   border-radius: 4px;
   font-size: 1rem;
   width: 100%;
@@ -46,12 +48,15 @@ const Dropdown = styled.select`
   width: 100%;
   padding: 0.75rem;
   border: 1px solid ${(props) => props.theme.colors.primary};
+  background-color: ${(props) => props.theme.colors.secondaryBackground}; // Darker background
+  color: ${(props) => props.theme.colors.white}; // White text
   border-radius: 4px;
   font-size: 1rem;
 `;
 
 const DropdownButton = styled.button`
-  background-color: ${(props) => props.theme.colors.white};
+  background-color: ${(props) => props.theme.colors.secondaryBackground}; // Darker background
+  color: ${(props) => props.theme.colors.white}; // White text
   border: 1px solid ${(props) => props.theme.colors.primary};
   border-radius: 4px;
   padding: 0.75rem;
@@ -60,12 +65,17 @@ const DropdownButton = styled.button`
   align-items: center;
   justify-content: space-between;
   width: 100%;
+
+  &:hover {
+    background-color: ${(props) => props.theme.colors.primary}; // Highlight on hover
+    color: ${(props) => props.theme.colors.white};
+  }
 `;
 
 const DropdownContent = styled.div<{ show: boolean }>`
   display: ${(props) => (props.show ? 'block' : 'none')};
   position: absolute;
-  background-color: ${(props) => props.theme.colors.white};
+  background-color: ${(props) => props.theme.colors.secondaryBackground}; // Darker background
   border-radius: 4px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
   padding: 1rem;
@@ -75,6 +85,7 @@ const DropdownContent = styled.div<{ show: boolean }>`
 
 const FilterLabel = styled.label`
   margin-bottom: 0.5rem;
+  color: ${(props) => props.theme.colors.white}; // White text
 `;
 
 const CheckboxContainer = styled.div`
@@ -111,12 +122,12 @@ interface PuppyFormProps {
 }
 
 const PuppyForm: React.FC<PuppyFormProps> = ({
-    onClose,
-    title = 'Add New Puppy',
-    defaultValues = {},
-    onPuppyCreated,
-    litterData,
-}) => {
+                                                 onClose,
+                                                 title = 'Add New Puppy',
+                                                 defaultValues = {},
+                                                 onPuppyCreated,
+                                                 litterData,
+                                             }) => {
     const [formState, setFormState] = useState<PuppyCreate>({
         name: '',
         dob: litterData.birthDate ?? '',
@@ -260,11 +271,18 @@ const PuppyForm: React.FC<PuppyFormProps> = ({
                     {errors.gender && <FieldFeedback message={errors.gender} />}
                 </InputGroup>
                 <InputGroup ref={dropdownRef}>
-                    <DropdownButton onClick={(e) => { e.stopPropagation(); e.preventDefault(); setShowDropdown(!showDropdown); }}>
+                    <DropdownButton onClick={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        setShowDropdown(!showDropdown);
+                    }}>
                         {formState.status ? (
                             <StatusBadge color="#E76F00">
                                 {formState.status}
-                                <span onClick={(e) => { e.stopPropagation(); handleStatusChange(undefined); }}>
+                                <span onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleStatusChange(undefined);
+                                }}>
                                     &#x2715;
                                 </span>
                             </StatusBadge>
@@ -292,12 +310,19 @@ const PuppyForm: React.FC<PuppyFormProps> = ({
                 <ParentSelector
                     sireId={formState.parentMaleId}
                     damId={formState.parentFemaleId}
-                    onSireChange={(e) => setFormState((prevState) => ({ ...prevState, parentMaleId: Number(e.target.value) }))}
-                    onDamChange={(e) => setFormState((prevState) => ({ ...prevState, parentFemaleId: Number(e.target.value) }))}
+                    onSireChange={(e) => setFormState((prevState) => ({
+                        ...prevState,
+                        parentMaleId: Number(e.target.value),
+                    }))}
+                    onDamChange={(e) => setFormState((prevState) => ({
+                        ...prevState,
+                        parentFemaleId: Number(e.target.value),
+                    }))}
                 />
                 <InputGroup>
                     <p>Select 1 profile image</p>
-                    <ImageUpload maxImages={1} onImagesChange={handleProfilePhotoChange} initialImages={formState.profilePhoto ? [formState.profilePhoto] : []} />
+                    <ImageUpload maxImages={1} onImagesChange={handleProfilePhotoChange}
+                                 initialImages={formState.profilePhoto ? [formState.profilePhoto] : []} />
                 </InputGroup>
                 <InputGroup>
                     <p>Select up to five gallery images</p>
@@ -309,6 +334,6 @@ const PuppyForm: React.FC<PuppyFormProps> = ({
             </form>
         </FormContainer>
     );
-}
+};
 
 export default PuppyForm;

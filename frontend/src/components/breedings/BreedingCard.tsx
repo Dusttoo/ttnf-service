@@ -103,9 +103,14 @@ const BreedingCard: React.FC<{ breeding: Breeding }> = ({ breeding }) => {
         <Tile>
             <ImagesWrapper>
                 <ImageContainer>
-                    <Link to={`/dogs/${breeding.maleDog.id}`}>
-                        <Image src={breeding.maleDog.profilePhoto} alt={breeding.maleDog.name} />
-                    </Link>
+                    {breeding.maleDog ? (
+                        <Link to={`/dogs/${breeding.maleDog.id}`}>
+                            <Image src={breeding.maleDog.profilePhoto} alt={breeding.maleDog.name} />
+                        </Link>
+                    ) : (
+                        <Image src={breeding.manualSireImageUrl || 'path/to/default-image.jpg'}
+                               alt={breeding.manualSireName || 'Unknown Sire'} />
+                    )}
                 </ImageContainer>
                 <ImageContainer>
                     <Link to={`/dogs/${breeding.femaleDog.id}`}>
@@ -114,12 +119,15 @@ const BreedingCard: React.FC<{ breeding: Breeding }> = ({ breeding }) => {
                 </ImageContainer>
             </ImagesWrapper>
             <Info>
-                <Name>{breeding.maleDog.name} &amp; {breeding.femaleDog.name}</Name>
+                <Name>
+                    {(breeding.maleDog?.name || breeding.manualSireName || 'Unknown Sire')} &amp; {breeding.femaleDog.name}
+                </Name>
                 <Detail>Breeding Date: {breeding.breedingDate}</Detail>
                 <Detail>Expected Birth Date: {breeding.expectedBirthDate}</Detail>
                 <Description>Description: {breeding.description}</Description>
-                {/* Update to take the user to available puppies if they exist */}
-                <ViewProfileLink to={`/breedings/${breeding.maleDog.id}-${breeding.femaleDog.id}`}>View Breeding</ViewProfileLink>
+                <ViewProfileLink
+                    to={`/breedings/${breeding.maleDog ? breeding.maleDog.id : 'manual'}-${breeding.femaleDog.id}`}>View
+                    Breeding</ViewProfileLink>
             </Info>
         </Tile>
     );

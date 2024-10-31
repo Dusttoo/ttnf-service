@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import styled from 'styled-components';
+import { useModal } from '../../context/ModalContext';
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -8,7 +9,7 @@ const ModalOverlay = styled.div`
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.75); // Darker overlay for more contrast
   display: flex;
   align-items: center;
   justify-content: center;
@@ -16,46 +17,45 @@ const ModalOverlay = styled.div`
 `;
 
 const ModalContent = styled.div`
-  background: white;
+  background: ${(props) => props.theme.colors.secondaryBackground}; // Dark modal background
   padding: 2rem;
   border-radius: 8px;
-  max-width: 800px; /* Increase the max-width for a wider modal */
+  max-width: 800px;
   width: 90%;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  max-height: 90vh; /* Ensure the modal content doesn't overflow the viewport height */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); // Slightly stronger shadow for better contrast
+  max-height: 90vh;
   overflow: auto;
+  color: ${(props) => props.theme.colors.white}; // Light text for readability
 `;
 
-interface GlobalModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    children: React.ReactNode;
-}
+const GlobalModal: React.FC = () => {
+    const { closeModal, modalContent, isOpen } = useModal();
+    console.log('in modal: ', isOpen, modalContent);
 
-const GlobalModal: React.FC<GlobalModalProps> = ({ isOpen, onClose, children }) => {
     useEffect(() => {
         const handleEscape = (event: KeyboardEvent) => {
-            if (event.key === 'Escape') {
-                onClose();
+            if (event.key === 'Escape' && isOpen) {
+                closeModal();
             }
         };
+
         document.addEventListener('keydown', handleEscape);
         return () => {
             document.removeEventListener('keydown', handleEscape);
         };
-    }, [onClose]);
+    }, [closeModal, isOpen]);
 
     if (!isOpen) {
         return null;
     }
 
     return ReactDOM.createPortal(
-        <ModalOverlay onClick={onClose}>
+        <ModalOverlay onClick={closeModal}>
             <ModalContent onClick={(e) => e.stopPropagation()}>
-                {children}
+                {modalContent}
             </ModalContent>
         </ModalOverlay>,
-        document.getElementById('modal-root')!
+        document.getElementById('modal-root')!,
     );
 };
 

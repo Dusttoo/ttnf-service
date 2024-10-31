@@ -153,7 +153,6 @@ class PageService:
 
                     if "category" in announcement:
                         announcement_category = AnnouncementType(announcement["category"])
-                        print(f'\n\n{announcement_category}\n\n')
 
                     if "id" in announcement:
                         existing_announcement = await db.execute(
@@ -197,7 +196,8 @@ class PageService:
                     db_page.custom_values["carouselImages"] = custom_values["carouselImages"]
 
                 if "heroContent" in custom_values and "carouselImages" in custom_values["heroContent"]:
-                    db_page.custom_values["heroContent"]["carouselImages"] = custom_values["heroContent"]["carouselImages"]
+                    db_page.custom_values["heroContent"]["carouselImages"] = custom_values["heroContent"][
+                        "carouselImages"]
 
                 if "carousel" in update_data:
                     db_page.carousel.clear()  # Clear existing carousel images
@@ -206,7 +206,6 @@ class PageService:
                 del update_data["customValues"]
 
             for key, value in update_data.items():
-                print(f'\n{key} : {value}\n')
                 setattr(db_page, key, value)
 
             await db.commit()

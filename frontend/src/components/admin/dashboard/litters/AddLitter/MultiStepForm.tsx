@@ -5,7 +5,7 @@ import { faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import LitterForm from '../AddLitter/LitterForm';
 import PuppyForm from '../AddLitter/PuppyForm';
 import ReviewForm from '../AddLitter/ReviewForm';
-import {GenderEnum, StatusEnum } from '../../../../../api/types/core';
+import { GenderEnum, StatusEnum } from '../../../../../api/types/core';
 import { LitterCreate, LitterUpdate, PuppyCreate } from '../../../../../api/types/breeding';
 
 import { useLitter, useCreateLitter, useUpdateLitter, useAddPuppiesToLitter } from '../../../../../hooks/useLitter';
@@ -13,16 +13,17 @@ import Button from '../../../../common/form/Button';
 import ProgressIndicator from '../../../../common/form/ProgressIndicator';
 
 const Title = styled.h1`
-    font-family: ${(props) => props.theme.fonts.secondary};
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
-    color: ${(props) => props.theme.colors.primary};
+  font-family: ${(props) => props.theme.fonts.secondary};
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: ${(props) => props.theme.colors.primaryText};
 `;
 
 const FormContainer = styled.div`
-  background-color: ${(props) => props.theme.colors.white};
+  background-color: ${(props) => props.theme.colors.secondaryBackground};
   padding: 2rem;
   margin: 1rem auto;
+  border-radius: 8px;
 `;
 
 const NavigationButtons = styled.div`
@@ -30,7 +31,7 @@ const NavigationButtons = styled.div`
   justify-content: space-between;
   margin-top: 1rem;
   padding-top: 1rem;
-  border-top: 4px solid ${(props) => (props.theme.colors.primary)};
+  border-top: 2px solid ${(props) => props.theme.colors.border};
 `;
 
 interface MultiStepFormProps {
@@ -41,7 +42,13 @@ interface MultiStepFormProps {
     parentFemaleId?: number;
 }
 
-const MultiStepForm: React.FC<MultiStepFormProps> = ({ onClose, litterId, breedingId, parentMaleId, parentFemaleId }) => {
+const MultiStepForm: React.FC<MultiStepFormProps> = ({
+                                                         onClose,
+                                                         litterId,
+                                                         breedingId,
+                                                         parentMaleId,
+                                                         parentFemaleId,
+                                                     }) => {
     const isEditing = !!litterId;
     const { data: litter, isLoading: litterLoading } = useLitter(litterId ?? 0, { enabled: isEditing });
     const createLitterMutation = useCreateLitter();
@@ -155,7 +162,14 @@ const MultiStepForm: React.FC<MultiStepFormProps> = ({ onClose, litterId, breedi
                     defaultValues={puppyList[puppyIndex] || {}}
                     title={`Add Puppy ${puppyIndex + 1}`}
                     onPuppyCreated={handlePuppySubmit}
-                    litterData={{ breedingId, pedigreeUrl, birthDate: litterData.birthDate, numberOfPuppies: litterData.numberOfPuppies, parentMaleId, parentFemaleId }}
+                    litterData={{
+                        breedingId,
+                        pedigreeUrl,
+                        birthDate: litterData.birthDate,
+                        numberOfPuppies: litterData.numberOfPuppies,
+                        parentMaleId,
+                        parentFemaleId,
+                    }}
                     onNextStep={handleNextStep}
                     key={puppyIndex}
                 />

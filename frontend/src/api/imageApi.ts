@@ -14,6 +14,10 @@ export const uploadImage = async (file: File): Promise<ImageResponse> => {
 };
 
 export const getImageUrl = async (filename: string): Promise<ImageResponse> => {
-    const response = await axiosWithTimeout.get<ImageResponse>(`/images/${filename}`);
+    const response = await axiosWithTimeout.get<ImageResponse>(`/images/${filename}`, {
+        headers: {
+            isBackgroundRequest: 'true', // Set as background request
+        },
+    });
     return response.data;
 };

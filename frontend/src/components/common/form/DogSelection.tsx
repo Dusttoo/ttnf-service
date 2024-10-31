@@ -6,6 +6,7 @@ import { useFilteredDogs } from '../../../hooks/useDog';
 import { RootState } from '../../../store';
 import LoadingSpinner from '../LoadingSpinner';
 import ErrorComponent from '../Error';
+import { selectIsLoading } from '../../../store/loadingSlice';
 
 interface DogDropdownProps {
     name: string;
@@ -13,6 +14,7 @@ interface DogDropdownProps {
     onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
     filters: FilterProps;
     label: string;
+    disabled?: boolean;
 }
 
 const DropdownContainer = styled.div`
@@ -31,6 +33,13 @@ const DogImage = styled.img`
     height: 100px;
     border-radius: 20%;
     object-fit: cover;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+`;
+
+const Label = styled.label`
+    font-size: 0.875rem;
+    color: ${(props) => props.theme.colors.white};
+    margin-bottom: 0.5rem;
 `;
 
 const Dropdown = styled.select`
@@ -38,13 +47,20 @@ const Dropdown = styled.select`
     padding: 0.5rem;
     border: 1px solid ${(props) => props.theme.colors.primary};
     border-radius: 4px;
+    background-color: ${(props) => props.theme.colors.secondaryBackground};
+    color: ${(props) => props.theme.colors.white};
+
+    &:focus {
+        outline: none;
+        border-color: ${(props) => props.theme.colors.primaryDark};
+    }
 `;
 
-const DogDropdown: React.FC<DogDropdownProps> = ({ name, value, onChange, filters, label }) => {
+const DogDropdown: React.FC<DogDropdownProps> = ({ name, value, onChange, filters, label, disabled = false }) => {
     const { data, error } = useFilteredDogs(filters as SelectedFilters);
     const [selectedDog, setSelectedDog] = useState<Dog | null>(null);
-    const { isLoading } = useSelector((state: RootState) => state.loading);
-    
+    const isLoading = useSelector(selectIsLoading);
+
     useEffect(() => {
         if (data) {
             const dog = data.items.find((dog: Dog) => dog.id === value);
@@ -53,7 +69,7 @@ const DogDropdown: React.FC<DogDropdownProps> = ({ name, value, onChange, filter
     }, [value, data]);
 
     if (isLoading) {
-        return <LoadingSpinner/>;
+        return <LoadingSpinner />;
     }
 
     if (error) {
@@ -69,8 +85,8 @@ const DogDropdown: React.FC<DogDropdownProps> = ({ name, value, onChange, filter
                     <DogImage src={selectedDog.profilePhoto} alt={selectedDog.name} />
                 </ImageContainer>
             )}
-            <label>{label}</label>
-            <Dropdown name={name} value={value} onChange={onChange}>
+            <Label>{label}</Label>
+            <Dropdown name={name} value={value} onChange={onChange} disabled={disabled}>
                 <option value="">Select {label}</option>
                 {dogs.map((dog: Dog) => (
                     <option key={dog.id} value={dog.id}>

@@ -20,23 +20,21 @@ import LoadingSpinner from '../components/common/LoadingSpinner';
 import ErrorComponent from '../components/common/Error';
 import HomePage from '../pages/HomePage';
 import ServicesPage from '../pages/services/ServicesPage';
+import { selectIsLoading } from '../store/loadingSlice';
 
 const PublicRoutes = () => {
     const dispatch: AppDispatch = useDispatch();
-    const { pages, status } = useSelector((state: RootState) => state.pages);
+    const { pages } = useSelector((state: RootState) => state.pages);
+    const isLoading = useSelector(selectIsLoading);
 
     useEffect(() => {
-        if (status === 'idle') {
+        if (pages.length === 0) {
             dispatch(fetchPages());
         }
-    }, [dispatch, status]);
+    }, [dispatch, pages.length]);
 
-    if (status === 'loading') {
+    if (isLoading) {
         return <LoadingSpinner />;
-    }
-
-    if (status === 'failed') {
-        return <ErrorComponent message={'Something went wrong. Please try again'} />;
     }
 
     const pageComponentMap: { [key: string]: React.FC<{ slug?: string }> } = {

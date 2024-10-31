@@ -10,24 +10,24 @@ import { validateSession } from './store/authSlice';
 import { AppDispatch } from './store';
 
 const App: React.FC = () => {
-  const dispatch = useDispatch<AppDispatch>();
+    const dispatch = useDispatch<AppDispatch>();
 
-  useEffect(() => {
-    dispatch(validateSession());
-  }, [dispatch]);
+    useEffect(() => {
+        dispatch(validateSession());
+    }, [dispatch]);
 
-  return (
-    <Suspense fallback={<LoadingSpinner />}>
-      <ThemeProvider theme={theme}>
-        <Router>
-          <Routes>
-            <Route path="/admin/*" element={<PrivateRoutes />} />
-            <Route path="/*" element={<PublicRoutes />} />
-          </Routes>
-        </Router>
-      </ThemeProvider>
-    </Suspense>
-  );
+    return (
+        <Suspense fallback={<LoadingSpinner />}>
+            <ThemeProvider theme={theme}>
+                <Router>
+                    <Routes>
+                        <Route path="/admin/*" element={<PrivateRoutes />} />
+                        <Route path="/*" element={<PublicRoutes />} />
+                    </Routes>
+                </Router>
+            </ThemeProvider>
+            // </Suspense>
+    );
 };
 
 export default App;

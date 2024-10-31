@@ -13,9 +13,10 @@ const FormContainer = styled.div`
   flex-direction: column;
   gap: 1rem;
   padding: 2rem;
-  background-color: white;
+  background-color: ${(props) => props.theme.colors.secondaryBackground};
   border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  color: ${(props) => props.theme.colors.white};
 `;
 
 const Input = styled.input`
@@ -23,12 +24,15 @@ const Input = styled.input`
   border: 1px solid ${(props) => props.theme.colors.primary};
   border-radius: 4px;
   font-size: 1rem;
+  background-color: ${(props) => props.theme.colors.neutralBackground};
+  color: ${(props) => props.theme.colors.black};
 `;
 
 const InputGroup = styled.div`
   display: flex;
   flex-direction: column;
   margin-bottom: 1rem;
+  color: ${(props) => props.theme.colors.white};
 `;
 
 const ButtonContainer = styled.div`
@@ -93,7 +97,10 @@ const ProductionForm: React.FC<ProductionFormProps> = ({ onClose, productionId }
         };
 
         if (productionId) {
-            await updateProduction.mutateAsync({ productionId: Number(productionId), productionData: updatedFormState as ProductionUpdate });
+            await updateProduction.mutateAsync({
+                productionId: Number(productionId),
+                productionData: updatedFormState as ProductionUpdate,
+            });
         } else {
             await createProduction.mutateAsync(updatedFormState as ProductionCreate);
         }
@@ -122,16 +129,23 @@ const ProductionForm: React.FC<ProductionFormProps> = ({ onClose, productionId }
                 <ParentSelector
                     sireId={formState.parentMaleId}
                     damId={formState.parentFemaleId}
-                    onSireChange={(e) => setFormState((prevState) => ({ ...prevState, parentMaleId: Number(e.target.value) }))}
-                    onDamChange={(e) => setFormState((prevState) => ({ ...prevState, parentFemaleId: Number(e.target.value) }))}
+                    onSireChange={(e) => setFormState((prevState) => ({
+                        ...prevState,
+                        parentMaleId: Number(e.target.value),
+                    }))}
+                    onDamChange={(e) => setFormState((prevState) => ({
+                        ...prevState,
+                        parentFemaleId: Number(e.target.value),
+                    }))}
                 />
                 <InputGroup>
                     <p>Select 1 profile image</p>
-                    <ImageUpload maxImages={1} onImagesChange={handleProfilePhotoChange} initialImages={formState.profilePhoto ? [formState.profilePhoto] : []} />
+                    <ImageUpload maxImages={1} onImagesChange={handleProfilePhotoChange}
+                                 initialImages={formState.profilePhoto ? [formState.profilePhoto] : []} />
                 </InputGroup>
                 <ButtonContainer>
-                    <Button variant="primary" type="submit">Save</Button>
-                    <Button variant="error" onClick={onClose}>Cancel</Button>
+                    <Button $variant="primary" type="submit">Save</Button>
+                    <Button $variant="error" onClick={onClose}>Cancel</Button>
                 </ButtonContainer>
             </Form>
         </FormContainer>

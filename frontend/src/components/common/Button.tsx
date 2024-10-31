@@ -2,14 +2,14 @@ import React from 'react';
 import styled from 'styled-components';
 
 interface ButtonProps {
-  variant: 'primary' | 'secondary';
-  onClick?: () => void;  
-  children: React.ReactNode;
-  disabled?: boolean;  
+    $variant: 'primary' | 'secondary';
+    onClick?: () => void;
+    children: React.ReactNode;
+    disabled?: boolean;
 }
 
 const StyledButton = styled.button<ButtonProps>`
-  background-color: ${(props) => props.theme.colors[props.variant]};
+  background-color: ${(props) => props.theme.colors[props.$variant]};
   color: ${(props) => props.theme.colors.white};
   border: none;
   padding: 10px 20px;
@@ -20,16 +20,16 @@ const StyledButton = styled.button<ButtonProps>`
   }
 `;
 
-const Button: React.FC<ButtonProps> = ({ variant, onClick, children, disabled = false }) => {
-  return (
-    <StyledButton
-      variant={variant}
-      onClick={disabled ? undefined : onClick}  
-      disabled={disabled}  
-    >
-      {children}
-    </StyledButton>
-  );
+const Button: React.FC<ButtonProps> = ({ $variant, onClick, children, disabled = false }) => {
+    return (
+        <StyledButton
+            $variant={$variant}
+            onClick={disabled ? undefined : onClick}
+            disabled={disabled}
+        >
+            {children}
+        </StyledButton>
+    );
 };
 
 export default Button;

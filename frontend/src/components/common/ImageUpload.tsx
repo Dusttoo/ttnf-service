@@ -9,7 +9,7 @@ const UploadContainer = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 100%;
+//  width: 100%;
   padding: 1rem;
   border: 2px dashed ${theme.colors.primary};
   border-radius: 8px;
@@ -70,7 +70,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ maxImages, onImagesChange, in
                     const response = await uploadImage(file);
                     uploadedUrls.push(response.url);
                 } catch (error) {
-                    return <ErrorComponent message={(error as Error).message} />
+                    return <ErrorComponent message={(error as Error).message} />;
                 }
             }
             const newImageUrls = [...imageUrls, ...uploadedUrls];

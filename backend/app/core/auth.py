@@ -37,7 +37,6 @@ async def verify_token(token: str, credentials_exception, db: AsyncSession) -> i
 
     # Fetch user by username
     user = await user_service.get_user_by_username(username, db)
-    print('User: ', user)
     if not user:
         raise credentials_exception
     return user
@@ -59,37 +58,21 @@ async def authenticate_user(db: AsyncSession, username: str, password: str):
 # Get the current user from token
 async def get_current_user(
     request: Request,
-    token: str = Security(oauth2_scheme),
     db: AsyncSession = Depends(get_database_session),
 ):
-    print(f'Token: {token}')
-
     credentials_exception = HTTPException(
         status_code=401,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    print(token)
+
+    token = request.cookies.get("access_token")
     if not token:
-        token = request.cookies.get("access_token")
-        print(token)
-        if not token:
-            raise credentials_exception
-
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username = payload.get("sub")
-        print(username)
-
-        if username is None:
-            raise credentials_exception
-    except JWTError:
         raise credentials_exception
 
-    user = await user_service.get_user_by_username(username, db)
-    print(user)
-
+    user = await verify_token(token, credentials_exception, db)
     if user is None:
+        print("No user, raise error")
         raise credentials_exception
 
     return user

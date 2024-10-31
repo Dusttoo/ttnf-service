@@ -1,6 +1,5 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
-import GlobalModal from '../../../common/Modal';
 import BreedingForm from './BreedingForm';
 import MultiStepForm from '../litters/AddLitter/MultiStepForm';
 import Pagination from '../../../common/Pagination';
@@ -11,6 +10,8 @@ import { EditButton, AddButton, DeleteButton } from '../../../common/Buttons';
 import LoadingSpinner from '../../../common/LoadingSpinner';
 import ErrorComponent from '../../../common/Error';
 import NoResults from '../../../common/NoResults';
+import { useModal } from '../../../../context/ModalContext';
+import GlobalModal from '../../../common/Modal';
 
 const ListWrapper = styled.div`
   display: flex;
@@ -121,15 +122,13 @@ const Title = styled.h1`
     color: ${(props) => props.theme.colors.primary};
 `;
 
-
 const AdminBreedingList: React.FC = () => {
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
     const { data: breedingsData, isLoading, error } = useBreedings(page, pageSize);
     const { mutate: deleteBreeding } = useDeleteBreeding();
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [modalContent, setModalContent] = useState<React.ReactNode>(null);
     const queryClient = useQueryClient();
+    const { openModal, closeModal } = useModal();
 
     const handlePageChange = (newPage: number, newItemsPerPage: number) => {
         setPage(newPage);
@@ -137,8 +136,7 @@ const AdminBreedingList: React.FC = () => {
     };
 
     const handleEdit = (breedingId: number) => {
-        setModalContent(<BreedingForm onClose={() => setIsModalOpen(false)} breedingId={breedingId} />);
-        setIsModalOpen(true);
+        openModal(<BreedingForm onClose={closeModal} breedingId={breedingId} />);
     };
 
     const handleDelete = (breedingId: number) => {
@@ -152,32 +150,25 @@ const AdminBreedingList: React.FC = () => {
     };
 
     const handleAddNewBreeding = () => {
-        setModalContent(<BreedingForm onClose={() => setIsModalOpen(false)} />);
-        setIsModalOpen(true);
+        openModal(<BreedingForm onClose={closeModal} />);
     };
 
     const handleCreateLitter = (breeding: Breeding) => {
-        const initialLitterValues: LitterCreate = {
-            breedingId: breeding.id,
-            birthDate: '',
-            numberOfPuppies: 0,
-        };
-        setModalContent(
+        openModal(
             <MultiStepForm
-                onClose={() => setIsModalOpen(false)}
+                onClose={closeModal}
                 breedingId={breeding.id}
                 parentMaleId={breeding.maleDogId}
                 parentFemaleId={breeding.femaleDogId}
-            />
+            />,
         );
-        setIsModalOpen(true);
     };
 
     return (
         <ListWrapper>
             <AddNewBreedingButton onClick={handleAddNewBreeding}>Add New Breeding</AddNewBreedingButton>
             {isLoading ? (
-                <LoadingSpinner/>
+                <LoadingSpinner />
             ) : error ? (
                 <ErrorComponent message={`Error loading breedings: ${(error as Error).message}`} />
             ) : (
@@ -188,11 +179,17 @@ const AdminBreedingList: React.FC = () => {
                                 <BreedingCard key={breeding.id}>
                                     <ImageContainer>
                                         <DogImage src={breeding.femaleDog.profilePhoto} alt={breeding.femaleDog.name} />
-                                        <DogImage src={breeding.maleDog.profilePhoto} alt={breeding.maleDog.name} />
+                                        <DogImage
+                                            src={
+                                                breeding.maleDog?.profilePhoto
+                                                ?? breeding.manualSireImageUrl
+                                                ?? 'path/to/default-image.jpg'
+                                            }
+                                            alt={breeding.maleDog?.name ?? breeding.manualSireName ?? 'Unknown Male Dog'}
+                                        />
                                     </ImageContainer>
                                     <BreedingInfo>
-                                        <Title>{breeding.femaleDog.name} X {breeding.maleDog.name}</Title>
-
+                                        <Title>{breeding.femaleDog.name} X {breeding.maleDog?.name ?? breeding.manualSireName ?? 'Unknown Sire'}</Title>
                                         <p>Breeding Date: {breeding.breedingDate}</p>
                                         <p>Expected Birth Date: {breeding.expectedBirthDate}</p>
                                     </BreedingInfo>
@@ -205,7 +202,7 @@ const AdminBreedingList: React.FC = () => {
                             ))}
                         </ListContainer>
                     ) : (
-                        <NoResults message='No breedings found.' description='Try adding a new breeding.' />
+                        <NoResults message="No breedings found." description="Try adding a new breeding." />
                     )}
                     <PaginationWrapper>
                         <Pagination
@@ -217,9 +214,7 @@ const AdminBreedingList: React.FC = () => {
                     </PaginationWrapper>
                 </>
             )}
-            <GlobalModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-                {modalContent}
-            </GlobalModal>
+            <GlobalModal />
         </ListWrapper>
     );
 };

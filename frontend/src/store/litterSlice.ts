@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk, createSelector } from '@reduxjs/toolkit';
 import * as litterService from '../api/litterApi';
 import { PuppyCreate, Dog } from '../api/types/dog';
-import { Litter, LitterCreate, LitterUpdate } from '../api/types/breeding'
+import { Litter, LitterCreate, LitterUpdate } from '../api/types/breeding';
 import { RootState } from '../store';
 
 interface LittersState {
@@ -28,12 +28,13 @@ const initialState: LittersState = {
     error: null,
 };
 
+// Async Thunks
 export const fetchLitters = createAsyncThunk(
     'litters/fetchLitters',
-    async ({ page, pageSize }: { page?: number, pageSize?: number }) => {
+    async ({ page, pageSize }: { page?: number; pageSize?: number }) => {
         const response = await litterService.getAllLitters(page, pageSize);
         return response;
-    }
+    },
 );
 
 export const fetchLitterById = createAsyncThunk(
@@ -41,7 +42,7 @@ export const fetchLitterById = createAsyncThunk(
     async (litterId: number) => {
         const response = await litterService.getLitterById(litterId);
         return response;
-    }
+    },
 );
 
 export const createLitter = createAsyncThunk(
@@ -49,23 +50,23 @@ export const createLitter = createAsyncThunk(
     async (litterData: LitterCreate) => {
         const response = await litterService.createLitter(litterData);
         return response;
-    }
+    },
 );
 
 export const populateLitter = createAsyncThunk(
     'litters/populateLitter',
-    async ({ breedingId, litterData }: { breedingId: number, litterData: LitterCreate }) => {
+    async ({ breedingId, litterData }: { breedingId: number; litterData: LitterCreate }) => {
         const response = await litterService.populateLitter(breedingId, litterData);
         return response;
-    }
+    },
 );
 
 export const addPuppiesToLitter = createAsyncThunk(
     'litters/addPuppiesToLitter',
-    async ({ litterId, puppies }: { litterId: number, puppies: PuppyCreate[] }) => {
+    async ({ litterId, puppies }: { litterId: number; puppies: PuppyCreate[] }) => {
         const response = await litterService.addPuppiesToLitter(litterId, puppies);
         return response;
-    }
+    },
 );
 
 export const deleteLitter = createAsyncThunk(
@@ -73,7 +74,7 @@ export const deleteLitter = createAsyncThunk(
     async (litterId: number) => {
         await litterService.deleteLitter(litterId);
         return litterId;
-    }
+    },
 );
 
 export const fetchPuppiesByLitterId = createAsyncThunk(
@@ -81,7 +82,7 @@ export const fetchPuppiesByLitterId = createAsyncThunk(
     async (litterId: number) => {
         const response = await litterService.getPuppiesByLitterId(litterId);
         return { litterId, puppies: response };
-    }
+    },
 );
 
 export const updateLitter = createAsyncThunk(
@@ -89,9 +90,10 @@ export const updateLitter = createAsyncThunk(
     async ({ litterId, litterData }: { litterId: number; litterData: LitterUpdate }) => {
         const response = await litterService.updateLitter(litterId, litterData);
         return response;
-    }
+    },
 );
 
+// Slice
 const littersSlice = createSlice({
     name: 'litters',
     initialState,
@@ -102,8 +104,6 @@ const littersSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            .addCase(fetchLitters.pending, (state) => {
-            })
             .addCase(fetchLitters.fulfilled, (state, action) => {
                 state.items = action.payload.items;
                 state.pagination.totalCount = action.payload.totalCount;
@@ -111,15 +111,11 @@ const littersSlice = createSlice({
             .addCase(fetchLitters.rejected, (state, action) => {
                 state.error = action.error.message || null;
             })
-            .addCase(fetchLitterById.pending, (state) => {
-            })
             .addCase(fetchLitterById.fulfilled, (state, action) => {
                 state.details[action.payload.id] = action.payload;
             })
             .addCase(fetchLitterById.rejected, (state, action) => {
                 state.error = action.error.message || null;
-            })
-            .addCase(createLitter.pending, (state) => {
             })
             .addCase(createLitter.fulfilled, (state, action) => {
                 state.items.push(action.payload);
@@ -127,15 +123,11 @@ const littersSlice = createSlice({
             .addCase(createLitter.rejected, (state, action) => {
                 state.error = action.error.message || null;
             })
-            .addCase(populateLitter.pending, (state) => {
-            })
             .addCase(populateLitter.fulfilled, (state, action) => {
                 state.items.push(action.payload);
             })
             .addCase(populateLitter.rejected, (state, action) => {
                 state.error = action.error.message || null;
-            })
-            .addCase(addPuppiesToLitter.pending, (state) => {
             })
             .addCase(addPuppiesToLitter.fulfilled, (state, action) => {
                 const litterId = action.meta.arg.litterId;
@@ -145,8 +137,6 @@ const littersSlice = createSlice({
             })
             .addCase(addPuppiesToLitter.rejected, (state, action) => {
                 state.error = action.error.message || null;
-            })
-            .addCase(updateLitter.pending, (state) => {
             })
             .addCase(updateLitter.fulfilled, (state, action) => {
                 const index = state.items.findIndex((litter) => litter.id === action.payload.id);
@@ -158,16 +148,12 @@ const littersSlice = createSlice({
             .addCase(updateLitter.rejected, (state, action) => {
                 state.error = action.error.message;
             })
-            .addCase(deleteLitter.pending, (state) => {
-            })
             .addCase(deleteLitter.fulfilled, (state, action) => {
                 state.items = state.items.filter((litter) => litter.id !== action.payload);
                 delete state.details[action.payload];
             })
             .addCase(deleteLitter.rejected, (state, action) => {
                 state.error = action.error.message;
-            })
-            .addCase(fetchPuppiesByLitterId.pending, (state) => {
             })
             .addCase(fetchPuppiesByLitterId.fulfilled, (state, action) => {
                 state.puppies[action.payload.litterId] = action.payload.puppies;
@@ -180,19 +166,20 @@ const littersSlice = createSlice({
 
 export const { setPagination } = littersSlice.actions;
 
+// Selectors
 export const selectLitters = (state: RootState) => state.litters.items;
 export const selectLitterDetails = (state: RootState, litterId: number) => state.litters.details[litterId];
 
 export const selectLitterById = createSelector(
     (state: RootState) => state.litters.details,
     (_: RootState, litterId: number) => litterId,
-    (details: Record<number, Litter>, litterId: number) => details[litterId]
+    (details: Record<number, Litter>, litterId: number) => details[litterId],
 );
 
 export const selectPuppiesByLitterId = createSelector(
     (state: RootState) => state.litters.puppies,
     (_: RootState, litterId: number) => litterId,
-    (puppies: Record<number, Dog[]>, litterId: number) => puppies[litterId]
+    (puppies: Record<number, Dog[]>, litterId: number) => puppies[litterId],
 );
 
 export default littersSlice.reducer;

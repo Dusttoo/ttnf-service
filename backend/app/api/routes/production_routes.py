@@ -33,7 +33,6 @@ async def get_all_productions(
     db: AsyncSession = Depends(get_database_session)
 ):
     response = await production_svc.get_all_productions(page, page_size, db, gender, sire, dam)
-    print(response)
     return response
 
 

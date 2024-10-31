@@ -10,8 +10,8 @@ const ProgressContainer = styled.div`
 const Step = styled.div<{ isActive: boolean }>`
   width: 100%;
   padding: 0.5rem;
-  border-bottom: 4px solid ${(props) => (props.isActive ? props.theme.colors.primary : props.theme.colors.secondaryBackground)};
-  color: ${(props) => (props.isActive ? props.theme.colors.primary : props.theme.colors.secondaryBackground)};
+  border-bottom: 4px solid ${(props) => (props.isActive ? props.theme.colors.primary : props.theme.colors.white)};
+  color: ${(props) => (props.isActive ? props.theme.colors.primary : props.theme.colors.white)};
   text-align: center;
 `;
 

@@ -9,7 +9,9 @@ import { useDogs, useDeleteDog } from '../../../../hooks/useDog';
 import { useNavigate } from 'react-router-dom';
 import { GenderEnum, StatusEnum } from '../../../../api/types/core';
 import LoadingSpinner from '../../../common/LoadingSpinner';
-import NoResults from "../../../common/NoResults";
+import NoResults from '../../../common/NoResults';
+import { useModal } from '../../../../context/ModalContext';
+
 
 const ListWrapper = styled.div`
   display: flex;
@@ -114,10 +116,10 @@ const AdminDogList: React.FC<{ defaultGender?: GenderEnum; owned?: boolean }> = 
     const [status, setStatus] = useState<StatusEnum[]>([]);
     const [sire, setSire] = useState<Dog | undefined>(undefined);
     const [dam, setDam] = useState<Dog | undefined>(undefined);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [modalContent, setModalContent] = useState<React.ReactNode>(null);
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
+    const { openModal, closeModal } = useModal();
+
 
     const filters: SelectedFilters = { gender, status, owned, sire: sire, dam: dam };
     const { data: dogsData, isLoading } = useDogs(filters, page, pageSize);
@@ -141,15 +143,14 @@ const AdminDogList: React.FC<{ defaultGender?: GenderEnum; owned?: boolean }> = 
     };
 
     const handleEdit = (dogId: number) => {
-        setModalContent(
+        openModal(
             <DogForm
-                onClose={() => setIsModalOpen(false)}
+                onClose={closeModal}
                 dogId={dogId}
                 title="Edit Dog"
                 redirect="/admin/dashboard/dogs"
-            />
+            />,
         );
-        setIsModalOpen(true);
     };
 
     const handleDelete = (dogId: number) => {
@@ -159,14 +160,13 @@ const AdminDogList: React.FC<{ defaultGender?: GenderEnum; owned?: boolean }> = 
     };
 
     const handleAddNewDog = () => {
-        setModalContent(
+        openModal(
             <DogForm
-                onClose={() => setIsModalOpen(false)}
+                onClose={closeModal}
                 title="Add New Dog"
                 redirect="/admin/dashboard/dogs"
-            />
+            />,
         );
-        setIsModalOpen(true);
     };
 
     return (
@@ -184,7 +184,7 @@ const AdminDogList: React.FC<{ defaultGender?: GenderEnum; owned?: boolean }> = 
             />
             <AddNewDogButton onClick={handleAddNewDog}>Add New Dog</AddNewDogButton>
             {isLoading ? (
-                <LoadingSpinner/>
+                <LoadingSpinner />
             ) : (
                 <>
                     {dogs.length > 0 ? (
@@ -201,7 +201,7 @@ const AdminDogList: React.FC<{ defaultGender?: GenderEnum; owned?: boolean }> = 
                             ))}
                         </ListContainer>
                     ) : (
-                        <NoResults message={"No dogs found."} description={"Try adding a dog"} />
+                        <NoResults message={'No dogs found.'} description={'Try adding a dog'} />
                     )}
                     <PaginationWrapper>
                         <Pagination
@@ -213,9 +213,7 @@ const AdminDogList: React.FC<{ defaultGender?: GenderEnum; owned?: boolean }> = 
                     </PaginationWrapper>
                 </>
             )}
-            <GlobalModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-                {modalContent}
-            </GlobalModal>
+            <GlobalModal />
         </ListWrapper>
     );
 };

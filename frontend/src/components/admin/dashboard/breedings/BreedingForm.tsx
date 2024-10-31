@@ -13,6 +13,10 @@ const FormContainer = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  padding: 2rem;
+  background-color: ${(props) => props.theme.colors.secondaryBackground};
+  border-radius: 8px;
+  color: ${(props) => props.theme.colors.white};
 `;
 
 const ButtonContainer = styled.div`
@@ -28,26 +32,41 @@ const Form = styled.form`
 
 const Input = styled.input`
   padding: 0.75rem;
+  background-color: ${(props) => props.theme.colors.neutralBackground};
+  color: ${(props) => props.theme.colors.black};
   border: 1px solid ${(props) => props.theme.colors.primary};
   border-radius: 4px;
   font-size: 1rem;
+
+  &::placeholder {
+    color: ${(props) => props.theme.colors.secondary};
+  }
 `;
 
-const BreedingForm: React.FC<{ onClose: () => void; breedingId?: number; }> = ({ onClose, breedingId }) => {
+const BreedingForm: React.FC<{ onClose: () => void; breedingId?: number }> = ({ onClose, breedingId }) => {
     const navigate = useNavigate();
     const { data: breeding, isLoading: isBreedingLoading } = useBreedingById(breedingId);
     const createBreedingMutation = useCreateBreeding();
     const updateBreedingMutation = useUpdateBreeding();
 
+    const [useManualSire, setUseManualSire] = useState(false);
     const [formState, setFormState] = useState<BreedingCreate | BreedingUpdate>({
         femaleDogId: 0,
         maleDogId: 0,
         breedingDate: '',
         expectedBirthDate: '',
         description: '',
+        manualSireName: '',
+        manualSireColor: '',
+        manualSireImageUrl: '',
+        manualSirePedigreeLink: '',
     });
 
-    const [errors, setErrors] = useState<{ breedingDate?: string; expectedBirthDate?: string }>({});
+    const [errors, setErrors] = useState<{
+        breedingDate?: string;
+        expectedBirthDate?: string;
+        manualSireName?: string
+    }>({});
 
     useEffect(() => {
         if (breedingId && breeding) {
@@ -69,13 +88,13 @@ const BreedingForm: React.FC<{ onClose: () => void; breedingId?: number; }> = ({
     };
 
     const validate = () => {
-        const newErrors: { breedingDate?: string; expectedBirthDate?: string } = {};
-        if (!formState.breedingDate) {
-            newErrors.breedingDate = 'Breeding Date is required.';
-        }
-        if (!formState.expectedBirthDate) {
-            newErrors.expectedBirthDate = 'Expected Birth Date is required.';
-        }
+        const newErrors: { breedingDate?: string; expectedBirthDate?: string; manualSireName?: string } = {};
+        if (!formState.breedingDate) newErrors.breedingDate = 'Breeding Date is required.';
+        if (!formState.expectedBirthDate) newErrors.expectedBirthDate = 'Expected Birth Date is required.';
+
+        // Validate manual sire fields if `useManualSire` is true
+        if (useManualSire && !formState.manualSireName) newErrors.manualSireName = 'Manual sire name is required.';
+
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -84,17 +103,25 @@ const BreedingForm: React.FC<{ onClose: () => void; breedingId?: number; }> = ({
         e.preventDefault();
 
         if (validate()) {
+            const breedingData = {
+                ...formState,
+                maleDogId: useManualSire ? undefined : formState.maleDogId, // Only send `maleDogId` if not using manual sire
+            };
+
             if (breedingId) {
-                await updateBreedingMutation.mutateAsync({ breedingId: Number(breedingId), breedingData: formState as BreedingUpdate });
+                await updateBreedingMutation.mutateAsync({
+                    breedingId: Number(breedingId),
+                    breedingData: breedingData as BreedingUpdate,
+                });
             } else {
-                await createBreedingMutation.mutateAsync(formState as BreedingCreate);
+                await createBreedingMutation.mutateAsync(breedingData as BreedingCreate);
             }
             onClose();
             navigate('/admin/dashboard/breedings');
         }
     };
 
-    if (isBreedingLoading) return <LoadingSpinner/>;
+    if (isBreedingLoading) return <LoadingSpinner />;
 
     return (
         <FormContainer>
@@ -103,9 +130,61 @@ const BreedingForm: React.FC<{ onClose: () => void; breedingId?: number; }> = ({
                 <ParentSelector
                     sireId={formState.maleDogId}
                     damId={formState.femaleDogId}
-                    onSireChange={(e) => setFormState((prevState) => ({ ...prevState, maleDogId: Number(e.target.value) }))}
-                    onDamChange={(e) => setFormState((prevState) => ({ ...prevState, femaleDogId: Number(e.target.value) }))}
+                    onSireChange={(e) => setFormState((prevState) => ({
+                        ...prevState,
+                        maleDogId: Number(e.target.value),
+                    }))}
+                    onDamChange={(e) => setFormState((prevState) => ({
+                        ...prevState,
+                        femaleDogId: Number(e.target.value),
+                    }))}
+                    disabled={useManualSire}
                 />
+                <div>
+                    <label>
+                        <input
+                            type="checkbox"
+                            checked={useManualSire}
+                            onChange={() => setUseManualSire((prev) => !prev)}
+                        />
+                        Use Manual Sire
+                    </label>
+                </div>
+
+                {useManualSire && (
+                    <>
+                        <Input
+                            type="text"
+                            name="manualSireName"
+                            value={formState.manualSireName}
+                            onChange={handleChange}
+                            placeholder="Manual Sire Name"
+                        />
+                        {errors.manualSireName && <FieldFeedback message={errors.manualSireName} />}
+                        <Input
+                            type="text"
+                            name="manualSireColor"
+                            value={formState.manualSireColor}
+                            onChange={handleChange}
+                            placeholder="Manual Sire Color"
+                        />
+                        <Input
+                            type="text"
+                            name="manualSireImageUrl"
+                            value={formState.manualSireImageUrl}
+                            onChange={handleChange}
+                            placeholder="Manual Sire Image URL"
+                        />
+                        <Input
+                            type="text"
+                            name="manualSirePedigreeLink"
+                            value={formState.manualSirePedigreeLink}
+                            onChange={handleChange}
+                            placeholder="Manual Sire Pedigree Link"
+                        />
+                    </>
+                )}
+
                 <div>
                     <DateInput
                         label="Breeding Date"
@@ -130,8 +209,8 @@ const BreedingForm: React.FC<{ onClose: () => void; breedingId?: number; }> = ({
                     placeholder="Description"
                 />
                 <ButtonContainer>
-                    <Button variant="primary" type="submit">Save</Button>
-                    <Button variant="error" onClick={onClose}>Cancel</Button>
+                    <Button $variant="primary" type="submit">Save</Button>
+                    <Button $variant="error" onClick={onClose}>Cancel</Button>
                 </ButtonContainer>
             </Form>
         </FormContainer>

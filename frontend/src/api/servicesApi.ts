@@ -3,12 +3,20 @@ import axiosWithTimeout from './axiosInstance';
 
 // Services API
 export const getServices = async (): Promise<Service[]> => {
-    const response = await axiosWithTimeout.get('/services');
+    const response = await axiosWithTimeout.get('/services', {
+        headers: {
+            isBackgroundRequest: 'true', // Set as background request
+        },
+    });
     return response.data.services;
 };
 
 export const getServiceById = async (serviceId: number): Promise<Service> => {
-    const response = await axiosWithTimeout.get(`/services/${serviceId}`);
+    const response = await axiosWithTimeout.get(`/services/${serviceId}`, {
+        headers: {
+            isBackgroundRequest: 'true', // Set as background request
+        },
+    });
     return response.data;
 };
 
@@ -28,12 +36,20 @@ export const deleteService = async (serviceId: number): Promise<void> => {
 
 // Tags API
 export const getTags = async (): Promise<Tag[]> => {
-    const response = await axiosWithTimeout.get('/tags');
+    const response = await axiosWithTimeout.get('/tags', {
+        headers: {
+            isBackgroundRequest: 'true', // Set as background request
+        },
+    });
     return response.data;
 };
 
 // Categories API
 export const getCategories = async (): Promise<Category[]> => {
-    const response = await axiosWithTimeout.get('/categories');
+    const response = await axiosWithTimeout.get('/categories', {
+        headers: {
+            isBackgroundRequest: 'true', // Set as background request
+        },
+    });
     return response.data;
 };

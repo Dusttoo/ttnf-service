@@ -34,11 +34,12 @@ export const fetchServices = createAsyncThunk(
         const services = state.services.items;
         const pagination = state.services.pagination;
 
+        // Cache check
         if (services.length && pagination.page === page && pagination.pageSize === pageSize) {
             return { items: services, total: pagination.totalCount };
         }
         const response = await serviceApi.getServices();
-        return { items: response, total: response.length };  // Adjust if pagination support is added
+        return { items: response, total: response.length };  // Adjust for pagination if added later
     },
 );
 
@@ -93,32 +94,27 @@ const servicesSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            .addCase(fetchServices.pending, (state) => {
-            })
             .addCase(fetchServices.fulfilled, (state, action) => {
                 state.items = action.payload.items;
                 state.pagination.totalCount = action.payload.total;
+                state.error = null;
             })
             .addCase(fetchServices.rejected, (state, action) => {
                 state.error = action.error.message || null;
             })
-            .addCase(fetchServiceById.pending, (state) => {
-            })
             .addCase(fetchServiceById.fulfilled, (state, action) => {
                 state.details[action.payload.id] = action.payload;
+                state.error = null;
             })
             .addCase(fetchServiceById.rejected, (state, action) => {
                 state.error = action.error.message || null;
             })
-            .addCase(createService.pending, (state) => {
-            })
             .addCase(createService.fulfilled, (state, action) => {
                 state.items.push(action.payload);
+                state.error = null;
             })
             .addCase(createService.rejected, (state, action) => {
                 state.error = action.error.message || null;
-            })
-            .addCase(updateService.pending, (state) => {
             })
             .addCase(updateService.fulfilled, (state, action) => {
                 const index = state.items.findIndex(item => item.id === action.payload.id);
@@ -126,15 +122,15 @@ const servicesSlice = createSlice({
                     state.items[index] = action.payload;
                 }
                 state.details[action.payload.id] = action.payload;
+                state.error = null;
             })
             .addCase(updateService.rejected, (state, action) => {
                 state.error = action.error.message || null;
             })
-            .addCase(deleteService.pending, (state) => {
-            })
             .addCase(deleteService.fulfilled, (state, action) => {
                 state.items = state.items.filter(item => item.id !== action.payload);
                 delete state.details[action.payload];
+                state.error = null;
             })
             .addCase(deleteService.rejected, (state, action) => {
                 state.error = action.error.message || null;

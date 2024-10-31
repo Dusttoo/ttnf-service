@@ -7,6 +7,7 @@ import { RootState, AppDispatch } from '../../../../store';
 import LoadingSpinner from '../../../common/LoadingSpinner';
 import ErrorComponent from '../../../common/Error';
 import { AddButton, EditButton, DeleteButton } from '../../../common/Buttons';
+import { selectIsLoading } from '../../../../store/loadingSlice'; // Import the new loading selector
 
 const PageListContainer = styled.div`
   padding: 2rem;
@@ -62,53 +63,53 @@ const LoadingContainer = styled.div`
 `;
 
 const PageList: React.FC = () => {
-  const navigate = useNavigate();
-  const dispatch: AppDispatch = useDispatch();
-  const { pages, error } = useSelector((state: RootState) => state.pages);
-  const { isLoading } = useSelector((state: RootState) => state.loading);
+    const navigate = useNavigate();
+    const dispatch: AppDispatch = useDispatch();
+    const { pages, error } = useSelector((state: RootState) => state.pages);
+    const isLoading = useSelector(selectIsLoading); // Use selectIsLoading here
 
-  useEffect(() => {
-    dispatch(fetchPages());
-  }, [dispatch]);
+    useEffect(() => {
+        dispatch(fetchPages());
+    }, [dispatch]);
 
-  const handleDelete = async (pageId: string) => {
-    if (window.confirm('Are you sure you want to delete this page?')) {
-      await dispatch(removePage(pageId));
+    const handleDelete = async (pageId: string) => {
+        if (window.confirm('Are you sure you want to delete this page?')) {
+            await dispatch(removePage(pageId));
+        }
+    };
+
+    if (isLoading) {
+        return (
+            <LoadingContainer>
+                <LoadingSpinner />
+            </LoadingContainer>
+        );
     }
-  };
 
-  if (isLoading) {
+    if (error) return <ErrorComponent message={error} />;
+
     return (
-      <LoadingContainer>
-        <LoadingSpinner />
-      </LoadingContainer>
+        <PageListContainer>
+            <h2>Pages</h2>
+            <AddButton onClick={() => navigate('/admin/dashboard/pages/new')} />
+
+            {pages
+                .filter((page) => !page.isLocked)
+                .map((page) => (
+                    <PageItem key={page.id}>
+                        <PageTitle>{page.name}</PageTitle>
+                        <ButtonContainer>
+                            <EditButton
+                                onClick={() =>
+                                    navigate(`/admin/dashboard/pages/edit/${page.slug}`)
+                                }
+                            />
+                            <DeleteButton onClick={() => handleDelete(page.id)} />
+                        </ButtonContainer>
+                    </PageItem>
+                ))}
+        </PageListContainer>
     );
-  }
-
-  if (error) return <ErrorComponent message={error} />;
-
-  return (
-    <PageListContainer>
-      <h2>Pages</h2>
-      <AddButton onClick={() => navigate('/admin/dashboard/pages/new')} />
-
-      {pages
-        .filter((page) => !page.isLocked)
-        .map((page) => (
-          <PageItem key={page.id}>
-            <PageTitle>{page.name}</PageTitle>
-            <ButtonContainer>
-              <EditButton
-                onClick={() =>
-                  navigate(`/admin/dashboard/pages/edit/${page.slug}`)
-                }
-              />
-              <DeleteButton onClick={() => handleDelete(page.id)} />
-            </ButtonContainer>
-          </PageItem>
-        ))}
-    </PageListContainer>
-  );
 };
 
 export default PageList;

@@ -25,6 +25,7 @@ const initialState: BreedingsState = {
     error: null,
 };
 
+// Thunks
 export const fetchBreedings = createAsyncThunk(
     'breedings/fetchBreedings',
     async ({ page, pageSize }: { page?: number; pageSize?: number }, { getState }) => {
@@ -35,9 +36,8 @@ export const fetchBreedings = createAsyncThunk(
         if (breedings.length && pagination.page === page && pagination.pageSize === pageSize) {
             return { items: breedings, total: pagination.totalCount };
         }
-        const response = await breedingService.getBreedings(page, pageSize);
-        return response;
-    }
+        return await breedingService.getBreedings(page, pageSize);
+    },
 );
 
 export const fetchBreedingById = createAsyncThunk(
@@ -45,30 +45,22 @@ export const fetchBreedingById = createAsyncThunk(
     async (breedingId: number, { getState }) => {
         const state = getState() as RootState;
         const breedingDetails = state.breedings.details[breedingId];
-
-        if (breedingDetails) {
-            return breedingDetails;
-        }
-
-        const response = await breedingService.getBreedingById(breedingId);
-        return response;
-    }
+        return breedingDetails ?? await breedingService.getBreedingById(breedingId);
+    },
 );
 
 export const createBreeding = createAsyncThunk(
     'breedings/createBreeding',
     async (breedingData: BreedingCreate) => {
-        const response = await breedingService.createBreeding(breedingData);
-        return response;
-    }
+        return await breedingService.createBreeding(breedingData);
+    },
 );
 
 export const updateBreeding = createAsyncThunk(
     'breedings/updateBreeding',
     async ({ breedingId, breedingData }: { breedingId: number; breedingData: BreedingUpdate }) => {
-        const response = await breedingService.updateBreeding(breedingId, breedingData);
-        return response;
-    }
+        return await breedingService.updateBreeding(breedingId, breedingData);
+    },
 );
 
 export const deleteBreeding = createAsyncThunk(
@@ -76,9 +68,10 @@ export const deleteBreeding = createAsyncThunk(
     async (breedingId: number) => {
         await breedingService.deleteBreeding(breedingId);
         return breedingId;
-    }
+    },
 );
 
+// Slice
 const breedingsSlice = createSlice({
     name: 'breedings',
     initialState,
@@ -89,8 +82,6 @@ const breedingsSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            .addCase(fetchBreedings.pending, (state) => {
-            })
             .addCase(fetchBreedings.fulfilled, (state, action) => {
                 state.items = action.payload.items;
                 state.pagination.totalCount = action.payload.total;
@@ -98,23 +89,17 @@ const breedingsSlice = createSlice({
             .addCase(fetchBreedings.rejected, (state, action) => {
                 state.error = action.error.message || null;
             })
-            .addCase(fetchBreedingById.pending, (state) => {
-            })
             .addCase(fetchBreedingById.fulfilled, (state, action) => {
                 state.details[action.payload.id] = action.payload;
             })
             .addCase(fetchBreedingById.rejected, (state, action) => {
                 state.error = action.error.message || null;
             })
-            .addCase(createBreeding.pending, (state) => {
-            })
             .addCase(createBreeding.fulfilled, (state, action) => {
                 state.items.push(action.payload);
             })
             .addCase(createBreeding.rejected, (state, action) => {
                 state.error = action.error.message || null;
-            })
-            .addCase(updateBreeding.pending, (state) => {
             })
             .addCase(updateBreeding.fulfilled, (state, action) => {
                 const index = state.items.findIndex(item => item.id === action.payload.id);
@@ -125,8 +110,6 @@ const breedingsSlice = createSlice({
             })
             .addCase(updateBreeding.rejected, (state, action) => {
                 state.error = action.error.message || null;
-            })
-            .addCase(deleteBreeding.pending, (state) => {
             })
             .addCase(deleteBreeding.fulfilled, (state, action) => {
                 state.items = state.items.filter(item => item.id !== action.payload);

@@ -11,7 +11,7 @@ const DateInputContainer = styled.div`
 
 const Label = styled.label`
   font-size: 0.875rem;
-  color: ${(props) => props.theme.colors.secondary};
+  color: ${(props) => props.theme.colors.white};
 `;
 
 const StyledDatePicker = styled(DatePicker)`
@@ -20,8 +20,16 @@ const StyledDatePicker = styled(DatePicker)`
   border: 1px solid ${(props) => props.theme.colors.primary};
   border-radius: 4px;
   font-size: 1rem;
+  background-color: ${(props) => props.theme.colors.secondaryBackground};
+  color: ${(props) => props.theme.colors.white};
+
   ::placeholder {
-    color: ${(props) => props.theme.colors.secondaryBackground};
+    color: ${(props) => props.theme.colors.neutralBackground};
+  }
+
+  &:focus {
+    outline: none;
+    border-color: ${(props) => props.theme.colors.primaryDark};
   }
 `;
 

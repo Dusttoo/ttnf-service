@@ -414,6 +414,7 @@ class DogService:
         page: Optional[int] = None,
         page_size: Optional[int] = None,
     ) -> Dict[str, any]:
+        print(filters["retired"])
         try:
             redis = await get_redis_client()
             cache_key = f"dogs_filtered_{json.dumps(filters)}_{page}_{page_size}"
@@ -453,7 +454,10 @@ class DogService:
                     query = query.filter(Dog.parent_male_id == filters["sire"])
                 if filters.get("dam"):
                     query = query.filter(Dog.parent_female_id == filters["dam"])
+                if "retired" in filters:
+                    query = query.filter(Dog.is_retired == filters["retired"])
 
+                print("Query: ", query)
                 # Only apply pagination if page and page_size are provided
                 if page is not None and page_size is not None:
                     offset = (page - 1) * page_size
@@ -469,6 +473,7 @@ class DogService:
                     (Dog.kennel_own == (filters["owned"].lower() == "true")) if filters.get("owned") else True,
                     (Dog.parent_male_id == filters["sire"]) if filters.get("sire") else True,
                     (Dog.parent_female_id == filters["dam"]) if filters.get("dam") else True,
+                    (Dog.is_retired == filters["retired"]) if "retired" in filters else True
                 )
                 total_result = await db.execute(total_query)
                 total_count = total_result.scalar_one()

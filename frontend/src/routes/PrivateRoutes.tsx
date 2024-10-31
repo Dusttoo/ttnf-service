@@ -19,57 +19,44 @@ import AdminSettings from '../components/admin/dashboard/settings/AdminSettings'
 import LoadingSpinner from '../components/common/LoadingSpinner';
 
 interface PrivateRouteProps {
-  element: React.ReactElement;
+    element: React.ReactElement;
 }
 
 const PrivateRoute: React.FC<PrivateRouteProps> = ({ element }) => {
-  const dispatch: AppDispatch = useDispatch();
-  const { user, error } = useSelector((state: RootState) => state.auth);
-  const isLoading = useSelector(selectIsLoading);
+    const dispatch: AppDispatch = useDispatch();
+    const { user, error, sessionValidated } = useSelector((state: RootState) => state.auth);
+    const isLoading = useSelector(selectIsLoading);
 
-  const [isSessionValidated, setIsSessionValidated] = useState(false);
+    if (isLoading || (!user && !sessionValidated)) {
+        return <LoadingSpinner />;
+    }
 
-  useEffect(() => {
-    const validateUserSession = async () => {
-      if (!user) {
-        await dispatch(validateSession());
-      }
-      setIsSessionValidated(true);
-    };
+    if (!user && sessionValidated) {
+        return <Navigate to="/login" />;
+    }
 
-    validateUserSession();
-  }, [dispatch, user]);
-
-  if (isLoading || !isSessionValidated) {
-    return <LoadingSpinner />;
-  }
-
-  if (!user && isSessionValidated) {
-    return <Navigate to="/login" />;
-  }
-
-  return element;
+    return element;
 };
 
 const PrivateRoutes: React.FC = () => (
-  <Routes>
-    <Route
-      path="/dashboard"
-      element={<PrivateRoute element={<AdminLayout />} />}
-    >
-      <Route path="" element={<Landing />} />
-      <Route path="pages" element={<PageList />} />
-      <Route path="pages/edit/:id" element={<PageEditor />} />
-      <Route path="dogs" element={<DogManager />} />
-      <Route path="dogs/:dogId" element={<DogDetail />} />
-      <Route path="productions" element={<AdminProductionList />} />
-      <Route path="breedings" element={<AdminBreedingList />} />
-      <Route path="litters" element={<AdminLitterList />} />
-      <Route path="litters/:litterId/puppies" element={<LitterPuppies />} />
-      <Route path="settings" element={<AdminSettings />} />
-      <Route path="*" element={<NotFoundPage />} />
-    </Route>
-  </Routes>
+    <Routes>
+        <Route
+            path="/dashboard"
+            element={<PrivateRoute element={<AdminLayout />} />}
+        >
+            <Route path="" element={<Landing />} />
+            <Route path="pages" element={<PageList />} />
+            <Route path="pages/edit/:id" element={<PageEditor />} />
+            <Route path="dogs" element={<DogManager />} />
+            <Route path="dogs/:dogId" element={<DogDetail />} />
+            <Route path="productions" element={<AdminProductionList />} />
+            <Route path="breedings" element={<AdminBreedingList />} />
+            <Route path="litters" element={<AdminLitterList />} />
+            <Route path="litters/:litterId/puppies" element={<LitterPuppies />} />
+            <Route path="settings" element={<AdminSettings />} />
+            <Route path="*" element={<NotFoundPage />} />
+        </Route>
+    </Routes>
 );
 
 export default PrivateRoutes;

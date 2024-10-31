@@ -12,7 +12,6 @@ interface DogsState {
         pageSize: number;
         totalCount: number;
     };
-    loading: boolean;
     error: string | null | undefined;
 }
 
@@ -25,13 +24,17 @@ const initialState: DogsState = {
         pageSize: 10,
         totalCount: 0,
     },
-    loading: false,
     error: null,
 };
 
+// Thunks
 export const fetchDogs = createAsyncThunk(
     'dogs/fetchDogs',
-    async ({ page, pageSize, filters }: { page?: number; pageSize?: number; filters: SelectedFilters }, { getState }) => {
+    async ({ page, pageSize, filters }: {
+        page?: number;
+        pageSize?: number;
+        filters: SelectedFilters
+    }, { getState }) => {
         const state = getState() as RootState;
         const dogs = state.dogs.items;
         const pagination = state.dogs.pagination;
@@ -39,9 +42,8 @@ export const fetchDogs = createAsyncThunk(
         if (dogs.length && pagination.page === page && pagination.pageSize === pageSize && JSON.stringify(filters) === JSON.stringify(state.dogs.filters)) {
             return { items: dogs, total: pagination.totalCount };
         }
-        const response = await dogService.getDogsFiltered(filters, page, pageSize);
-        return response;
-    }
+        return await dogService.getDogsFiltered(filters, page, pageSize);
+    },
 );
 
 export const fetchDogById = createAsyncThunk(
@@ -49,30 +51,18 @@ export const fetchDogById = createAsyncThunk(
     async (dogId: number, { getState }) => {
         const state = getState() as RootState;
         const dogDetails = state.dogs.details[dogId];
-
-        if (dogDetails) {
-            return dogDetails;
-        }
-
-        const response = await dogService.getDogById(dogId);
-        return response;
-    }
+        return dogDetails ?? await dogService.getDogById(dogId);
+    },
 );
 
 export const createDog = createAsyncThunk(
     'dogs/createDog',
-    async (dogData: DogCreate) => {
-        const response = await dogService.createDog(dogData);
-        return response;
-    }
+    async (dogData: DogCreate) => await dogService.createDog(dogData),
 );
 
 export const updateDog = createAsyncThunk(
     'dogs/updateDog',
-    async ({ dogId, dogData }: { dogId: number; dogData: DogUpdate }) => {
-        const response = await dogService.updateDog(dogId, dogData);
-        return response;
-    }
+    async ({ dogId, dogData }: { dogId: number; dogData: DogUpdate }) => await dogService.updateDog(dogId, dogData),
 );
 
 export const deleteDog = createAsyncThunk(
@@ -80,9 +70,10 @@ export const deleteDog = createAsyncThunk(
     async (dogId: number) => {
         await dogService.deleteDog(dogId);
         return dogId;
-    }
+    },
 );
 
+// Slice
 const dogsSlice = createSlice({
     name: 'dogs',
     initialState,
@@ -96,9 +87,6 @@ const dogsSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            .addCase(fetchDogs.pending, (state) => {
-                
-            })
             .addCase(fetchDogs.fulfilled, (state, action) => {
                 state.items = action.payload.items;
                 state.pagination.totalCount = action.payload.total;
@@ -106,26 +94,17 @@ const dogsSlice = createSlice({
             .addCase(fetchDogs.rejected, (state, action) => {
                 state.error = action.error.message;
             })
-            .addCase(fetchDogById.pending, (state) => {
-                
-            })
             .addCase(fetchDogById.fulfilled, (state, action) => {
                 state.details[action.payload.id] = action.payload;
             })
             .addCase(fetchDogById.rejected, (state, action) => {
                 state.error = action.error.message;
             })
-            .addCase(createDog.pending, (state) => {
-                
-            })
             .addCase(createDog.fulfilled, (state, action) => {
                 state.items.push(action.payload);
             })
             .addCase(createDog.rejected, (state, action) => {
                 state.error = action.error.message;
-            })
-            .addCase(updateDog.pending, (state) => {
-                
             })
             .addCase(updateDog.fulfilled, (state, action) => {
                 const index = state.items.findIndex((dog) => dog.id === action.payload.id);
@@ -136,9 +115,6 @@ const dogsSlice = createSlice({
             })
             .addCase(updateDog.rejected, (state, action) => {
                 state.error = action.error.message;
-            })
-            .addCase(deleteDog.pending, (state) => {
-                
             })
             .addCase(deleteDog.fulfilled, (state, action) => {
                 state.items = state.items.filter((dog) => dog.id !== action.payload);
@@ -155,7 +131,7 @@ export const { setFilters, setPagination } = dogsSlice.actions;
 export const selectDogById = createSelector(
     (state: RootState) => state.dogs.details,
     (_: RootState, dogId: number) => dogId,
-    (details: Record<number, Dog>, dogId: number) => details[dogId]
+    (details: Record<number, Dog>, dogId: number) => details[dogId],
 );
 
 export default dogsSlice.reducer;

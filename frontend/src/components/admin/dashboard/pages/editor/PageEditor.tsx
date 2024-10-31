@@ -3,7 +3,6 @@ import { useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import usePage from '../../../../../hooks/usePage';
 import { AppDispatch } from '../../../../../store';
-
 import { updateExistingPage } from '../../../../../store/pageSlice';
 import { HeroContent } from '../../../../../api/types/page';
 import { CarouselImage as CarouselImageType } from '../../../../../api/types/core';
@@ -13,15 +12,12 @@ import PreviewMode from './PreviewMode';
 import styled from 'styled-components';
 import LoadingSpinner from '../../../../common/LoadingSpinner';
 import ErrorComponent from '../../../../common/Error';
-import GlobalModal from '../../../../common/Modal'
-import SuccessMessage from '../../../../common/SuccessMessage'
+import SuccessMessage from '../../../../common/SuccessMessage';
 import HeroEdit from './HeroEditor';
 import CarouselEdit from './CarouselEditor';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faChevronLeft,
-  faChevronRight,
-} from '@fortawesome/free-solid-svg-icons';
+import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import { useModal } from '../../../../../context/ModalContext';
 
 const LEFT_SIDEBAR_WIDTH = 150;
 const RIGHT_SIDEBAR_OPEN_WIDTH = 300;
@@ -43,7 +39,6 @@ const ContentContainer = styled.div<{ isSidebarOpen: boolean }>`
     props.isSidebarOpen ? `${RIGHT_SIDEBAR_OPEN_WIDTH}px` : '0'};
   overflow: auto;
 
-  /* Media queries to handle small screen sizes */
   @media (max-width: 768px) {
     padding: 1rem;
     margin-left: 0;
@@ -89,169 +84,164 @@ const SaveButton = styled.button`
 `;
 
 const PageEditor: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-  const { page, loading, error, handleSave, modalMessage, isModalOpen, setIsModalOpen, setModalMessage } = usePage(id);
-  const dispatch: AppDispatch = useDispatch();
-  const [isEditMode, setIsEditMode] = useState(true);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [content, setContent] = useState<string>('');
-  const [seoSettings, setSEOSettings] = useState(page?.settings?.seo || {});
-  const [layoutSettings, setLayoutSettings] = useState(
-    page?.settings?.layout || {}
-  );
-  const [aboutContent, setAboutContent] = useState<string>(
-    page?.customValues?.aboutContent || ''
-  );
-  const [heroCarouselImages, setHeroCarouselImages] = useState<
-    CarouselImageType[]
-  >(page?.customValues?.heroContent?.carouselImages || []);
-  const [standaloneCarouselImages, setStandaloneCarouselImages] = useState<
-    CarouselImageType[]
-  >(page?.carousel || []);
-  const [carouselSpeed, setCarouselSpeed] = useState<number>(page?.customValues?.heroContent?.carouselSpeed || 5000)
+    const { id } = useParams<{ id: string }>();
+    const { page, loading, error, handleSave } = usePage(id);
+    const dispatch: AppDispatch = useDispatch();
+    const { openModal, closeModal } = useModal();
+    const [isEditMode, setIsEditMode] = useState(true);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [content, setContent] = useState<string>('');
+    const [seoSettings, setSEOSettings] = useState(page?.settings?.seo || {});
+    const [layoutSettings, setLayoutSettings] = useState(
+        page?.settings?.layout || {},
+    );
+    const [aboutContent, setAboutContent] = useState<string>(
+        page?.customValues?.aboutContent || '',
+    );
+    const [heroCarouselImages, setHeroCarouselImages] = useState<
+        CarouselImageType[]
+    >(page?.customValues?.heroContent?.carouselImages || []);
+    const [standaloneCarouselImages, setStandaloneCarouselImages] = useState<
+        CarouselImageType[]
+    >(page?.carousel || []);
+    const [carouselSpeed, setCarouselSpeed] = useState<number>(page?.customValues?.heroContent?.carouselSpeed || 5000);
 
+    useEffect(() => {
+        if (page) {
+            setContent(page.content);
+            setSEOSettings(page.settings?.seo || {});
+            setLayoutSettings(page.settings?.layout || {});
+            setAboutContent(page.customValues?.aboutContent || '');
+            setHeroCarouselImages(page.customValues?.heroContent?.carouselImages || []);
+            setStandaloneCarouselImages(page.carousel || []);
+        }
+    }, [page]);
 
-  useEffect(() => {
-    if (page) {
-      setContent(page.content);
-      setSEOSettings(page.settings?.seo || {});
-      setLayoutSettings(page.settings?.layout || {});
-      setAboutContent(page.customValues?.aboutContent || '');
-      setHeroCarouselImages(page.customValues?.heroContent?.carouselImages || []);
-      setStandaloneCarouselImages(page.carousel || []);
-    } else {
-      console.log("Page is undefined in useEffect");
-    }
-  }, [page]);
+    const handleSaveContent = () => {
+        if (page) {
+            const updatedPage = {
+                ...page,
+                customValues: {
+                    ...page.customValues,
+                    aboutContent,
+                    heroContent: {
+                        ...page.customValues?.heroContent,
+                        carouselImages: heroCarouselImages,
+                        carouselSpeed: carouselSpeed,
+                        title: page.customValues?.heroContent?.title || '',
+                        description: page.customValues?.heroContent?.description || '',
+                        ctaText: page.customValues?.heroContent?.ctaText || '',
+                        introductionText: page.customValues?.heroContent?.introductionText || '',
+                    },
+                },
+                content,
+                carousel: standaloneCarouselImages,
+            };
 
-  const handleSaveContent = () => {
-  if (page) {
-    const updatedPage = {
-      ...page,
-      customValues: {
-        ...page.customValues,
-        aboutContent,
-        heroContent: {
-          ...page.customValues?.heroContent,
-          carouselImages: heroCarouselImages,
-          carouselSpeed: carouselSpeed,
-          // Provide default values if undefined
-          title: page.customValues?.heroContent?.title || '',
-          description: page.customValues?.heroContent?.description || '',
-          ctaText: page.customValues?.heroContent?.ctaText || '',
-          introductionText: page.customValues?.heroContent?.introductionText || '',
-        },
-      },
-      content,
-      carousel: standaloneCarouselImages,
+            handleSave(updatedPage);
+            openModal(<SuccessMessage message="Page saved successfully!" />);
+        }
     };
 
-    handleSave(updatedPage);
-  }
-};
+    const handleSaveHeroCarousel = (updatedHeroContent: HeroContent) => {
+        if (page) {
+            const updatedPage = {
+                ...page,
+                customValues: {
+                    ...page.customValues,
+                    heroContent: {
+                        ...updatedHeroContent,
+                        title: updatedHeroContent.title || '',
+                        description: updatedHeroContent.description || '',
+                        ctaText: updatedHeroContent.ctaText || '',
+                        introductionText: updatedHeroContent.introductionText || '',
+                    },
+                },
+            };
 
-  const handleSaveHeroCarousel = (updatedHeroContent: HeroContent) => {
-  if (page) {
-    const updatedPage = {
-      ...page,
-      customValues: {
-        ...page.customValues,
-        heroContent: {
-          ...updatedHeroContent,
-          // Provide default values if undefined
-          title: updatedHeroContent.title || '',
-          description: updatedHeroContent.description || '',
-          ctaText: updatedHeroContent.ctaText || '',
-          introductionText: updatedHeroContent.introductionText || '',
-        },
-      },
+            handleSave(updatedPage);
+            openModal(<SuccessMessage message="Hero carousel updated successfully!" />);
+        }
     };
 
-    handleSave(updatedPage);
-  }
-};
+    const handleSaveStandaloneCarousel = (
+        carouselSpeed: number,
+        updatedCarouselImages: CarouselImageType[],
+    ) => {
+        setStandaloneCarouselImages(updatedCarouselImages);
+        setCarouselSpeed(carouselSpeed);
+    };
 
-  const handleSaveStandaloneCarousel = (
-    carouselSpeed: number,
-    updatedCarouselImages: CarouselImageType[]
-  ) => {
-    setStandaloneCarouselImages(updatedCarouselImages);
-    setCarouselSpeed(carouselSpeed)
-  };
+    const handleToggleSidebar = () => {
+        setIsSidebarOpen((prev) => !prev);
+        setTimeout(() => {
+            const event = new Event('resize');
+            window.dispatchEvent(event);
+        }, 300);
+    };
 
-  const handleToggleSidebar = () => {
-    setIsSidebarOpen((prev) => !prev);
-    setTimeout(() => {
-      const event = new Event('resize');
-      window.dispatchEvent(event);
-    }, 300);
-  };
+    if (loading) return <LoadingSpinner />;
+    if (error) return <ErrorComponent message={error} />;
+    if (!page) return <ErrorComponent message={'Could not find page.'} />;
 
-  if (loading) return <LoadingSpinner />;
-  if (error) return <ErrorComponent message={error} />;
-  if (!page) return <ErrorComponent message={'Could not find page.'} />;
+    return (
+        <EditorContainer>
+            <ContentContainer isSidebarOpen={isSidebarOpen}>
+                {isEditMode ? (
+                    <>
+                        {page.customValues?.heroContent && (
+                            <HeroEdit
+                                page={page}
+                                onSaveHero={handleSaveHeroCarousel}
+                                isSidebarOpen={isSidebarOpen}
+                            />
+                        )}
 
-  return (
-    <EditorContainer>
-      <ContentContainer isSidebarOpen={isSidebarOpen}>
-        {isEditMode ? (
-          <>
-            {page.customValues?.heroContent && (
-              <HeroEdit
-                page={page}
-                onSaveHero={handleSaveHeroCarousel}
-                isSidebarOpen={isSidebarOpen}
-              />
-            )}
+                        {page.carousel && !page.customValues?.heroContent && (
+                            <CarouselEdit
+                                page={page}
+                                onSaveCarousel={handleSaveStandaloneCarousel}
+                                isInsideParent={false}
+                                isSidebarOpen={isSidebarOpen}
+                            />
+                        )}
 
-            {page.carousel && !page.customValues?.heroContent && (
-              <CarouselEdit
-                page={page}
-                onSaveCarousel={handleSaveStandaloneCarousel}
-                isInsideParent={false}
-                isSidebarOpen={isSidebarOpen}
-              />
-            )}
+                        {page.customValues?.aboutContent && (
+                            <ContentArea
+                                content={aboutContent}
+                                setContent={setAboutContent}
+                                height={300}
+                                toolbarOptions="bold italic | bullist numlist"
+                                placeholder="Enter content for the About section..."
+                            />
+                        )}
 
-            {page.customValues?.aboutContent && (
-              <ContentArea
-                content={aboutContent}
-                setContent={setAboutContent}
-                height={300}
-                toolbarOptions="bold italic | bullist numlist"
-                placeholder="Enter content for the About section..."
-              />
-            )}
+                        <ContentArea content={content} setContent={setContent} />
+                    </>
+                ) : (
+                    <PreviewMode content={content} />
+                )}
+                {isEditMode && (
+                    <SaveButton onClick={handleSaveContent}>Save</SaveButton>
+                )}
+            </ContentContainer>
 
-            <ContentArea content={content} setContent={setContent} />
-          </>
-        ) : (
-          <PreviewMode content={content} />
-        )}
-        {isEditMode && (
-          <SaveButton onClick={handleSaveContent}>Save</SaveButton>
-        )}
-      </ContentContainer>
+            <SidebarContainer isSidebarOpen={isSidebarOpen}>
+                <Sidebar
+                    seoSettings={seoSettings}
+                    setSEOSettings={setSEOSettings}
+                    layoutSettings={layoutSettings}
+                    setLayoutSettings={setLayoutSettings}
+                />
+            </SidebarContainer>
 
-      <SidebarContainer isSidebarOpen={isSidebarOpen}>
-        <Sidebar
-          seoSettings={seoSettings}
-          setSEOSettings={setSEOSettings}
-          layoutSettings={layoutSettings}
-          setLayoutSettings={setLayoutSettings}
-        />
-      </SidebarContainer>
-
-      <ToggleButton isSidebarOpen={isSidebarOpen} onClick={handleToggleSidebar}>
-        <FontAwesomeIcon
-          icon={isSidebarOpen ? faChevronRight : faChevronLeft}
-        />
-      </ToggleButton>
-      <GlobalModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-          <SuccessMessage message={modalMessage} />
-      </GlobalModal>
-    </EditorContainer>
-  );
+            <ToggleButton isSidebarOpen={isSidebarOpen} onClick={handleToggleSidebar}>
+                <FontAwesomeIcon
+                    icon={isSidebarOpen ? faChevronRight : faChevronLeft}
+                />
+            </ToggleButton>
+        </EditorContainer>
+    );
 };
 
 export default PageEditor;

@@ -5,7 +5,7 @@ import { RootState } from '../../store';
 import { getPageBySlug, updatePage } from '../../api/pageApi';
 import { Page } from '../../api/types/page';
 import DOMPurify from 'dompurify';
-import ContentArea from '../admin/dashboard/pages/editor/ContentArea'; 
+import ContentArea from '../admin/dashboard/pages/editor/ContentArea';
 import LoadingSpinner from '../common/LoadingSpinner';
 import ErrorComponent from '../common/Error';
 
@@ -20,7 +20,7 @@ const DynamicPage: React.FC<DynamicPageProps> = ({ slug: initialSlug }) => {
     const [editContent, setEditContent] = useState<string>('');
     const [error, setError] = useState<string | null>(null);
     const isEditMode = useSelector((state: RootState) => state.editMode.isEditMode);
-
+    console.log('dynamic page');
     useEffect(() => {
         const fetchPage = async () => {
             try {
@@ -28,7 +28,7 @@ const DynamicPage: React.FC<DynamicPageProps> = ({ slug: initialSlug }) => {
                 if (!slug) return;
                 const fetchedPage = await getPageBySlug(slug);
                 setPage(fetchedPage);
-                setEditContent(fetchedPage.content); 
+                setEditContent(fetchedPage.content);
             } catch (error) {
                 setError((error as Error).message || 'Failed to load the page');
                 setPage(null);
@@ -42,7 +42,7 @@ const DynamicPage: React.FC<DynamicPageProps> = ({ slug: initialSlug }) => {
         if (page) {
             try {
                 setError(null);
-                await updatePage(page.id, { ...page, content: editContent }); 
+                await updatePage(page.id, { ...page, content: editContent });
                 alert('Page updated successfully');
             } catch (error) {
                 setError((error as Error).message || 'Failed to save the page');
@@ -65,11 +65,11 @@ const DynamicPage: React.FC<DynamicPageProps> = ({ slug: initialSlug }) => {
             {showTitle && <h1>{page.name}</h1>}
             {isEditMode ? (
                 <div>
-                    <ContentArea content={editContent} setContent={setEditContent} /> 
+                    <ContentArea content={editContent} setContent={setEditContent} />
                     <button onClick={handleSave}>Save</button>
                 </div>
             ) : (
-                <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(page.content) }} /> 
+                <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(page.content) }} />
             )}
         </div>
     );

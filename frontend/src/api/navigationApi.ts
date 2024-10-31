@@ -2,7 +2,11 @@ import axiosWithTimeout from './axiosInstance';
 import { NavLink } from './types/navigation';
 
 export const getNavLinks = async (): Promise<NavLink[]> => {
-    const response = await axiosWithTimeout.get<NavLink[]>('/navigation/links');
+    const response = await axiosWithTimeout.get<NavLink[]>('/navigation/links', {
+        headers: {
+            isBackgroundRequest: 'true', // Set as background request
+        },
+    });
     return response.data;
 };
 

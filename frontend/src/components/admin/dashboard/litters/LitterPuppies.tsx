@@ -6,11 +6,12 @@ import { useLitter, useAddPuppiesToLitter, useUpdateLitter, useDeleteLitter } fr
 import { useDeleteDog } from '../../../../hooks/useDog';
 import { useBreedingById } from '../../../../hooks/useBreeding';
 import Button from '../../../common/form/Button';
-import GlobalModal from '../../../common/Modal';
 import DogForm from '../dogs/DogForm';
 import BreedingForm from '../breedings/BreedingForm';
 import { EditButton, DeleteButton } from '../../../common/Buttons';
 import LoadingSpinner from '../../../common/LoadingSpinner';
+import { useModal } from '../../../../context/ModalContext';
+import GlobalModal from '../../../common/Modal';
 
 const Container = styled.div`
   display: flex;
@@ -106,38 +107,35 @@ const LitterPuppyManagement: React.FC = () => {
     const { litterId } = useParams<{ litterId: string }>();
     const { data: litter, isLoading: litterLoading } = useLitter(Number(litterId), { enabled: !!litterId });
     const { data: breeding } = useBreedingById(litter?.breedingId);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [modalContent, setModalContent] = useState<React.ReactNode>(null);
     const addPuppiesToLitterMutation = useAddPuppiesToLitter();
     const updateLitterMutation = useUpdateLitter();
     const deleteLitterMutation = useDeleteLitter();
     const deleteDogMutation = useDeleteDog();
+    const { openModal, closeModal } = useModal();
 
     const handleAddNewPuppy = () => {
-        setModalContent(
+        openModal(
             <DogForm
-                onClose={() => setIsModalOpen(false)}
+                onClose={closeModal}
                 title="Add New Puppy"
                 redirect={`/admin/dashboard/litters/${litterId}/puppies`}
                 onDogCreated={(puppy: DogCreate) => {
                     addPuppiesToLitterMutation.mutate({ litterId: Number(litterId), puppies: [puppy] });
-                    setIsModalOpen(false);
+                    closeModal();
                 }}
-            />
+            />,
         );
-        setIsModalOpen(true);
     };
 
     const handleEditPuppy = (puppyId: number) => {
-        setModalContent(
+        openModal(
             <DogForm
-                onClose={() => setIsModalOpen(false)}
+                onClose={closeModal}
                 title="Edit Puppy"
                 dogId={puppyId}
                 redirect={`/admin/dashboard/litters/${litterId}/puppies`}
-            />
+            />,
         );
-        setIsModalOpen(true);
     };
 
     const handleDeletePuppy = (puppyId: number) => {
@@ -147,27 +145,25 @@ const LitterPuppyManagement: React.FC = () => {
     };
 
     const handleEditBreeding = () => {
-        setModalContent(
+        openModal(
             <BreedingForm
-                onClose={() => setIsModalOpen(false)}
+                onClose={closeModal}
                 breedingId={breeding?.id}
-            />
+            />,
         );
-        setIsModalOpen(true);
     };
 
     const handleDescriptionSave = (updatedDescription: Description) => {
         if (!litter) return;
         updateLitterMutation.mutate({
             litterId: litter.id,
-            litterData: { ...litter, description: updatedDescription }
+            litterData: { ...litter, description: updatedDescription },
         });
     };
 
     if (litterLoading) {
         return <LoadingSpinner />;
     }
-
 
     return (
         <Container>
@@ -183,8 +179,13 @@ const LitterPuppyManagement: React.FC = () => {
                     </ParentInfo>
                     <ParentInfo>
                         <ParentDetails>
-                            <ParentImage src={breeding?.maleDog.profilePhoto} alt={breeding?.maleDog.name} />
-                            <Title>{breeding?.maleDog.name}</Title>
+                            <ParentImage src={
+                                breeding?.maleDog?.profilePhoto
+                                ?? breeding?.manualSireImageUrl
+                                ?? 'path/to/default-image.jpg'
+                            }
+                                         alt={breeding?.maleDog?.name ?? breeding?.manualSireName ?? 'Unknown Male Dog'} />
+                            <Title>{breeding?.maleDog?.name ?? breeding?.manualSireName ?? 'Unknown Sire'}</Title>
                         </ParentDetails>
                     </ParentInfo>
                 </ParentContainer>
@@ -216,9 +217,8 @@ const LitterPuppyManagement: React.FC = () => {
                     ))}
                 </PuppyList>
             </Section>
-            <GlobalModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-                {modalContent}
-            </GlobalModal>
+            <GlobalModal />
+
         </Container>
     );
 };

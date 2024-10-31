@@ -9,6 +9,8 @@ interface ParentSelectorProps {
     damId: number | undefined;
     onSireChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
     onDamChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+    includeRetired?: boolean;
+    disabled?: boolean;
 }
 
 const ParentContainer = styled.div`
@@ -28,9 +30,16 @@ const ParentLabel = styled.h3`
     margin-bottom: 0.5rem;
 `;
 
-const ParentSelector: React.FC<ParentSelectorProps> = ({ sireId, damId, onSireChange, onDamChange }) => {
-    const sireFilters: FilterProps = { gender: GenderEnum.Male };
-    const damFilters: FilterProps = { gender: GenderEnum.Female };
+const ParentSelector: React.FC<ParentSelectorProps> = ({
+                                                           sireId,
+                                                           damId,
+                                                           onSireChange,
+                                                           onDamChange,
+                                                           includeRetired = false,
+                                                           disabled = false,
+                                                       }) => {
+    const sireFilters: FilterProps = { gender: GenderEnum.Male, retired: includeRetired };
+    const damFilters: FilterProps = { gender: GenderEnum.Female, retired: includeRetired };
 
     return (
         <ParentContainer>
@@ -42,6 +51,7 @@ const ParentSelector: React.FC<ParentSelectorProps> = ({ sireId, damId, onSireCh
                     onChange={onSireChange}
                     filters={sireFilters}
                     label=""
+                    disabled={disabled}
                 />
             </ParentColumn>
             <ParentColumn>

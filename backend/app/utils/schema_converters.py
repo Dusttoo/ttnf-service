@@ -73,6 +73,10 @@ def convert_to_breeding_schema(breeding: Breeding) -> BreedingSchema:
             str(breeding.expected_birth_date) if breeding.expected_birth_date else None
         ),
         description=breeding.description,
+        manual_sire_name=breeding.manual_sire_name,
+        manual_sire_color=breeding.manual_sire_color,
+        manual_sire_image_url=breeding.manual_sire_image_url,
+        manual_sire_pedigree_link=breeding.manual_sire_pedigree_link,
         female_dog=(
             convert_to_dog_schema(breeding.female_dog) if breeding.female_dog else None
         ),
@@ -247,7 +251,6 @@ def convert_to_service_schema(service: Service) -> ServiceResponse:
 
     availability = service.availability.value
 
-    print(f'\n\nAvailability in schema: {availability}')
     return ServiceResponse(
         id=service.id,
         name=service.name,

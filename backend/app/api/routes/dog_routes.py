@@ -44,6 +44,7 @@ async def get_dogs_filtered(
     owned: Optional[str] = Query(None),
     sire: Optional[int] = Query(None),
     dam: Optional[int] = Query(None),
+    retired: Optional[bool] = Query(None),
     page: Optional[int] = Query(None),
     page_size: Optional[int] = Query(None),
     db: AsyncSession = Depends(get_database_session),
@@ -55,6 +56,7 @@ async def get_dogs_filtered(
             "owned": owned,
             "sire": sire,
             "dam": dam,
+            "retired": retired
         }
         result = await dog_svc.get_dogs_filtered(db, filters, page, page_size)
         return result

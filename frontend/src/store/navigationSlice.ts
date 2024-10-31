@@ -5,19 +5,18 @@ import { buildNavTree } from '../utils/buildNavTree';
 
 interface NavigationState {
     links: NavLink[];
-    status: 'idle' | 'loading' | 'succeeded' | 'failed';
     error: string | null;
 }
 
 const initialState: NavigationState = {
     links: [],
-    status: 'idle',
     error: null,
 };
 
+// Async Thunks
 export const fetchNavLinks = createAsyncThunk('navigation/fetchNavLinks', async () => {
     const response = await getNavLinks();
-    return buildNavTree(response); 
+    return buildNavTree(response);
 });
 
 export const addNavLink = createAsyncThunk('navigation/addNavLink', async (navLink: Partial<NavLink>) => {
@@ -35,21 +34,17 @@ export const removeNavLink = createAsyncThunk('navigation/removeNavLink', async 
     return id;
 });
 
+// Slice
 const navigationSlice = createSlice({
     name: 'navigation',
     initialState,
     reducers: {},
     extraReducers: (builder) => {
         builder
-            .addCase(fetchNavLinks.pending, (state) => {
-                state.status = 'loading';
-            })
             .addCase(fetchNavLinks.fulfilled, (state, action) => {
-                state.status = 'succeeded';
                 state.links = action.payload;
             })
             .addCase(fetchNavLinks.rejected, (state, action) => {
-                state.status = 'failed';
                 state.error = action.error.message || null;
             })
             .addCase(addNavLink.fulfilled, (state, action) => {
@@ -63,6 +58,15 @@ const navigationSlice = createSlice({
             })
             .addCase(removeNavLink.fulfilled, (state, action) => {
                 state.links = state.links.filter(link => link.id !== action.payload);
+            })
+            .addCase(addNavLink.rejected, (state, action) => {
+                state.error = action.error.message || null;
+            })
+            .addCase(updateExistingNavLink.rejected, (state, action) => {
+                state.error = action.error.message || null;
+            })
+            .addCase(removeNavLink.rejected, (state, action) => {
+                state.error = action.error.message || null;
             });
     },
 });

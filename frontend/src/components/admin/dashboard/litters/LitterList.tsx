@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useLitters, useDeleteLitter, useCreateLitter, useUpdateLitter } from '../../../../hooks/useLitter';
 import Pagination from '../../../common/Pagination';
-import GlobalModal from '../../../common/Modal';
 import LitterForm from './AddLitter/LitterForm';
 import { Litter, LitterCreate, LitterUpdate } from '../../../../api/types/breeding';
 import { useNavigate } from 'react-router-dom';
@@ -10,7 +9,9 @@ import { EditButton, ViewButton, DeleteButton } from '../../../common/Buttons';
 import { sortByKey } from '../../../../utils/sort';
 import LoadingSpinner from '../../../common/LoadingSpinner';
 import ErrorComponent from '../../../common/Error';
-import NoResults from "../../../common/NoResults";
+import NoResults from '../../../common/NoResults';
+import { useModal } from '../../../../context/ModalContext';
+import GlobalModal from '../../../common/Modal';
 
 const ListWrapper = styled.div`
   display: flex;
@@ -117,13 +118,7 @@ const AdminLitterList: React.FC = () => {
     const createLitterMutation = useCreateLitter();
     const updateLitterMutation = useUpdateLitter();
     const navigate = useNavigate();
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [modalContent, setModalContent] = useState<React.ReactNode>(null);
-    const [initialValues, setInitialValues] = useState<LitterCreate | LitterUpdate>({
-        birthDate: '',
-        numberOfPuppies: 0,
-        breedingId: 0,
-    });
+    const { openModal, closeModal } = useModal();
 
     const handlePageChange = (newPage: number, newItemsPerPage: number) => {
         setPage(newPage);
@@ -133,12 +128,12 @@ const AdminLitterList: React.FC = () => {
     const handleEdit = (litterId: number) => {
         const litterToEdit = data?.items.find((litter: Litter) => litter.id === litterId);
         if (litterToEdit) {
-            setInitialValues({
+            const initialValues: LitterUpdate = {
                 birthDate: litterToEdit.birthDate,
                 numberOfPuppies: litterToEdit.numberOfPuppies,
                 breedingId: litterToEdit.breedingId,
-            });
-            setModalContent(
+            };
+            openModal(
                 <LitterForm
                     initialValues={initialValues}
                     onSubmit={async (litterData) => {
@@ -146,13 +141,12 @@ const AdminLitterList: React.FC = () => {
                             litterId: litterId,
                             litterData: litterData as LitterUpdate,
                         });
-                        setIsModalOpen(false);
+                        closeModal();
                         refetch();
                     }}
-                    onCancel={() => setIsModalOpen(false)}
-                />
+                    onCancel={closeModal}
+                />,
             );
-            setIsModalOpen(true);
         }
     };
 
@@ -167,23 +161,22 @@ const AdminLitterList: React.FC = () => {
     };
 
     const handleAddNewLitter = () => {
-        setInitialValues({
+        const initialValues: LitterCreate = {
             birthDate: '',
             numberOfPuppies: 0,
             breedingId: 0,
-        });
-        setModalContent(
+        };
+        openModal(
             <LitterForm
                 initialValues={initialValues}
                 onSubmit={async (litterData) => {
                     await createLitterMutation.mutateAsync(litterData as LitterCreate);
-                    setIsModalOpen(false);
+                    closeModal();
                     refetch();
                 }}
-                onCancel={() => setIsModalOpen(false)}
-            />
+                onCancel={closeModal}
+            />,
         );
-        setIsModalOpen(true);
     };
 
     const handleViewPuppies = (litterId: number) => {
@@ -196,7 +189,7 @@ const AdminLitterList: React.FC = () => {
             {isLoading ? (
                 <LoadingSpinner />
             ) : isError ? (
-                <ErrorComponent message="Error loading litters" /> 
+                <ErrorComponent message="Error loading litters" />
             ) : (
                 <>
                     {data && data.items.length > 0 ? (
@@ -204,11 +197,19 @@ const AdminLitterList: React.FC = () => {
                             {sortByKey<Litter>(data.items, 'birthDate', 'desc').map((litter) => (
                                 <LitterCard key={litter.id}>
                                     <ImageContainer>
-                                        <DogImage src={litter.breeding.femaleDog.profilePhoto} alt={litter.breeding.femaleDog.name} />
-                                        <DogImage src={litter.breeding.maleDog.profilePhoto} alt={litter.breeding.maleDog.name} />
+                                        <DogImage src={litter.breeding.femaleDog.profilePhoto}
+                                                  alt={litter.breeding.femaleDog.name} />
+                                        <DogImage
+                                            src={
+                                                litter.breeding.maleDog?.profilePhoto
+                                                ?? litter.breeding.manualSireImageUrl
+                                                ?? 'path/to/default-image.jpg'
+                                            }
+                                            alt={litter.breeding.maleDog?.name ?? litter.breeding.manualSireName ?? 'Unknown Male Dog'}
+                                        />
                                     </ImageContainer>
                                     <LitterInfo>
-                                        <Title>{litter.breeding.femaleDog.name} X {litter.breeding.maleDog.name}</Title>
+                                        <Title>{litter.breeding.femaleDog.name} X {litter.breeding.maleDog?.name ?? litter.breeding.manualSireName ?? 'Unknown Sire'}</Title>
                                         <p>Birth Date: {litter.birthDate}</p>
                                         <p>Number of Puppies: {litter.numberOfPuppies}</p>
                                     </LitterInfo>
@@ -221,7 +222,7 @@ const AdminLitterList: React.FC = () => {
                             ))}
                         </ListContainer>
                     ) : (
-                        <NoResults message={"No litters found."} description={"Try adding a litter."} />
+                        <NoResults message={'No litters found.'} description={'Try adding a litter.'} />
                     )}
                     <PaginationWrapper>
                         {data?.totalCount !== undefined && (
@@ -235,9 +236,8 @@ const AdminLitterList: React.FC = () => {
                     </PaginationWrapper>
                 </>
             )}
-            <GlobalModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-                {modalContent}
-            </GlobalModal>
+            <GlobalModal />
+
         </ListWrapper>
     );
 };

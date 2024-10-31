@@ -6,13 +6,14 @@ import Button from '../common/Button';
 import { AppDispatch, RootState } from '../../store';
 import { selectAuthError } from '../../store/authSlice';
 import { useNavigate } from 'react-router-dom';
+import { selectIsLoading } from '../../store/loadingSlice';
 
 const Login: React.FC = () => {
     const dispatch: AppDispatch = useDispatch();
     const navigate = useNavigate();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const { isLoading } = useSelector((state: RootState) => state.loading);
+    const isLoading = useSelector(selectIsLoading); // Use the centralized loading selector
     const error = useSelector(selectAuthError);
 
     const handleLogin = async () => {
@@ -40,7 +41,7 @@ const Login: React.FC = () => {
                 placeholder="Password"
             />
             <Button
-                variant="primary"
+                $variant="primary"
                 onClick={handleLogin}
                 disabled={isLoading}
             >

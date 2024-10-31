@@ -2,7 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 import { RootState } from '../store';
 
 const initialState = {
-    isLoading: true,
+    requestCount: 0,
 };
 
 const loadingSlice = createSlice({
@@ -10,14 +10,19 @@ const loadingSlice = createSlice({
     initialState,
     reducers: {
         startLoading: (state) => {
-            state.isLoading = true;
+            console.log('start loading');
+            state.requestCount += 1;
         },
         stopLoading: (state) => {
-            state.isLoading = false;
+            console.log('stop loading');
+            if (state.requestCount > 0) {
+                state.requestCount -= 1;
+            }
+            console.log(state.requestCount);
         },
     },
 });
 
 export const { startLoading, stopLoading } = loadingSlice.actions;
-export const selectIsLoading = (state: RootState) => state.loading.isLoading;
+export const selectIsLoading = (state: RootState) => state.loading.requestCount > 0;
 export default loadingSlice.reducer;

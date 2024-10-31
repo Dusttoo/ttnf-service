@@ -4,7 +4,7 @@ import { SearchResponse } from '../api/types/core';
 export const searchResources = async (
     query: string,
     resources: string[],
-    limit: number
+    limit: number,
 ): Promise<SearchResponse[]> => {
     try {
         const response = await axiosWithTimeout.get('/search', {
@@ -12,6 +12,9 @@ export const searchResources = async (
                 query,
                 resources: resources.join(','),
                 limit,
+            },
+            headers: {
+                isBackgroundRequest: 'true', // Set as background request
             },
         });
         return response.data.results;

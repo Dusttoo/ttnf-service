@@ -12,12 +12,16 @@ export const getLitterById = async (id: number): Promise<Litter> => {
     return response.data;
 };
 
-export const getAllLitters = async (page?: number, pageSize?: number): Promise<{ items: Litter[], totalCount: number }> => {
-    const requestUrl: string = '/litters/'
-    if (page && pageSize) {
-        requestUrl.concat(`?page=${page}&page_size=${pageSize}`)
-    }
-    const response = await axiosWithTimeout.get(requestUrl);
+export const getAllLitters = async (page?: number, pageSize?: number): Promise<{
+    items: Litter[],
+    totalCount: number
+}> => {
+    const requestUrl = `/litters/${page && pageSize ? `?page=${page}&page_size=${pageSize}` : ''}`;
+    const response = await axiosWithTimeout.get(requestUrl, {
+        headers: {
+            isBackgroundRequest: 'true',
+        },
+    });
     return response.data;
 };
 
@@ -36,7 +40,11 @@ export const deleteLitter = async (litterId: number): Promise<void> => {
 };
 
 export const getPuppiesByLitterId = async (litterId: number): Promise<Dog[]> => {
-    const response = await axiosWithTimeout.get(`/litters/${litterId}/puppies`);
+    const response = await axiosWithTimeout.get(`/litters/${litterId}/puppies`, {
+        headers: {
+            isBackgroundRequest: 'true', // Set as background request
+        },
+    });
     return response.data;
 };
 
@@ -46,6 +54,10 @@ export const updateLitter = async (litterId: number, litterData: LitterUpdate): 
 };
 
 export const getLittersByBreeding = async (breedingId: number): Promise<Litter[]> => {
-    const response = await axiosWithTimeout.get(`/litters/by-breeding/${breedingId}`);
+    const response = await axiosWithTimeout.get(`/litters/by-breeding/${breedingId}`, {
+        headers: {
+            isBackgroundRequest: 'true', // Set as background request
+        },
+    });
     return response.data;
 };

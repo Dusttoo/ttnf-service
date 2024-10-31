@@ -17,6 +17,9 @@ const Form = styled.form`
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  background-color: ${(props) => props.theme.colors.secondaryBackground}; // Dark background for form
+  padding: 1.5rem;
+  border-radius: 8px;
 `;
 
 const ButtonContainer = styled.div`
@@ -27,15 +30,22 @@ const ButtonContainer = styled.div`
 const Input = styled.input`
   padding: 0.75rem;
   border: 1px solid ${(props) => props.theme.colors.primary};
+  background-color: ${(props) => props.theme.colors.secondaryBackground};
+  color: ${(props) => props.theme.colors.white};
   border-radius: 4px;
   font-size: 1rem;
   width: 100%;
+
+  &::placeholder {
+    color: ${(props) => props.theme.colors.textLight};
+    opacity: 0.8; // Slight opacity to blend it in without being too faint
+  }
 `;
 
 const LitterForm: React.FC<LitterFormProps> = ({ initialValues, onSubmit, onCancel, setLitterData }) => {
     const [formState, setFormState] = useState<LitterCreate | LitterUpdate>({
         ...initialValues,
-        description: typeof initialValues.description === 'string' ? { content: initialValues.description } : initialValues.description || { content: '' }
+        description: typeof initialValues.description === 'string' ? { content: initialValues.description } : initialValues.description || { content: '' },
     });
     const [errors, setErrors] = useState<{ birthDate?: string; numberOfPuppies?: string }>({});
     const [pedigreeUrl, setPedigreeUrl] = useState<string>(initialValues.pedigreeUrl || '');
@@ -109,10 +119,10 @@ const LitterForm: React.FC<LitterFormProps> = ({ initialValues, onSubmit, onCanc
                 /> */}
             </div>
             <ButtonContainer>
-                <Button variant="error" onClick={onCancel}>
+                <Button $variant="error" onClick={onCancel}>
                     Cancel
                 </Button>
-                <Button variant="primary" type='submit'>
+                <Button $variant="primary" type="submit">
                     Save Litter
                 </Button>
             </ButtonContainer>

@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Photo } from '../../api/types/dog';
-import ImageCarousel from './ImageCarousel'
-import GlobalModal from './Modal'
+import ImageCarousel from './ImageCarousel';
 import Pagination from './Pagination';
-import NoResults from './NoResults'
-
+import NoResults from './NoResults';
+import { useModal } from '../../context/ModalContext';
 
 interface ImageGalleryProps {
     images: Photo[];
@@ -40,12 +39,13 @@ const PaginationContainer = styled.div`
 const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
     const [currentPage, setCurrentPage] = useState(1);
     const [imagesPerPage] = useState(9);
-    const [showModal, setShowModal] = useState(false);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
-    const carouselImages = images.map((image) => (
-        {id: image.id, src: image.photoUrl, alt: image.alt}
-    ))
-    const [itemsPerPage, setItemsPerPage] = useState(10);
+    const { openModal, closeModal } = useModal();
+    const carouselImages = images.map((image) => ({
+        id: image.id,
+        src: image.photoUrl,
+        alt: image.alt,
+    }));
 
     const indexOfLastImage = currentPage * imagesPerPage;
     const indexOfFirstImage = indexOfLastImage - imagesPerPage;
@@ -55,15 +55,12 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
 
     const handleClick = (index: number) => {
         setCurrentImageIndex(index);
-        setShowModal(true);
+        openModal(<ImageCarousel images={carouselImages} initialIndex={index} />);
     };
-
-    const handleCloseModal = () => setShowModal(false);
 
     const handlePageChange = (page: number, newItemsPerPage: number) => {
         setCurrentPage(page);
-        setItemsPerPage(newItemsPerPage);
-      };
+    };
 
     return (
         <>
@@ -76,20 +73,23 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
                         onClick={() => handleClick(index + indexOfFirstImage)}
                     />
                 ))}
-                {!images.length && <NoResults message={"No images at the moment"} description={"Please check back later for updated photos"}/>}
+                {!images.length && (
+                    <NoResults
+                        message={'No images at the moment'}
+                        description={'Please check back later for updated photos'}
+                    />
+                )}
             </GalleryContainer>
-            {images.length > 0 &&
-                <Pagination
-                totalItems={images?.length || 0}
-                currentPage={currentPage}
-                itemsPerPage={itemsPerPage}
-                onPageChange={handlePageChange}
-              />
-            }
-
-            <GlobalModal isOpen={showModal} onClose={handleCloseModal}>
-                    <ImageCarousel images={carouselImages} />
-            </GlobalModal>
+            {images.length > 0 && (
+                <PaginationContainer>
+                    <Pagination
+                        totalItems={images.length}
+                        currentPage={currentPage}
+                        itemsPerPage={imagesPerPage}
+                        onPageChange={handlePageChange}
+                    />
+                </PaginationContainer>
+            )}
         </>
     );
 };

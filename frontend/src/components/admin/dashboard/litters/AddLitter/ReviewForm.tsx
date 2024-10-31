@@ -53,19 +53,19 @@ const ButtonContainer = styled.div`
 `;
 
 interface ButtonProps {
-    variant?: 'primary' | 'secondary';
+    $variant?: 'primary' | 'secondary';
 }
 
 const Button = styled.button<ButtonProps>`
     padding: 0.75rem 1.5rem;
-    background-color: ${(props) => (props.variant === 'secondary' ? props.theme.ui.button.secondary.background : props.theme.ui.button.primary.background)};
-    color: ${(props) => (props.variant === 'secondary' ? props.theme.ui.button.secondary.color : props.theme.ui.button.primary.color)};
+    background-color: ${(props) => (props.$variant === 'secondary' ? props.theme.ui.button.secondary.background : props.theme.ui.button.primary.background)};
+    color: ${(props) => (props.$variant === 'secondary' ? props.theme.ui.button.secondary.color : props.theme.ui.button.primary.color)};
     border: none;
     border-radius: 4px;
     cursor: pointer;
 
     &:hover {
-        background-color: ${(props) => (props.variant === 'secondary' ? props.theme.colors.accent : props.theme.colors.primary)};
+        background-color: ${(props) => (props.$variant === 'secondary' ? props.theme.colors.accent : props.theme.colors.primary)};
     }
 
     &:disabled {
@@ -100,7 +100,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ litterData, puppyList, onSubmit
             </InfoContainer>
             <ButtonContainer>
                 <Button onClick={onSubmit}>Submit</Button>
-                <Button onClick={onCancel} variant="secondary">Cancel</Button> {/* Add cancel button */}
+                <Button onClick={onCancel} $variant="secondary">Cancel</Button> {/* Add cancel button */}
             </ButtonContainer>
         </ReviewContainer>
     );

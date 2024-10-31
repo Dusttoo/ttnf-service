@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import GlobalModal from '../../../common/Modal';
-import ErrorComponent from '../../../common/Error';
 import styled from 'styled-components';
 import { clearCache } from '../../../../api/utilsApi';
+import { useModal } from '../../../../context/ModalContext';
+import ErrorComponent from '../../../common/Error';
+import GlobalModal from '../../../common/Modal';
 
 const CachePageContainer = styled.div`
   background-color: ${(props) => props.theme.colors.neutralBackground};
@@ -41,54 +42,44 @@ const Button = styled.button`
 `;
 
 const ClearCacheComponent = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isError, setIsError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
+    const [isError, setIsError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
+    const { openModal, closeModal } = useModal();
 
-  const handleClearCache = async () => {
-    try {
-      await clearCache();
-      setIsError(false);
-      setIsModalOpen(true);
-    } catch (error) {
-      console.error('Failed to clear cache:', error);
-      setErrorMessage('Failed to clear cache. Please try again.');
-      setIsError(true);
-      setIsModalOpen(true);
-    }
-  };
+    const handleClearCache = async () => {
+        try {
+            await clearCache();
+            setIsError(false);
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setIsError(false);
-    setErrorMessage(undefined);
-  };
+            openModal(
+                <div>
+                    <h2>Cache cleared successfully!</h2>
+                    <p>The Redis cache was cleared. You can continue using the application without any issues.</p>
+                    <Button onClick={closeModal}>OK</Button>
+                </div>,
+            );
+        } catch (error) {
+            console.error('Failed to clear cache:', error);
+            setErrorMessage('Failed to clear cache. Please try again.');
+            setIsError(true);
 
-  const handleRetry = () => {
-    setIsModalOpen(false);
-    setErrorMessage(undefined);
-    handleClearCache();
-  };
+            openModal(
+                <ErrorComponent message={errorMessage} onRetry={handleClearCache} />,
+            );
+        }
+    };
 
-  return (
-    <CachePageContainer>
-      <SectionTitle>Cache Management</SectionTitle>
-      <Description>Not seeing recent updates, like a new dog you added or pictures not showing up correctly? Try using the button below to refresh the system and clear the cache.</Description>
-      <Button onClick={handleClearCache}>Clear Cache</Button>
-
-      <GlobalModal isOpen={isModalOpen} onClose={handleCloseModal}>
-        {isError ? (
-          <ErrorComponent message={errorMessage} onRetry={handleRetry} />
-        ) : (
-          <div>
-            <h2>Cache cleared successfully!</h2>
-            <p>The Redis cache was cleared. You can continue using the application without any issues.</p>
-            <Button onClick={handleCloseModal}>OK</Button>
-          </div>
-        )}
-      </GlobalModal>
-    </CachePageContainer>
-  );
+    return (
+        <CachePageContainer>
+            <SectionTitle>Cache Management</SectionTitle>
+            <Description>
+                Not seeing recent updates, like a new dog you added or pictures not showing up correctly? Try
+                using the button below to refresh the system and clear the cache.
+            </Description>
+            <Button onClick={handleClearCache}>Clear Cache</Button>
+            <GlobalModal />
+        </CachePageContainer>
+    );
 };
 
 export default ClearCacheComponent;

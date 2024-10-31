@@ -8,6 +8,7 @@ import { theme } from './theme/theme';
 import { GlobalStyle } from './styles/GlobalStyle';
 import { QueryClientProvider } from 'react-query';
 import queryClient from './api/queryClient';
+import { ModalProvider } from './context/ModalContext';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 
@@ -15,14 +16,16 @@ const container = document.getElementById('root');
 const root = ReactDOM.createRoot(container!);
 
 root.render(
-  <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-    <Provider store={store}>
-      <ThemeProvider theme={theme}>
-        <GlobalStyle />
-        <App />
-      </ThemeProvider>
-    </Provider>
-    </QueryClientProvider>
-  </React.StrictMode>
+    <React.StrictMode>
+        <ModalProvider>
+            <QueryClientProvider client={queryClient}>
+                <Provider store={store}>
+                    <ThemeProvider theme={theme}>
+                        <GlobalStyle />
+                        <App />
+                    </ThemeProvider>
+                </Provider>
+            </QueryClientProvider>
+        </ModalProvider>
+    </React.StrictMode>,
 );

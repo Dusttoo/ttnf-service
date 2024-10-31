@@ -20,91 +20,91 @@ const CTAButton = styled(Button)`
 `;
 
 interface HeroEditProps {
-  page: Page;
-  onSaveHero: (updatedHeroContent: HeroContent) => void;
-  isSidebarOpen: boolean;
+    page: Page;
+    onSaveHero: (updatedHeroContent: HeroContent) => void;
+    isSidebarOpen: boolean;
 }
 
 const HeroEdit: React.FC<HeroEditProps> = ({
-  page,
-  onSaveHero,
-  isSidebarOpen,
-}) => {
-  const [heroContent, setHeroContent] = useState<HeroContent>({
-    title: '',
-    description: '',
-    ctaText: '',
-    introductionText: '',
-    carouselImages: [],
-    carouselSpeed: 5000
-  });
+                                               page,
+                                               onSaveHero,
+                                               isSidebarOpen,
+                                           }) => {
+    const [heroContent, setHeroContent] = useState<HeroContent>({
+        title: '',
+        description: '',
+        ctaText: '',
+        introductionText: '',
+        carouselImages: [],
+        carouselSpeed: 5000,
+    });
 
-  useEffect(() => {
-    if (page.customValues?.heroContent) {
-      setHeroContent(page.customValues.heroContent);
-    }
-  }, [page]);
+    useEffect(() => {
+        if (page.customValues?.heroContent) {
+            setHeroContent(page.customValues.heroContent);
+        }
+    }, [page]);
 
-  const handleSaveHero = () => {
-    onSaveHero(heroContent);
-  };
-
-  const handleUpdateCarousel = (
-      speed: number,
-      updatedCarouselImages: HeroContent['carouselImages']
-    ) => {
-      setHeroContent((prevState) => ({
-        ...prevState,
-        carouselImages: updatedCarouselImages,
-        carouselSpeed: speed,
-      }));
+    const handleSaveHero = () => {
+        onSaveHero(heroContent);
     };
 
-  return (
-    <HeroEditContainer>
-      <h3>Edit Hero Section</h3>
+    const handleUpdateCarousel = (
+        speed: number,
+        updatedCarouselImages: HeroContent['carouselImages'],
+    ) => {
+        setHeroContent((prevState) => ({
+            ...prevState,
+            carouselImages: updatedCarouselImages,
+            carouselSpeed: speed,
+        }));
+    };
 
-      <Input
-        type="text"
-        value={heroContent.title}
-        onChange={(e) =>
-          setHeroContent({ ...heroContent, title: e.target.value })
-        }
-        label="Title"
-        placeholder="Enter hero title"
-      />
+    return (
+        <HeroEditContainer>
+            <h3>Edit Hero Section</h3>
 
-      <Textarea
-        value={heroContent.description}
-        onChange={(e) =>
-          setHeroContent({ ...heroContent, description: e.target.value })
-        }
-        label="Description"
-        placeholder="Enter hero description"
-      />
+            <Input
+                type="text"
+                value={heroContent.title}
+                onChange={(e) =>
+                    setHeroContent({ ...heroContent, title: e.target.value })
+                }
+                label="Title"
+                placeholder="Enter hero title"
+            />
 
-      <Input
-        type="text"
-        value={heroContent.ctaText}
-        onChange={(e) =>
-          setHeroContent({ ...heroContent, ctaText: e.target.value })
-        }
-        label="Call-to-Action Text"
-        placeholder="Enter CTA text"
-      />
+            <Textarea
+                value={heroContent.description}
+                onChange={(e) =>
+                    setHeroContent({ ...heroContent, description: e.target.value })
+                }
+                label="Description"
+                placeholder="Enter hero description"
+            />
 
-      <CarouselEdit
-        page={page}
-        onSaveCarousel={handleUpdateCarousel}
-        isInsideParent
-        isSidebarOpen={isSidebarOpen}
-      />
+            <Input
+                type="text"
+                value={heroContent.ctaText}
+                onChange={(e) =>
+                    setHeroContent({ ...heroContent, ctaText: e.target.value })
+                }
+                label="Call-to-Action Text"
+                placeholder="Enter CTA text"
+            />
 
-      <CTAButton variant="primary" onClick={handleSaveHero}>
-        Save Hero Section
-      </CTAButton>
-    </HeroEditContainer>
-  );
+            <CarouselEdit
+                page={page}
+                onSaveCarousel={handleUpdateCarousel}
+                isInsideParent
+                isSidebarOpen={isSidebarOpen}
+            />
+
+            <CTAButton $variant="primary" onClick={handleSaveHero}>
+                Save Hero Section
+            </CTAButton>
+        </HeroEditContainer>
+    );
 };
 
 export default HeroEdit;

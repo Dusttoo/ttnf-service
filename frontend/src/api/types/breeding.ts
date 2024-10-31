@@ -4,22 +4,34 @@ import { Dog, DogCreate, Description } from './dog';
 export interface Breeding {
     id: number;
     femaleDogId: number;
-    maleDogId: number;
+    maleDogId?: number;
     breedingDate: string;
     expectedBirthDate: string;
     description?: string;
     actualBirthDate?: string;
     litters: Litter[];
     femaleDog: Dog;
-    maleDog: Dog;
+    maleDog?: Dog;
+
+    // Manual Sire Details
+    manualSireName?: string;
+    manualSireColor?: string;
+    manualSireImageUrl?: string;
+    manualSirePedigreeLink?: string;
 }
 
 export interface BreedingCreate {
     femaleDogId: number;
-    maleDogId: number;
+    maleDogId?: number;
     breedingDate: string;
     expectedBirthDate: string;
     description?: string;
+
+    // Manual Sire Details
+    manualSireName?: string;
+    manualSireColor?: string;
+    manualSireImageUrl?: string;
+    manualSirePedigreeLink?: string;
 }
 
 export interface BreedingUpdate {
@@ -29,6 +41,12 @@ export interface BreedingUpdate {
     expectedBirthDate?: string;
     actualBirthDate?: string;
     description?: string;
+
+    // Manual Sire Details
+    manualSireName?: string;
+    manualSireColor?: string;
+    manualSireImageUrl?: string;
+    manualSirePedigreeLink?: string;
 }
 
 // Litter Interfaces
@@ -56,6 +74,8 @@ export interface LitterUpdate {
     numberOfPuppies?: number;
     description?: Description;
     pedigreeUrl?: string;
+    breedingId?: number;
 }
 
-export interface PuppyCreate extends DogCreate { }
+export interface PuppyCreate extends DogCreate {
+}

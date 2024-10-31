@@ -122,14 +122,49 @@ class BreedingService:
         self, breeding_data: BreedingCreate, db: AsyncSession
     ) -> Breeding:
         try:
-            new_breeding = Breeding(**breeding_data.dict())
+            # If manual sire details are provided, set male_dog_id to None
+            new_breeding = Breeding(
+                **breeding_data.dict(exclude={"manual_sire_name", "manual_sire_color", "manual_sire_image_url",
+                                              "manual_sire_pedigree_link"})
+            )
+            # Assign manual sire details if present
+            if not breeding_data.male_dog_id and (
+                breeding_data.manual_sire_name
+                or breeding_data.manual_sire_color
+                or breeding_data.manual_sire_image_url
+                or breeding_data.manual_sire_pedigree_link
+            ):
+                new_breeding.manual_sire_name = breeding_data.manual_sire_name
+                new_breeding.manual_sire_color = breeding_data.manual_sire_color
+                new_breeding.manual_sire_image_url = breeding_data.manual_sire_image_url
+                new_breeding.manual_sire_pedigree_link = breeding_data.manual_sire_pedigree_link
+
             db.add(new_breeding)
             await db.commit()
             await db.refresh(new_breeding)
 
             await db.refresh(new_breeding, attribute_names=["female_dog", "male_dog"])
 
-            return new_breeding
+            result = await db.execute(
+                select(Breeding)
+                .options(
+                    selectinload(Breeding.female_dog).options(
+                        selectinload(Dog.health_infos),
+                        selectinload(Dog.photos),
+                        selectinload(Dog.productions),
+                        selectinload(Dog.children),
+                    ),
+                    selectinload(Breeding.male_dog).options(
+                        selectinload(Dog.health_infos),
+                        selectinload(Dog.photos),
+                        selectinload(Dog.productions),
+                        selectinload(Dog.children),
+                    ),
+                )
+                .filter(Breeding.id == new_breeding.id)
+            )
+
+            return convert_to_breeding_schema(result.scalars().first())
         except SQLAlchemyError as e:
             logger.error(f"Error in create_breeding: {e}", exc_info=True)
             raise HTTPException(status_code=500, detail=f"Internal Server Error: {e}")
@@ -138,16 +173,46 @@ class BreedingService:
         self, breeding_id: int, breeding_data: BreedingUpdate, db: AsyncSession
     ) -> Optional[Breeding]:
         try:
-            result = await db.execute(
-                select(Breeding).filter(Breeding.id == breeding_id)
-            )
+            result = await db.execute(select(Breeding).filter(Breeding.id == breeding_id))
             breeding = result.scalars().first()
             if breeding:
                 for var, value in breeding_data.dict(exclude_unset=True).items():
                     setattr(breeding, var, value)
+                # Assign or clear manual sire details based on update data
+                if not breeding_data.male_dog_id:
+                    breeding.manual_sire_name = breeding_data.manual_sire_name
+                    breeding.manual_sire_color = breeding_data.manual_sire_color
+                    breeding.manual_sire_image_url = breeding_data.manual_sire_image_url
+                    breeding.manual_sire_pedigree_link = breeding_data.manual_sire_pedigree_link
+                else:
+                    # Clear manual sire details if a male dog ID is provided
+                    breeding.manual_sire_name = None
+                    breeding.manual_sire_color = None
+                    breeding.manual_sire_image_url = None
+                    breeding.manual_sire_pedigree_link = None
+
                 await db.commit()
                 await db.refresh(breeding, attribute_names=["female_dog", "male_dog"])
-                return breeding
+                result = await db.execute(
+                    select(Breeding)
+                    .options(
+                        selectinload(Breeding.female_dog).options(
+                            selectinload(Dog.health_infos),
+                            selectinload(Dog.photos),
+                            selectinload(Dog.productions),
+                            selectinload(Dog.children),
+                        ),
+                        selectinload(Breeding.male_dog).options(
+                            selectinload(Dog.health_infos),
+                            selectinload(Dog.photos),
+                            selectinload(Dog.productions),
+                            selectinload(Dog.children),
+                        ),
+                    )
+                    .filter(Breeding.id == breeding.id)
+                )
+
+                return convert_to_breeding_schema(result.scalars().first())
             return None
         except SQLAlchemyError as e:
             logger.error(f"Error in update_breeding: {e}", exc_info=True)
