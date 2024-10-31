@@ -49,7 +49,7 @@ stages:
               buildArguments: |
                 REACT_APP_BACKEND_URL=$(REACT_APP_BACKEND_URL)
                 REACT_APP_TINYMCE_API_KEY=$(REACT_APP_TINYMCE_API_KEY)
-                REACT_APP_ENV=dev
+                REACT_APP_ENV=production
               tags: |
                 $(Build.BuildId)-dev
 
