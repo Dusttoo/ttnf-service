@@ -35,6 +35,7 @@ export const useCreateDog = () => {
 };
 
 export const useUpdateDog = () => {
+    console.log("updating")
     const queryClient = useQueryClient();
     return useMutation(
         ({ dogId, dogData }: { dogId: number, dogData: DogUpdate }) => updateDog(dogId, dogData),

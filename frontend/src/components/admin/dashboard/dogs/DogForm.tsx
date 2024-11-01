@@ -130,7 +130,7 @@ const DogForm: React.FC<DogFormProps> = ({
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!validate()) return;
-
+        console.log("profilePhoto", profilePhoto)
         const updatedFormState = {
             ...formState,
             profilePhoto: profilePhoto || '',

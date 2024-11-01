@@ -5,8 +5,7 @@ import FilterComponent from '../../../common/Filter';
 import Pagination from '../../../common/Pagination';
 import GlobalModal from '../../../common/Modal';
 import DogForm from './DogForm';
-import { useDogs, useDeleteDog, useUpdateDog } from '../../../../hooks/useDog';
-import { useNavigate } from 'react-router-dom';
+import { useDogs, useDeleteDog, useUpdateDog, useCreateDog } from '../../../../hooks/useDog';
 import { GenderEnum, StatusEnum } from '../../../../api/types/core';
 import LoadingSpinner from '../../../common/LoadingSpinner';
 import NoResults from '../../../common/NoResults';
@@ -120,6 +119,7 @@ const AdminDogList: React.FC<{ defaultGender?: GenderEnum; owned?: boolean }> = 
   const [pageSize, setPageSize] = useState(10);
   const { openModal, closeModal } = useModal();
   const updateDogMutation = useUpdateDog(); 
+  const createDogMutation = useCreateDog();
 
   const filters: SelectedFilters = { gender, status, owned, sire: sire, dam: dam };
   const { data: dogsData, isLoading } = useDogs(filters, page, pageSize);
@@ -168,6 +168,9 @@ const AdminDogList: React.FC<{ defaultGender?: GenderEnum; owned?: boolean }> = 
               onClose={closeModal}
               title="Add New Dog"
               redirect="/admin/dashboard/dogs"
+              onDogCreated={(newDog) => {
+                createDogMutation.mutate(newDog);
+              }}
           />,
       );
   };

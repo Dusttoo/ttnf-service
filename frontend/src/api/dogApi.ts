@@ -67,6 +67,7 @@ export const getDogsFiltered = async (
             isBackgroundRequest: 'true', // Set as background request
         },
     });
+
     return {
         items: response.data.items,
         total: response.data.totalCount,

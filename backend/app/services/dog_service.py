@@ -27,6 +27,8 @@ STATUS_MAPPING = {
     "available": StatusEnum.available,
 }
 
+def normalize_url( url: str) -> str:
+    return url.strip().lower()
 
 class DogService:
     def __init__(self):
@@ -190,6 +192,7 @@ class DogService:
             logger.error(f"Exception in create_dog: {str(e)}", exc_info=True)
             raise HTTPException(status_code=500, detail=f"Internal Server Error: {e}")
 
+    
     async def update_dog(
         self, dog_id: int, dog_data: DogUpdate, db: AsyncSession
     ) -> Optional[DogSchema]:
@@ -225,34 +228,53 @@ class DogService:
                 logger.info(f"Updated main attributes for dog ID: {dog_id}")
                 await db.commit()
 
-                # Update or add profile photo
-                profile_photo = next(
-                    (
-                        photo
-                        for photo in dog.photos
-                        if photo.photo_url == dog.profile_photo
-                    ),
-                    None,
-                )
-                if profile_photo:
-                    profile_photo.photo_url = dog_data.profile_photo
-                    logger.info(f"Updated profile photo for dog ID: {dog_id}")
-                else:
-                    new_photo = Photo(
-                        dog_id=dog.id,
-                        photo_url=dog_data.profile_photo,
-                        alt=f"{dog.name}",
-                    )
-                    db.add(new_photo)
-                    logger.info(f"Added new profile photo for dog ID: {dog_id}")
+                 # Handle profile photo separately
+                if dog_data.profile_photo:
+                    if dog.profile_photo != dog_data.profile_photo:
+                        dog.profile_photo = dog_data.profile_photo
+                        # Update or add profile photo in photos table
+                        profile_photo = next(
+                            (photo for photo in dog.photos if photo.photo_url == dog.profile_photo),
+                            None,
+                        )
+                        if profile_photo:
+                            profile_photo.photo_url = dog_data.profile_photo
+                            logger.info(f"Updated profile photo for dog ID: {dog_id}")
+                        else:
+                            new_photo = Photo(
+                                dog_id=dog.id,
+                                photo_url=dog_data.profile_photo,
+                                alt=f"{dog.name}",
+                            )
+                            db.add(new_photo)
+                            logger.info(f"Added new profile photo for dog ID: {dog_id}")
+                    await db.commit()
 
-                # Update or add gallery photos
-                existing_photo_urls = [photo.photo_url for photo in dog.photos]
-                new_photo_urls = [
-                    url
-                    for url in dog_data.gallery_photos
-                    if url not in existing_photo_urls
+                # **Normalize existing and new gallery photo URLs**
+                existing_photo_urls = set(
+                    normalize_url(photo.photo_url) for photo in dog.photos if photo.photo_url != dog.profile_photo
+                )
+
+                updated_gallery_photo_urls = set(
+                    normalize_url(url) for url in dog_data.gallery_photos if url != dog_data.profile_photo
+                )
+
+                # **Identify photos to delete**
+                photos_to_delete = [
+                    photo for photo in dog.photos
+                    if normalize_url(photo.photo_url) not in updated_gallery_photo_urls and photo.photo_url != dog.profile_photo
                 ]
+
+                print("deleting: ", photos_to_delete)
+                # **Delete photos**
+                for photo in photos_to_delete:
+                    await db.delete(photo)
+                    logger.info(f"Deleted photo {photo.photo_url} for dog ID: {dog_id}")
+
+                # **Identify new photos to add**
+                new_photo_urls = updated_gallery_photo_urls - existing_photo_urls
+
+                # **Add new photos**
                 for photo_url in new_photo_urls:
                     gallery_photo = Photo(
                         dog_id=dog.id,
@@ -260,7 +282,13 @@ class DogService:
                         alt=f"{dog.name}",
                     )
                     db.add(gallery_photo)
+                    logger.info(f"Added new gallery photo {photo_url} for dog ID: {dog_id}")
+
                 logger.info(f"Updated gallery photos for dog ID: {dog_id}")
+
+                # Commit the changes to save deletions and additions
+                await db.commit()
+
 
                 # Add or update production info
                 if dog.parent_male_id or dog.parent_female_id:
@@ -414,7 +442,6 @@ class DogService:
         page: Optional[int] = None,
         page_size: Optional[int] = None,
     ) -> Dict[str, any]:
-        print(filters["retired"])
         try:
             redis = await get_redis_client()
             cache_key = f"dogs_filtered_{json.dumps(filters)}_{page}_{page_size}"
@@ -432,33 +459,38 @@ class DogService:
                     selectinload(Dog.children),
                 ).order_by(Dog.dob.asc().nulls_last())
 
-                if filters.get("gender"):
-                    query = query.filter(Dog.gender == filters["gender"].lower())
+                filters_list = []
 
-                mapped_statuses = []
+                if filters.get("gender"):
+                    filters_list.append(Dog.gender == filters["gender"].lower())
+
                 if filters.get("status"):
                     statuses = [status.lower() for status in filters["status"]]
                     if "active" in statuses:
-                        query = query.filter(
+                        filters_list.append(
                             (Dog.status == None)
                             | (~Dog.status.in_([StatusEnum.retired, StatusEnum.sold]))
                         )
                         statuses = [status for status in statuses if status != "active"]
                     if statuses:
-                        mapped_statuses = statuses
-                        query = query.filter(Dog.status.in_(mapped_statuses))
+                        filters_list.append(Dog.status.in_(statuses))
 
                 if filters.get("owned"):
-                    query = query.filter(Dog.kennel_own == (filters["owned"].lower() == "true"))
+                    filters_list.append(Dog.kennel_own == (filters["owned"].lower() == "true"))
+
                 if filters.get("sire"):
-                    query = query.filter(Dog.parent_male_id == filters["sire"])
+                    filters_list.append(Dog.parent_male_id == filters["sire"])
+
                 if filters.get("dam"):
-                    query = query.filter(Dog.parent_female_id == filters["dam"])
+                    filters_list.append(Dog.parent_female_id == filters["dam"])
+
                 if "retired" in filters and filters["retired"] is not None:
-                    query = query.filter(Dog.is_retired == filters["retired"])
-                print(filters["retired"])
-                print("Query: ", query)
-                # Only apply pagination if page and page_size are provided
+                    filters_list.append(Dog.is_retired == filters["retired"])
+
+                # Apply filters to the main query
+                query = query.filter(*filters_list)
+
+                # Pagination
                 if page is not None and page_size is not None:
                     offset = (page - 1) * page_size
                     query = query.offset(offset).limit(page_size)
@@ -466,15 +498,8 @@ class DogService:
                 result = await db.execute(query)
                 dogs = result.scalars().all()
 
-                # Calculate total count (no need for pagination here)
-                total_query = select(func.count(Dog.id)).filter(
-                    (Dog.gender == filters["gender"].lower()) if filters.get("gender") else True,
-                    Dog.status.in_(mapped_statuses) if filters.get("status") and statuses else True,
-                    (Dog.kennel_own == (filters["owned"].lower() == "true")) if filters.get("owned") else True,
-                    (Dog.parent_male_id == filters["sire"]) if filters.get("sire") else True,
-                    (Dog.parent_female_id == filters["dam"]) if filters.get("dam") else True,
-                    (Dog.is_retired == filters["retired"]) if "retired" in filters else True
-                )
+                # Total count query with the same filters
+                total_query = select(func.count(Dog.id)).filter(*filters_list)
                 total_result = await db.execute(total_query)
                 total_count = total_result.scalar_one()
 

@@ -9,7 +9,6 @@ let API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'https://api-dev.texasto
 if (process.env.NODE_ENV !== 'development') {
   API_BASE_URL = API_BASE_URL.replace(/^http:\/\//i, 'https://');
 }
-console.log(API_BASE_URL);
 const TIMEOUT = 10000;
 
 const apiClient = axios.create({
@@ -46,7 +45,6 @@ apiClient.interceptors.request.use(
     } else if (config.url) {
       config.url = config.url.replace(/^http:\/\//i, 'https://');
     }
-    console.log('Request url: ', config.url);
 
     return config;
   },
