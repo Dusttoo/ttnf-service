@@ -47,6 +47,7 @@ export interface DogCreate {
     parentMaleId?: number;
     parentFemaleId?: number;
     healthInfos?: HealthInfoCreate[];
+    galleryPhotos?: string[];
 }
 
 export interface DogUpdate {
@@ -64,6 +65,8 @@ export interface DogUpdate {
     parentMaleId?: number;
     parentFemaleId?: number;
     healthInfos?: HealthInfoCreate[];
+    galleryPhotos?: string[];
+
 }
 
 export interface PuppyCreate extends DogCreate {
