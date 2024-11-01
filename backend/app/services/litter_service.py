@@ -22,6 +22,7 @@ from app.models import (
 from app.schemas import Litter as LitterSchema
 from app.schemas import LitterCreate, LitterUpdate, PuppyCreate
 from app.utils import DateTimeEncoder, convert_to_litter_schema
+from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +34,7 @@ class LitterService:
     ) -> Dict[str, any]:
         try:
             redis_client = await get_redis_client()
-            cache_key = f"all_litters:{page}:{page_size}"
+            cache_key = f"all_litters:{page}:{page_size}:{settings.env}"
             cached_data = await redis_client.get(cache_key)
 
             if cached_data:
@@ -98,7 +99,7 @@ class LitterService:
     ) -> Optional[LitterSchema]:
         try:
             redis_client = await get_redis_client()
-            cache_key = f"litter:{litter_id}"
+            cache_key = f"litter:{litter_id}:{settings.env}"
             cached_data = await redis_client.get(cache_key)
 
             if cached_data:
@@ -278,7 +279,7 @@ class LitterService:
 
                 # Invalidate cache for this litter
                 redis_client = await get_redis_client()
-                cache_key = f"litter:{litter_id}"
+                cache_key = f"litter:{litter_id}:{settings.env}"
                 await redis_client.delete(cache_key)
 
                 # Invalidate cache for all paginated lists
@@ -301,7 +302,7 @@ class LitterService:
                 await db.delete(litter)
                 await db.commit()
 
-                cache_key = f"litter:{litter_id}"
+                cache_key = f"litter:{litter_id}:{settings.env}"
                 await redis_client.delete(cache_key)
 
                 all_litters_keys = await redis_client.keys("all_litters:*")
@@ -325,7 +326,7 @@ class LitterService:
     ) -> List[LitterSchema]:
         try:
             redis_client = await get_redis_client()
-            cache_key = f"litters:{breeding_id}"
+            cache_key = f"litters:{breeding_id}:{settings.env}"
             cached_data = await redis_client.get(cache_key)
 
             if cached_data:

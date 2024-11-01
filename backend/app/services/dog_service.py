@@ -17,6 +17,7 @@ from app.schemas import Production as ProductionSchema
 from app.schemas import ProductionCreate
 from app.utils import DateTimeEncoder
 from app.utils.schema_converters import convert_to_dog_schema
+from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +45,7 @@ class DogService:
     ) -> Dict[str, any]:
         try:
             redis_client = await get_redis_client()
-            cache_key = f"all_dogs:{page}:{page_size}"
+            cache_key = f"all_dogs:{page}:{page_size}:{settings.env}"
             cached_data = await redis_client.get(cache_key)
 
             if cached_data:
@@ -85,7 +86,7 @@ class DogService:
     async def get_dog_by_id(self, dog_id: int, db: AsyncSession) -> Optional[DogSchema]:
         try:
             redis_client = await get_redis_client()
-            cache_key = f"dog:{dog_id}"
+            cache_key = f"dog:{dog_id}:{settings.env}"
             cached_data = await redis_client.get(cache_key)
 
             if cached_data:
@@ -321,7 +322,7 @@ class DogService:
 
                 # Invalidate cache for this dog
                 redis_client = await self.get_redis_client()
-                cache_key = f"dog:{dog_id}"
+                cache_key = f"dog:{dog_id}:{settings.env}"
                 await redis_client.delete(cache_key)
                 logger.info(f"Invalidated cache for dog ID: {dog_id}")
 
@@ -338,7 +339,7 @@ class DogService:
                 updated_dog_schema = convert_to_dog_schema(dog)
 
                 # Update paginated lists
-                pattern = "all_dogs:*"
+                pattern = f"all_dogs:*"
                 cache_keys = await redis_client.keys(pattern)
                 for cache_key in cache_keys:
                     cached_data = await redis_client.get(cache_key)
@@ -444,7 +445,7 @@ class DogService:
     ) -> Dict[str, any]:
         try:
             redis = await get_redis_client()
-            cache_key = f"dogs_filtered_{json.dumps(filters)}_{page}_{page_size}"
+            cache_key = f"dogs_filtered_{json.dumps(filters)}_{page}_{page_size}:{settings.env}"
             cached_data = await redis.get(cache_key)
 
             if cached_data:

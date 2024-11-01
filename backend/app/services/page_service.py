@@ -15,6 +15,7 @@ from app.schemas import Page as PageSchema, AnnouncementType as AnnouncementType
 from app.schemas import PageCreate, PageUpdate
 from app.utils import DateTimeEncoder
 from app.utils.schema_converters import convert_to_page_schema
+from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +34,7 @@ class PageService:
         await delete_pattern(redis_client, pattern)
 
     async def get_page(self, db: AsyncSession, page_id: str) -> Optional[PageSchema]:
-        cache_key = f"page:{page_id}"
+        cache_key = f"page:{page_id}:{settings.env}"
         redis_client = await self.get_redis_client()
 
         cached_page = await redis_client.get(cache_key)
@@ -68,7 +69,7 @@ class PageService:
     async def get_page_by_slug(
         self, db: AsyncSession, slug: str
     ) -> Optional[PageSchema]:
-        cache_key = f"page:slug:{slug}"
+        cache_key = f"page:slug:{slug}:{settings.env}"
         redis_client = await self.get_redis_client()
 
         cached_page = await redis_client.get(cache_key)
@@ -223,7 +224,7 @@ class PageService:
     async def get_pages(
         self, db: AsyncSession, skip: int = 0, limit: int = 10
     ) -> List[PageSchema]:
-        cache_key = f"pages:{skip}:{limit}"
+        cache_key = f"pages:{skip}:{limit}:{settings.env}"
         redis_client = await self.get_redis_client()
 
         cached_pages = await redis_client.get(cache_key)

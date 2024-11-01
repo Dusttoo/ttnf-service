@@ -13,6 +13,7 @@ from app.models.navigation import NavLink
 from app.schemas import NavLink as NavLinkSchema
 from app.schemas import NavLinkCreate, NavLinkUpdate
 from app.utils.schema_converters import convert_to_navigation_schema
+from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +24,7 @@ class NavigationService:
     ) -> List[NavLinkSchema]:
         try:
             redis_client = await get_redis_client()
-            cache_key = f"nav_links:{skip}:{limit}"
+            cache_key = f"nav_links:{skip}:{limit}:{settings.env}"
             cached_data = await redis_client.get(cache_key)
 
             if cached_data:
@@ -56,7 +57,7 @@ class NavigationService:
     ) -> Optional[NavLink]:
         try:
             redis_client = await get_redis_client()
-            cache_key = f"nav_link:{nav_link_id}"
+            cache_key = f"nav_link:{nav_link_id}:{settings.env}"
             cached_data = await redis_client.get(cache_key)
 
             if cached_data:

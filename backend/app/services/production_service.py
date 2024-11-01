@@ -13,6 +13,7 @@ from app.core.redis import get_redis_client
 from app.models import GenderEnum, Production, dog_production_link
 from app.schemas import ProductionCreate, ProductionUpdate, GenderEnum as GenderEnumSchema
 from app.utils import DateTimeEncoder, convert_to_production_schema
+from app.core.config import settings    
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +36,7 @@ class ProductionService:
                     raise HTTPException(status_code=400, detail="Invalid gender value")
 
             redis_client = await get_redis_client()
-            cache_key = f"all_productions:{page}:{page_size}:{gender}:{sire}:{dam}"
+            cache_key = f"all_productions:{page}:{page_size}:{gender}:{sire}:{dam}:{settings.env}"
             cached_data = await redis_client.get(cache_key)
 
             if cached_data:
@@ -86,7 +87,7 @@ async def get_production_by_id(
 ) -> Optional[Production]:
     try:
         redis_client = await get_redis_client()
-        cache_key = f"production:{production_id}"
+        cache_key = f"production:{production_id}:{settings.env}"
         cached_data = await redis_client.get(cache_key)
 
         if cached_data:

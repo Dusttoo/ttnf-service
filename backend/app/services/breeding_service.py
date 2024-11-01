@@ -14,6 +14,7 @@ from app.models import Breeding, Dog
 from app.schemas import BreedingCreate, BreedingUpdate
 from app.utils import DateTimeEncoder
 from app.utils.schema_converters import convert_to_breeding_schema
+from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +25,7 @@ class BreedingService:
     ) -> Dict[str, any]:
         try:
             redis_client = await get_redis_client()
-            cache_key = f"all_breedings:{page}:{page_size}"
+            cache_key = f"all_breedings:{page}:{page_size}:{settings.env}"
             cached_data = await redis_client.get(cache_key)
 
             if cached_data:
@@ -79,7 +80,7 @@ class BreedingService:
     ) -> Optional[Breeding]:
         try:
             redis_client = await get_redis_client()
-            cache_key = f"breeding:{breeding_id}"
+            cache_key = f"breeding:{breeding_id}:{settings.env}"
             cached_data = await redis_client.get(cache_key)
 
             if cached_data:
