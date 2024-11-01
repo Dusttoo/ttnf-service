@@ -1,9 +1,9 @@
-import React, { useState, CSSProperties } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useParams } from 'react-router-dom';
-import { DogCreate, Description } from '../../../../api/types/dog';
+import { DogCreate, DogUpdate, Description } from '../../../../api/types/dog';
 import { useLitter, useAddPuppiesToLitter, useUpdateLitter, useDeleteLitter } from '../../../../hooks/useLitter';
-import { useDeleteDog } from '../../../../hooks/useDog';
+import { useDeleteDog, useUpdateDog } from '../../../../hooks/useDog';
 import { useBreedingById } from '../../../../hooks/useBreeding';
 import Button from '../../../common/form/Button';
 import DogForm from '../dogs/DogForm';
@@ -104,123 +104,122 @@ const AddNewPuppyButton = styled(Button)`
 `;
 
 const LitterPuppyManagement: React.FC = () => {
-    const { litterId } = useParams<{ litterId: string }>();
-    const { data: litter, isLoading: litterLoading } = useLitter(Number(litterId), { enabled: !!litterId });
-    const { data: breeding } = useBreedingById(litter?.breedingId);
-    const addPuppiesToLitterMutation = useAddPuppiesToLitter();
-    const updateLitterMutation = useUpdateLitter();
-    const deleteLitterMutation = useDeleteLitter();
-    const deleteDogMutation = useDeleteDog();
-    const { openModal, closeModal } = useModal();
+  const { litterId } = useParams<{ litterId: string }>();
+  const { data: litter, isLoading: litterLoading } = useLitter(Number(litterId), { enabled: !!litterId });
+  const { data: breeding } = useBreedingById(litter?.breedingId);
+  const addPuppiesToLitterMutation = useAddPuppiesToLitter();
+  const updateLitterMutation = useUpdateLitter();
+  const deleteLitterMutation = useDeleteLitter();
+  const deleteDogMutation = useDeleteDog();
+  const updateDogMutation = useUpdateDog();
+  const { openModal, closeModal } = useModal();
 
-    const handleAddNewPuppy = () => {
-        openModal(
-            <DogForm
-                onClose={closeModal}
-                title="Add New Puppy"
-                redirect={`/admin/dashboard/litters/${litterId}/puppies`}
-                onDogCreated={(puppy: DogCreate) => {
-                    addPuppiesToLitterMutation.mutate({ litterId: Number(litterId), puppies: [puppy] });
-                    closeModal();
-                }}
-            />,
-        );
-    };
-
-    const handleEditPuppy = (puppyId: number) => {
-        openModal(
-            <DogForm
-                onClose={closeModal}
-                title="Edit Puppy"
-                dogId={puppyId}
-                redirect={`/admin/dashboard/litters/${litterId}/puppies`}
-            />,
-        );
-    };
-
-    const handleDeletePuppy = (puppyId: number) => {
-        if (window.confirm('Are you sure you want to delete this puppy?')) {
-            deleteDogMutation.mutate(puppyId);
-        }
-    };
-
-    const handleEditBreeding = () => {
-        openModal(
-            <BreedingForm
-                onClose={closeModal}
-                breedingId={breeding?.id}
-            />,
-        );
-    };
-
-    const handleDescriptionSave = (updatedDescription: Description) => {
-        if (!litter) return;
-        updateLitterMutation.mutate({
-            litterId: litter.id,
-            litterData: { ...litter, description: updatedDescription },
-        });
-    };
-
-    if (litterLoading) {
-        return <LoadingSpinner />;
-    }
-
-    return (
-        <Container>
-            <Title>Manage Puppies in Litter</Title>
-            <Section>
-                <h2>Parents Information</h2>
-                <ParentContainer>
-                    <ParentInfo>
-                        <ParentDetails>
-                            <ParentImage src={breeding?.femaleDog.profilePhoto} alt={breeding?.femaleDog.name} />
-                            <Title>{breeding?.femaleDog.name}</Title>
-                        </ParentDetails>
-                    </ParentInfo>
-                    <ParentInfo>
-                        <ParentDetails>
-                            <ParentImage src={
-                                breeding?.maleDog?.profilePhoto
-                                ?? breeding?.manualSireImageUrl
-                                ?? 'path/to/default-image.jpg'
-                            }
-                                         alt={breeding?.maleDog?.name ?? breeding?.manualSireName ?? 'Unknown Male Dog'} />
-                            <Title>{breeding?.maleDog?.name ?? breeding?.manualSireName ?? 'Unknown Sire'}</Title>
-                        </ParentDetails>
-                    </ParentInfo>
-                </ParentContainer>
-                <ParentDetails>
-                    <div><strong>Breeding Date:</strong> {breeding?.breedingDate}</div>
-                    <div><strong>Expected Birth Date:</strong> {breeding?.expectedBirthDate}</div>
-                    <div><strong>Breeding Description:</strong> {breeding?.description}</div>
-                    <EditButton onClick={handleEditBreeding} />
-                </ParentDetails>
-            </Section>
-            <Section>
-                <h2>Litter Description</h2>
-                {/* <EditableDescription
-                    description={litter?.description || { content: '' }}  /> */}
-            </Section>
-            <Section>
-                <h2>Puppies</h2>
-                <AddNewPuppyButton onClick={handleAddNewPuppy}>Add New Puppy</AddNewPuppyButton>
-                <PuppyList>
-                    {litter && litter.puppies.map(puppy => (
-                        <PuppyCard key={puppy.id}>
-                            <PuppyImage src={puppy.profilePhoto} alt={puppy.name} />
-                            <PuppyName>{puppy.name}</PuppyName>
-                            <ButtonContainer>
-                                <EditButton onClick={() => handleEditPuppy(puppy.id)} />
-                                <DeleteButton onClick={() => handleDeletePuppy(puppy.id)} />
-                            </ButtonContainer>
-                        </PuppyCard>
-                    ))}
-                </PuppyList>
-            </Section>
-            <GlobalModal />
-
-        </Container>
+  const handleAddNewPuppy = () => {
+    openModal(
+      <DogForm
+        onClose={closeModal}
+        title="Add New Puppy"
+        redirect={`/admin/dashboard/litters/${litterId}/puppies`}
+        onDogCreated={(puppy: DogCreate) => {
+          addPuppiesToLitterMutation.mutate({ litterId: Number(litterId), puppies: [puppy] });
+          closeModal();
+        }}
+      />
     );
+  };
+
+  const handleEditPuppy = (puppyId: number) => {
+    openModal(
+      <DogForm
+        onClose={closeModal}
+        title="Edit Puppy"
+        dogId={puppyId}
+        redirect={`/admin/dashboard/litters/${litterId}/puppies`}
+        onDogUpdated={(puppyData: DogUpdate) => {
+          updateDogMutation.mutate({ dogId: puppyId, dogData: puppyData });
+          closeModal();
+        }}
+      />
+    );
+  };
+
+  const handleDeletePuppy = (puppyId: number) => {
+    if (window.confirm('Are you sure you want to delete this puppy?')) {
+      deleteDogMutation.mutate(puppyId);
+    }
+  };
+
+  const handleEditBreeding = () => {
+    openModal(
+      <BreedingForm
+        onClose={closeModal}
+        breedingId={breeding?.id}
+      />
+    );
+  };
+
+  const handleDescriptionSave = (updatedDescription: Description) => {
+    if (!litter) return;
+    updateLitterMutation.mutate({
+      litterId: litter.id,
+      litterData: { ...litter, description: updatedDescription },
+    });
+  };
+
+  if (litterLoading) {
+    return <LoadingSpinner />;
+  }
+
+  return (
+    <Container>
+      <Title>Manage Puppies in Litter</Title>
+      <Section>
+        <h2>Parents Information</h2>
+        <ParentContainer>
+          <ParentInfo>
+            <ParentDetails>
+              <ParentImage src={breeding?.femaleDog.profilePhoto} alt={breeding?.femaleDog.name} />
+              <Title>{breeding?.femaleDog.name}</Title>
+            </ParentDetails>
+          </ParentInfo>
+          <ParentInfo>
+            <ParentDetails>
+              <ParentImage src={breeding?.maleDog?.profilePhoto ?? breeding?.manualSireImageUrl ?? 'path/to/default-image.jpg'}
+                           alt={breeding?.maleDog?.name ?? breeding?.manualSireName ?? 'Unknown Male Dog'} />
+              <Title>{breeding?.maleDog?.name ?? breeding?.manualSireName ?? 'Unknown Sire'}</Title>
+            </ParentDetails>
+          </ParentInfo>
+        </ParentContainer>
+        <ParentDetails>
+          <div><strong>Breeding Date:</strong> {breeding?.breedingDate}</div>
+          <div><strong>Expected Birth Date:</strong> {breeding?.expectedBirthDate}</div>
+          <div><strong>Breeding Description:</strong> {breeding?.description}</div>
+          <EditButton onClick={handleEditBreeding} />
+        </ParentDetails>
+      </Section>
+      <Section>
+        <h2>Litter Description</h2>
+        {/* Add a description editing component if available */}
+      </Section>
+      <Section>
+        <h2>Puppies</h2>
+        <AddNewPuppyButton onClick={handleAddNewPuppy}>Add New Puppy</AddNewPuppyButton>
+        <PuppyList>
+          {litter && litter.puppies.map((puppy) => (
+            <PuppyCard key={puppy.id}>
+              <PuppyImage src={puppy.profilePhoto} alt={puppy.name} />
+              <PuppyName>{puppy.name}</PuppyName>
+              <ButtonContainer>
+                <EditButton onClick={() => handleEditPuppy(puppy.id)} />
+                <DeleteButton onClick={() => handleDeletePuppy(puppy.id)} />
+              </ButtonContainer>
+            </PuppyCard>
+          ))}
+        </PuppyList>
+      </Section>
+      <GlobalModal />
+    </Container>
+  );
 };
 
 export default LitterPuppyManagement;

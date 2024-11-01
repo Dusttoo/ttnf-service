@@ -31,12 +31,32 @@ const ImagePreview = styled.div`
   margin-top: 1rem;
 `;
 
+const PreviewContainer = styled.div`
+  position: relative;
+  display: inline-block;
+`;
+
 const PreviewImage = styled.img`
   width: 100px;
   height: 100px;
   object-fit: cover;
   border-radius: 4px;
   border: 2px solid ${theme.colors.primary};
+  cursor: pointer;
+`;
+
+const RemoveButton = styled.button`
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: ${theme.colors.error};
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
 `;
 
 const UploadLabel = styled.label`
@@ -49,15 +69,15 @@ interface ImageUploadProps {
     maxImages: number;
     onImagesChange: (urls: string[]) => void;
     initialImages?: string[];
+    singleImageMode?: boolean; 
 }
 
-const ImageUpload: React.FC<ImageUploadProps> = ({ maxImages, onImagesChange, initialImages = [] }) => {
+const ImageUpload: React.FC<ImageUploadProps> = ({ maxImages, onImagesChange, initialImages = [], singleImageMode = false }) => {
     const [imageUrls, setImageUrls] = useState<string[]>(initialImages);
 
     useEffect(() => {
         if (initialImages.length) {
             setImageUrls(initialImages);
-            console.log("Initial images loaded: ", initialImages);
         }
     }, [initialImages]);
 
@@ -78,14 +98,26 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ maxImages, onImagesChange, in
                 }
             }
             
-            const newImageUrls = [...imageUrls, ...uploadedUrls];
-            console.log("new urls: ",newImageUrls)
+            const newImageUrls = singleImageMode ? uploadedUrls : [...imageUrls, ...uploadedUrls];
             setImageUrls(newImageUrls);
-
             onImagesChange(newImageUrls);
         } else {
             alert(`You can upload up to ${maxImages} images.`);
         }
+    };
+
+    const handleReplaceImage = () => {
+        const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+        fileInput?.click();
+    };
+
+    const handleRemoveImage = (event: React.MouseEvent, index: number) => {
+        event.stopPropagation(); 
+        event.preventDefault();
+        const updatedUrls = [...imageUrls];
+        updatedUrls.splice(index, 1);
+        setImageUrls(updatedUrls);
+        onImagesChange(updatedUrls);
     };
 
     return (
@@ -95,7 +127,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ maxImages, onImagesChange, in
                     <>
                         <HiddenInput
                             type="file"
-                            multiple
+                            multiple={!singleImageMode}
                             accept="image/*"
                             onChange={handleFileChange}
                         />
@@ -107,7 +139,16 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ maxImages, onImagesChange, in
             </UploadLabel>
             <ImagePreview>
                 {imageUrls.map((image, index) => (
-                    <PreviewImage key={index} src={image} alt={`Preview ${index + 1}`} />
+                    <PreviewContainer key={index}>
+                        <PreviewImage
+                            src={image}
+                            alt={`Preview ${index + 1}`}
+                            onClick={() => singleImageMode && handleReplaceImage()}
+                        />
+                        {!singleImageMode && (
+                            <RemoveButton onClick={(event) => handleRemoveImage(event, index)}>×</RemoveButton>
+                        )}
+                    </PreviewContainer>
                 ))}
             </ImagePreview>
         </UploadContainer>

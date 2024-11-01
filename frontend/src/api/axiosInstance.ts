@@ -5,7 +5,7 @@ import store from '../store';
 import { startLoading, stopLoading } from '../store/loadingSlice';
 import { withTimeout } from '../utils/withTimeout';
 
-let API_BASE_URL = process.env.REACT_APP_BACKEND_URL || '';
+let API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'https://api-dev.texastopnotchfrenchies.com/api/v1';
 if (process.env.NODE_ENV !== 'development') {
   API_BASE_URL = API_BASE_URL.replace(/^http:\/\//i, 'https://');
 }

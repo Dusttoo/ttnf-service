@@ -5,7 +5,7 @@ import FilterComponent from '../../../common/Filter';
 import Pagination from '../../../common/Pagination';
 import GlobalModal from '../../../common/Modal';
 import DogForm from './DogForm';
-import { useDogs, useDeleteDog } from '../../../../hooks/useDog';
+import { useDogs, useDeleteDog, useUpdateDog } from '../../../../hooks/useDog';
 import { useNavigate } from 'react-router-dom';
 import { GenderEnum, StatusEnum } from '../../../../api/types/core';
 import LoadingSpinner from '../../../common/LoadingSpinner';
@@ -112,110 +112,113 @@ const PaginationWrapper = styled.div`
 `;
 
 const AdminDogList: React.FC<{ defaultGender?: GenderEnum; owned?: boolean }> = ({ defaultGender, owned }) => {
-    const [gender, setGender] = useState<GenderEnum | undefined>(defaultGender);
-    const [status, setStatus] = useState<StatusEnum[]>([]);
-    const [sire, setSire] = useState<Dog | undefined>(undefined);
-    const [dam, setDam] = useState<Dog | undefined>(undefined);
-    const [page, setPage] = useState(1);
-    const [pageSize, setPageSize] = useState(10);
-    const { openModal, closeModal } = useModal();
+  const [gender, setGender] = useState<GenderEnum | undefined>(defaultGender);
+  const [status, setStatus] = useState<StatusEnum[]>([]);
+  const [sire, setSire] = useState<Dog | undefined>(undefined);
+  const [dam, setDam] = useState<Dog | undefined>(undefined);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const { openModal, closeModal } = useModal();
+  const updateDogMutation = useUpdateDog(); 
 
+  const filters: SelectedFilters = { gender, status, owned, sire: sire, dam: dam };
+  const { data: dogsData, isLoading } = useDogs(filters, page, pageSize);
 
-    const filters: SelectedFilters = { gender, status, owned, sire: sire, dam: dam };
-    const { data: dogsData, isLoading } = useDogs(filters, page, pageSize);
+  const dogs = dogsData?.items ?? [];
+  const totalCount = dogsData?.total ?? 0;
 
-    const dogs = dogsData?.items ?? [];
-    const totalCount = dogsData?.total ?? 0;
+  const deleteDogMutation = useDeleteDog();
 
-    const deleteDogMutation = useDeleteDog();
+  const handlePageChange = (newPage: number, newItemsPerPage: number) => {
+      setPage(newPage);
+      setPageSize(newItemsPerPage);
+  };
 
-    const handlePageChange = (newPage: number, newItemsPerPage: number) => {
-        setPage(newPage);
-        setPageSize(newItemsPerPage);
-    };
+  const handleSireChange = (sire?: Dog) => {
+      setSire(sire);
+  };
 
-    const handleSireChange = (sire?: Dog) => {
-        setSire(sire);
-    };
+  const handleDamChange = (dam?: Dog) => {
+      setDam(dam);
+  };
 
-    const handleDamChange = (dam?: Dog) => {
-        setDam(dam);
-    };
+  const handleEdit = (dogId: number) => {
+      openModal(
+          <DogForm
+              onClose={closeModal}
+              dogId={dogId}
+              title="Edit Dog"
+              redirect="/admin/dashboard/dogs"
+              onDogUpdated={(updatedDog) => {
+                  updateDogMutation.mutate({ dogId, dogData: updatedDog });
+              }}
+          />,
+      );
+  };
 
-    const handleEdit = (dogId: number) => {
-        openModal(
-            <DogForm
-                onClose={closeModal}
-                dogId={dogId}
-                title="Edit Dog"
-                redirect="/admin/dashboard/dogs"
-            />,
-        );
-    };
+  const handleDelete = (dogId: number) => {
+      if (window.confirm('Are you sure you want to delete this dog?')) {
+          deleteDogMutation.mutate(dogId);
+      }
+  };
 
-    const handleDelete = (dogId: number) => {
-        if (window.confirm('Are you sure you want to delete this dog?')) {
-            deleteDogMutation.mutate(dogId);
-        }
-    };
+  const handleAddNewDog = () => {
+      openModal(
+          <DogForm
+              onClose={closeModal}
+              title="Add New Dog"
+              redirect="/admin/dashboard/dogs"
+          />,
+      );
+  };
 
-    const handleAddNewDog = () => {
-        openModal(
-            <DogForm
-                onClose={closeModal}
-                title="Add New Dog"
-                redirect="/admin/dashboard/dogs"
-            />,
-        );
-    };
-
-    return (
-        <ListWrapper>
-            <FilterComponent
-                onGenderChange={setGender}
-                onStatusChange={setStatus}
-                onSireChange={handleSireChange}
-                onDamChange={handleDamChange}
-                gender={gender}
-                status={status}
-                isGenderDisabled={!!defaultGender}
-                isSireDisabled={false}
-                isDamDisabled={false}
-            />
-            <AddNewDogButton onClick={handleAddNewDog}>Add New Dog</AddNewDogButton>
-            {isLoading ? (
-                <LoadingSpinner />
-            ) : (
-                <>
-                    {dogs.length > 0 ? (
-                        <ListContainer>
-                            {dogs.map((dog: Dog) => (
-                                <DogCard key={dog.id}>
-                                    <DogImage src={dog.profilePhoto} alt={dog.name} />
-                                    <a href={`/dogs/${dog.id}`}><DogName>{dog.name}</DogName></a>
-                                    <ButtonContainer>
-                                        <Button onClick={() => handleEdit(dog.id)}>Edit</Button>
-                                        <Button onClick={() => handleDelete(dog.id)}>Delete</Button>
-                                    </ButtonContainer>
-                                </DogCard>
-                            ))}
-                        </ListContainer>
-                    ) : (
-                        <NoResults message={'No dogs found.'} description={'Try adding a dog'} />
-                    )}
-                    <PaginationWrapper>
-                        <Pagination
-                            totalItems={totalCount}
-                            currentPage={page}
-                            itemsPerPage={pageSize}
-                            onPageChange={handlePageChange}
-                        />
-                    </PaginationWrapper>
-                </>
-            )}
-            <GlobalModal />
-        </ListWrapper>
-    );
+  return (
+      <ListWrapper>
+          <FilterComponent
+              onGenderChange={setGender}
+              onStatusChange={setStatus}
+              onSireChange={handleSireChange}
+              onDamChange={handleDamChange}
+              gender={gender}
+              status={status}
+              isGenderDisabled={!!defaultGender}
+              isSireDisabled={false}
+              isDamDisabled={false}
+          />
+          <AddNewDogButton onClick={handleAddNewDog}>Add New Dog</AddNewDogButton>
+          {isLoading ? (
+              <LoadingSpinner />
+          ) : (
+              <>
+                  {dogs.length > 0 ? (
+                      <ListContainer>
+                          {dogs.map((dog: Dog) => (
+                              <DogCard key={dog.id}>
+                                  <DogImage src={dog.profilePhoto} alt={dog.name} />
+                                  <a href={`/dogs/${dog.id}`}><DogName>{dog.name}</DogName></a>
+                                  <ButtonContainer>
+                                      <Button onClick={() => handleEdit(dog.id)}>Edit</Button>
+                                      <Button onClick={() => handleDelete(dog.id)}>Delete</Button>
+                                  </ButtonContainer>
+                              </DogCard>
+                          ))}
+                      </ListContainer>
+                  ) : (
+                      <NoResults message={'No dogs found.'} description={'Try adding a dog'} />
+                  )}
+                  <PaginationWrapper>
+                      <Pagination
+                          totalItems={totalCount}
+                          currentPage={page}
+                          itemsPerPage={pageSize}
+                          onPageChange={handlePageChange}
+                      />
+                  </PaginationWrapper>
+              </>
+          )}
+          <GlobalModal />
+      </ListWrapper>
+  );
 };
 
 export default AdminDogList;
