@@ -62,8 +62,6 @@ export const getDogsFiltered = async (
         params.append('page_size', itemsPerPage.toString());
     }
 
-    console.log(params.toString());
-
     const response = await axiosWithTimeout.get(`/dogs/filtered?${params.toString()}`, {
         headers: {
             isBackgroundRequest: 'true', // Set as background request

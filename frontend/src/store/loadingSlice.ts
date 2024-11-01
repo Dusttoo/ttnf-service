@@ -10,15 +10,12 @@ const loadingSlice = createSlice({
     initialState,
     reducers: {
         startLoading: (state) => {
-            console.log('start loading');
             state.requestCount += 1;
         },
         stopLoading: (state) => {
-            console.log('stop loading');
             if (state.requestCount > 0) {
                 state.requestCount -= 1;
             }
-            console.log(state.requestCount);
         },
     },
 });

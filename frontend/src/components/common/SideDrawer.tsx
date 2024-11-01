@@ -33,7 +33,6 @@ interface SideDrawerProps {
 }
 
 const SideDrawer: React.FC<SideDrawerProps> = ({ isOpen, onClose, children }) => {
-    console.log('side drawer is open: ', isOpen, children);
     return (
         <>
             {isOpen && (

@@ -20,7 +20,6 @@ const DynamicPage: React.FC<DynamicPageProps> = ({ slug: initialSlug }) => {
     const [editContent, setEditContent] = useState<string>('');
     const [error, setError] = useState<string | null>(null);
     const isEditMode = useSelector((state: RootState) => state.editMode.isEditMode);
-    console.log('dynamic page');
     useEffect(() => {
         const fetchPage = async () => {
             try {

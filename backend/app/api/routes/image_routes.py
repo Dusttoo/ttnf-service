@@ -1,5 +1,5 @@
 import logging
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi import Form, APIRouter, Depends, File, HTTPException, UploadFile
 from app.core.settings import update_global_updated_at
 from app.schemas import ImageResponse, MediaResponse, VideoResponse
 from app.services import MediaService
@@ -11,10 +11,10 @@ media_router = APIRouter()
 
 @media_router.post("/upload", response_model=MediaResponse)
 async def upload_media(
-    entity: str,  # e.g., "dogs", "products", "user_profiles"
-    name: str,
-    type: str,  # "image" or "video"
-    file: UploadFile = File(...),
+    entity: str = Form(...),  # Form field, not a query parameter
+    name: str = Form(...),
+    type: str = Form(...),
+    file: UploadFile = File(...),  # File type for the file itself
     update_timestamp: None = Depends(update_global_updated_at),
 ):
     try:

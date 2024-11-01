@@ -9,7 +9,7 @@ const UploadContainer = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-//  width: 100%;
+  width: 100%;
   padding: 1rem;
   border: 2px dashed ${theme.colors.primary};
   border-radius: 8px;
@@ -55,26 +55,33 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ maxImages, onImagesChange, in
     const [imageUrls, setImageUrls] = useState<string[]>(initialImages);
 
     useEffect(() => {
-        setImageUrls(initialImages);
+        if (initialImages.length) {
+            setImageUrls(initialImages);
+            console.log("Initial images loaded: ", initialImages);
+        }
     }, [initialImages]);
 
     const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        event.stopPropagation();
+        event.preventDefault();
+
         const files = event.target.files;
         if (files && files.length + imageUrls.length <= maxImages) {
             const uploadedUrls: string[] = [];
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
-                const formData = new FormData();
-                formData.append('file', file);
                 try {
-                    const response = await uploadImage(file);
-                    uploadedUrls.push(response.url);
+                    const response = await uploadImage(file, "dogs", file.name, "image");
+                    uploadedUrls.push(response.url);  
                 } catch (error) {
                     return <ErrorComponent message={(error as Error).message} />;
                 }
             }
+            
             const newImageUrls = [...imageUrls, ...uploadedUrls];
+            console.log("new urls: ",newImageUrls)
             setImageUrls(newImageUrls);
+
             onImagesChange(newImageUrls);
         } else {
             alert(`You can upload up to ${maxImages} images.`);

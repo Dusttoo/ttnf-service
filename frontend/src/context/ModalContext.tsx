@@ -20,16 +20,12 @@ export const useModal = () => {
 export const ModalProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [modalContent, setModalContent] = useState<ReactNode | null>(null);
-    console.log('modal content: ', modalContent);
-    console.log('isOpen: ', isOpen);
     const openModal = (content: ReactNode) => {
-        console.log('Opening modal with content:', content);
         setModalContent(content);
         setIsOpen(true);
     };
 
     const closeModal = () => {
-        console.log('Closing modal');
         setModalContent(null);
         setIsOpen(false);
     };

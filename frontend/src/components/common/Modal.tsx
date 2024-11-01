@@ -30,7 +30,6 @@ const ModalContent = styled.div`
 
 const GlobalModal: React.FC = () => {
     const { closeModal, modalContent, isOpen } = useModal();
-    console.log('in modal: ', isOpen, modalContent);
 
     useEffect(() => {
         const handleEscape = (event: KeyboardEvent) => {

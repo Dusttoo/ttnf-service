@@ -113,7 +113,6 @@ const AdminProductionList: React.FC = () => {
     const { data, isLoading } = useProductions({}, page, pageSize);
     const deleteProduction = useDeleteProduction();
     const { openModal, closeModal } = useModal();
-    console.log(openModal, closeModal);
 
     const handlePageChange = (newPage: number, newItemsPerPage: number) => {
         setPage(newPage);

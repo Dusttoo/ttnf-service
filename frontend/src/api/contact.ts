@@ -7,7 +7,6 @@ interface ContactFormData {
 }
 
 export const submitContactForm = async (data: ContactFormData): Promise<void> => {
-    console.log(data);
     try {
         const response = await axiosWithTimeout(
             {
