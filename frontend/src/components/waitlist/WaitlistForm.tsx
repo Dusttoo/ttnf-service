@@ -106,6 +106,7 @@ const WaitlistForm: React.FC<WaitlistFormProps> = ({
                 onChange={(e) => setName(e.target.value)}
                 label="Name"
                 error={errors.name}
+                required
             />
             <Input
                 type="text"
@@ -113,6 +114,7 @@ const WaitlistForm: React.FC<WaitlistFormProps> = ({
                 onChange={(e) => setEmail(e.target.value)}
                 label="Email"
                 error={errors.email}
+                required
             />
             <Input
                 type="text"

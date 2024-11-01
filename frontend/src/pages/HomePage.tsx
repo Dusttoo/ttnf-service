@@ -13,12 +13,13 @@ import { ImageCarouselSettings, WebsiteSettings } from '../api/types/core';
 import ErrorComponent from '../components/common/Error';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-    faDna,
-    faRibbon,
-    faSuitcaseMedical,
+  faDna,
+  faRibbon,
+  faSuitcaseMedical,
 } from '@fortawesome/free-solid-svg-icons';
 import CTAButton from '../components/common/CTAButton';
 import WaitlistModal from '../components/waitlist/WaitlistModal';
+import { useModal } from '../context/ModalContext';
 import GlobalModal from '../components/common/Modal';
 
 const HomePageContainer = styled.div`
@@ -143,7 +144,8 @@ const AboutSection = styled.section`
   flex: 1;
   padding: 2rem;
   margin-left: 2rem;
-  background-color: ${(props) => props.theme.colors.cardBackground}; // Darker card background
+  background-color: ${(props) =>
+    props.theme.colors.cardBackground}; // Darker card background
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 
@@ -157,7 +159,9 @@ const AboutSection = styled.section`
   }
 
   p {
-    color: ${(props) => props.theme.colors.textSecondary}; // Use secondary text color for less emphasis
+    color: ${(props) =>
+      props.theme.colors
+        .textSecondary}; // Use secondary text color for less emphasis
   }
 `;
 
@@ -167,130 +171,124 @@ const SectionIcon = styled(FontAwesomeIcon)`
 `;
 
 const HomePage: React.FC = () => {
-    const [page, setPage] = useState<Page | null>(null);
-    const [settings, setSettings] = useState<WebsiteSettings | null>(null);
-    const [heroContent, setHeroContent] = useState<HeroContent | null>(null);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [isModalOpen, setModalOpen] = useState(false);
+  const [page, setPage] = useState<Page | null>(null);
+  const [settings, setSettings] = useState<WebsiteSettings | null>(null);
+  const [heroContent, setHeroContent] = useState<HeroContent | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const { openModal, closeModal } = useModal();
 
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const [fetchedPage, fetchedSettings] = await Promise.all([
-                    getPageBySlug('landing'),
-                    fetchWebsiteSettings(),
-                ]);
-                setPage(fetchedPage);
-                setSettings(fetchedSettings);
-                setHeroContent(
-                    fetchedPage?.customValues?.heroContent || {
-                        title: 'Welcome!',
-                        description:
-                            'Breeding top-notch quality, temperament, and beauty into every French Bulldog.',
-                        ctaText: 'Explore our services',
-                        introductionText: 'Healthy bulldogs',
-                        carouselSpeed: 8000,
-                        carouselImages: [],
-                    },
-                );
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchData();
-    }, []);
-
-    if (loading) return <LoadingSpinner />;
-    if (!page) return <ErrorComponent message={'Content not found'} />;
-    if (!settings) return <ErrorComponent message={'Error loading settings'} />;
-
-    const sanitizedContent = DOMPurify.sanitize(page.content);
-    const carouselImages = heroContent?.carouselImages || [];
-    const announcements = page.announcements || [];
-
-    const carouselSettings: ImageCarouselSettings = {
-        autoplaySpeed: heroContent?.carouselSpeed || 8000,
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [fetchedPage, fetchedSettings] = await Promise.all([
+          getPageBySlug('landing'),
+          fetchWebsiteSettings(),
+        ]);
+        setPage(fetchedPage);
+        setSettings(fetchedSettings);
+        setHeroContent(
+          fetchedPage?.customValues?.heroContent || {
+            title: 'Welcome!',
+            description:
+              'Breeding top-notch quality, temperament, and beauty into every French Bulldog.',
+            ctaText: 'Explore our services',
+            introductionText: 'Healthy bulldogs',
+            carouselSpeed: 8000,
+            carouselImages: [],
+          }
+        );
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
+      }
     };
+    fetchData();
+  }, []);
 
-    return (
-        <HomePageContainer>
-            {/* Announcements */}
-            {announcements.length > 0 && (
-                <AnnouncementSection
-                    title="Latest Announcements"
-                    announcements={announcements}
-                />
-            )}
+  if (loading) return <LoadingSpinner />;
+  if (!page) return <ErrorComponent message={'Content not found'} />;
+  if (!settings) return <ErrorComponent message={'Error loading settings'} />;
 
-            {/* Hero Section */}
-            <HeroSection>
-                <HeroText>
-                    <h1>{heroContent?.title || 'Welcome!'}</h1>
-                    <p>
-                        {heroContent?.description ||
-                            'Breeding top-notch quality, temperament, and beauty into every French Bulldog.'}
-                    </p>
-                    <div className="cta-buttons">
-                        <CTAButton
-                            label="Explore our services"
-                            onClick={() => navigate('/services')}
-                        />
-                        <CTAButton
-                            label="Join Waitlist"
-                            onClick={() => setModalOpen(true)}
-                        />
-                    </div>
-                    <HomePageHeader
-                        title={page.name}
-                        lastUpdated={settings.updatedAt}
-                        introduction={
-                            page.customValues?.introductionText ||
-                            'Welcome to Texas Top Notch Frenchies!'
-                        }
-                    />
-                </HeroText>
-                <HeroImage>
-                    {carouselImages.length > 0 && (
-                        <ImageCarousel
-                            images={carouselImages}
-                            width={'300px'}
-                            settings={carouselSettings}
-                        />
-                    )}
-                </HeroImage>
-            </HeroSection>
+  const sanitizedContent = DOMPurify.sanitize(page.content);
+  const carouselImages = heroContent?.carouselImages || [];
+  const announcements = page.announcements || [];
 
-            {/* Icon Section */}
-            <IconSection>
-                <IconBox>
-                    <SectionIcon icon={faDna} />
-                    <p>High-Quality Breeding</p>
-                </IconBox>
-                <IconBox>
-                    <SectionIcon icon={faRibbon} />
-                    <p>Excellent Temperament</p>
-                </IconBox>
-                <IconBox>
-                    <SectionIcon icon={faSuitcaseMedical} />
-                    <p>Exceptional Care</p>
-                </IconBox>
-            </IconSection>
+  const carouselSettings: ImageCarouselSettings = {
+    autoplaySpeed: heroContent?.carouselSpeed || 8000,
+  };
 
-            {/* Main Content */}
-            <ContentContainer>
-                <AboutSection dangerouslySetInnerHTML={{ __html: sanitizedContent }} />
-            </ContentContainer>
+  return (
+    <HomePageContainer>
+      {/* Announcements */}
+      {announcements.length > 0 && (
+        <AnnouncementSection
+          title="Latest Announcements"
+          announcements={announcements}
+        />
+      )}
 
-            {/* Waitlist Modal */}
+      {/* Hero Section */}
+      <HeroSection>
+        <HeroText>
+          <h1>{heroContent?.title || 'Welcome!'}</h1>
+          <p>
+            {heroContent?.description ||
+              'Breeding top-notch quality, temperament, and beauty into every French Bulldog.'}
+          </p>
+          <div className="cta-buttons">
+            <CTAButton
+              label="Explore our services"
+              onClick={() => navigate('/services')}
+            />
             <WaitlistModal />
-            <GlobalModal />
+          </div>
+          <HomePageHeader
+            title={page.name}
+            lastUpdated={settings.updatedAt}
+            introduction={
+              page.customValues?.introductionText ||
+              'Welcome to Texas Top Notch Frenchies!'
+            }
+          />
+        </HeroText>
+        <HeroImage>
+          {carouselImages.length > 0 && (
+            <ImageCarousel
+              images={carouselImages}
+              width={'300px'}
+              settings={carouselSettings}
+            />
+          )}
+        </HeroImage>
+      </HeroSection>
 
-        </HomePageContainer>
-    );
+      {/* Icon Section */}
+      <IconSection>
+        <IconBox>
+          <SectionIcon icon={faDna} />
+          <p>High-Quality Breeding</p>
+        </IconBox>
+        <IconBox>
+          <SectionIcon icon={faRibbon} />
+          <p>Excellent Temperament</p>
+        </IconBox>
+        <IconBox>
+          <SectionIcon icon={faSuitcaseMedical} />
+          <p>Exceptional Care</p>
+        </IconBox>
+      </IconSection>
+
+      {/* Main Content */}
+      <ContentContainer>
+        <AboutSection dangerouslySetInnerHTML={{ __html: sanitizedContent }} />
+      </ContentContainer>
+
+      {/* Waitlist Modal */}
+    </HomePageContainer>
+  );
 };
 
 export default HomePage;
