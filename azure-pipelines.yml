@@ -63,11 +63,25 @@ stages:
               appName: 'ttnf-dev'  
               containers: 'ttnfregistry.azurecr.io/frontend-dev:$(Build.BuildId)-dev'
 
+  - stage: ApprovalGate
+    dependsOn:
+      - BuildAndDeployBackendDev
+      - BuildAndDeployFrontendDev
+    jobs:
+      - job: Approval
+        pool: server
+        steps:
+          - task: ManualValidation@0
+            inputs:
+              instructions: 'Approve to promote to production'
+
   - stage: BuildBackendProd
     displayName: 'Build and Deploy Backend Prod'
     variables:
       - group: ttnf
-    dependsOn: BuildFrontendDev
+    dependsOn: 
+      - BuildFrontendDev
+      - ApprovalGate
     jobs:
       - job: BuildBackendProd
         displayName: 'Build Backend for Prod'
@@ -93,7 +107,9 @@ stages:
     displayName: 'Build and Deploy Frontend Prod'
     variables:
       - group: ttnf
-    dependsOn: BuildBackendProd
+    dependsOn: 
+      - BuildBackendProd
+      - ApprovalGate
     jobs:
       - job: BuildFrontendProd
         displayName: 'Build Frontend for Prod'
