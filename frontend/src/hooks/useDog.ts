@@ -8,9 +8,10 @@ export const useDog = (dogId: number) => {
 
 export const useDogs = (filters: SelectedFilters, page: number, pageSize: number) => {
     return useQuery(['dogs', filters, page, pageSize], () => getDogsFiltered(filters, page, pageSize), {
-        keepPreviousData: true,
+      staleTime: 0,
+      keepPreviousData: false,
     });
-};
+  };
 
 export const useFilteredDogs = (filters: SelectedFilters) => {
     return useQuery(['dogs', filters], () => getDogsFiltered(filters));
@@ -20,7 +21,7 @@ export const useDeleteDog = () => {
     const queryClient = useQueryClient();
     return useMutation((dogId: number) => deleteDog(dogId), {
         onSuccess: () => {
-            queryClient.invalidateQueries('dogs');
+            queryClient.invalidateQueries({ queryKey: ['dogs'], exact: false });
         },
     });
 };
@@ -29,21 +30,20 @@ export const useCreateDog = () => {
     const queryClient = useQueryClient();
     return useMutation((newDog: DogCreate) => createDog(newDog), {
         onSuccess: () => {
-            queryClient.invalidateQueries('dogs');
+            queryClient.invalidateQueries({ queryKey: ['dogs'], exact: false });
         },
     });
 };
 
 export const useUpdateDog = () => {
-    console.log("updating")
     const queryClient = useQueryClient();
     return useMutation(
         ({ dogId, dogData }: { dogId: number, dogData: DogUpdate }) => updateDog(dogId, dogData),
         {
             onSuccess: (_data, variables) => {
-                queryClient.invalidateQueries('dogs');
+                queryClient.invalidateQueries({ queryKey: ['dogs'], exact: false });
                 queryClient.invalidateQueries(['dog', variables.dogId]);
-            },
+              },
         }
     );
 };

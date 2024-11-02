@@ -35,6 +35,7 @@ class Photo(Base):
     dog_id = Column(Integer, ForeignKey("dogs.id", ondelete="CASCADE"))
     photo_url = Column(String(255), nullable=False)
     alt = Column(String(255), nullable=False)
+    position = Column(Integer)
     dog = relationship("Dog", back_populates="photos")
 
 

@@ -13,4 +13,8 @@ export const GlobalStyle = createGlobalStyle`
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Oswald', sans-serif;
   }
+  a {
+    color: ${(props) => props.theme.colors.primary};
+    text-decoration: none;
+  }
 `;

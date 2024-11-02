@@ -93,6 +93,7 @@ export interface Photo {
     dogId: number;
     photoUrl: string;
     alt: string;
+    position: number;
 }
 
 export interface PhotoCreate {

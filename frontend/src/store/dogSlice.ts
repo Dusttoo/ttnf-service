@@ -34,14 +34,7 @@ export const fetchDogs = createAsyncThunk(
         page?: number;
         pageSize?: number;
         filters: SelectedFilters
-    }, { getState }) => {
-        const state = getState() as RootState;
-        const dogs = state.dogs.items;
-        const pagination = state.dogs.pagination;
-
-        if (dogs.length && pagination.page === page && pagination.pageSize === pageSize && JSON.stringify(filters) === JSON.stringify(state.dogs.filters)) {
-            return { items: dogs, total: pagination.totalCount };
-        }
+    }) => {
         return await dogService.getDogsFiltered(filters, page, pageSize);
     },
 );

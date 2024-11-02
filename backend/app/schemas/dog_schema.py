@@ -43,6 +43,7 @@ class HealthInfo(HealthInfoBase):
 class PhotoBase(BaseModel):
     photo_url: str
     alt: str
+    position: Optional[int]
 
 
 class PhotoCreate(PhotoBase):
@@ -50,8 +51,8 @@ class PhotoCreate(PhotoBase):
 
 
 class Photo(PhotoBase):
-    id: int
-    dog_id: int
+    id: Optional[int]
+    dog_id: Optional[int]
 
     class Config:
         from_attributes = True

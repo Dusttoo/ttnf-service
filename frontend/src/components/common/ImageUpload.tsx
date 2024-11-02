@@ -1,7 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { uploadImage } from '../../api/imageApi';
 import { theme } from '../../theme/theme';
+import {
+    DndContext,
+    useSensor,
+    useSensors,
+    PointerSensor,
+    closestCenter,
+    DragEndEvent,
+  } from '@dnd-kit/core';
+  import {
+    SortableContext,
+    arrayMove,
+    useSortable,
+    horizontalListSortingStrategy,
+  } from '@dnd-kit/sortable';
+  import { CSS } from '@dnd-kit/utilities';
 import ErrorComponent from './Error';
 
 const UploadContainer = styled.div`
@@ -66,93 +81,200 @@ const UploadLabel = styled.label`
 `;
 
 interface ImageUploadProps {
-    maxImages: number;
-    onImagesChange: (urls: string[]) => void;
-    initialImages?: string[];
-    singleImageMode?: boolean; 
+  maxImages: number;
+  onImagesChange: (urls: string[]) => void;
+  initialImages?: string[];
+  singleImageMode?: boolean;
 }
 
-const ImageUpload: React.FC<ImageUploadProps> = ({ maxImages, onImagesChange, initialImages = [], singleImageMode = false }) => {
-    const [imageUrls, setImageUrls] = useState<string[]>(initialImages);
+const ImageUpload: React.FC<ImageUploadProps> = ({
+  maxImages,
+  onImagesChange,
+  initialImages = [],
+  singleImageMode = false,
+}) => {
+  const [imageUrls, setImageUrls] = useState<string[]>(initialImages);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-    useEffect(() => {
-        if (initialImages.length) {
-            setImageUrls(initialImages);
+  useEffect(() => {
+    if (!imageUrls.length && initialImages.length) {
+      console.log('Setting back to initial images');
+      setImageUrls(initialImages);
+    }
+  }, [initialImages.length, imageUrls.length]);
+
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    event.stopPropagation();
+    event.preventDefault();
+
+    const files = event.target.files;
+    if (files && files.length > 0) {
+      if (singleImageMode) {
+        const file = files[0];
+        try {
+          const response = await uploadImage(file, 'dogs', file.name, 'image');
+          const newImageUrls = [response.url];
+          setImageUrls(newImageUrls);
+          onImagesChange(newImageUrls);
+        } catch (error) {
+          console.error('Error uploading image:', error);
         }
-    }, [initialImages]);
-
-    const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-        event.stopPropagation();
-        event.preventDefault();
-
-        const files = event.target.files;
-        if (files && files.length + imageUrls.length <= maxImages) {
-            const uploadedUrls: string[] = [];
-            for (let i = 0; i < files.length; i++) {
-                const file = files[i];
-                try {
-                    const response = await uploadImage(file, "dogs", file.name, "image");
-                    uploadedUrls.push(response.url);  
-                } catch (error) {
-                    return <ErrorComponent message={(error as Error).message} />;
-                }
+      } else {
+        if (files.length + imageUrls.length <= maxImages) {
+          const uploadedUrls: string[] = [];
+          for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            try {
+              const response = await uploadImage(
+                file,
+                'dogs',
+                file.name,
+                'image'
+              );
+              uploadedUrls.push(response.url);
+            } catch (error) {
+              console.error('Error uploading image:', error);
             }
-            
-            const newImageUrls = singleImageMode ? uploadedUrls : [...imageUrls, ...uploadedUrls];
-            setImageUrls(newImageUrls);
-            onImagesChange(newImageUrls);
+          }
+          const newImageUrls = [...imageUrls, ...uploadedUrls];
+          setImageUrls(newImageUrls);
+          onImagesChange(newImageUrls);
         } else {
-            alert(`You can upload up to ${maxImages} images.`);
+          alert(`You can upload up to ${maxImages} images.`);
         }
-    };
+      }
+      event.target.value = '';
+    }
+  };
 
-    const handleReplaceImage = () => {
-        const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
-        fileInput?.click();
-    };
+  const handleReplaceImage = () => {
+    fileInputRef.current?.click();
+  };
 
-    const handleRemoveImage = (event: React.MouseEvent, index: number) => {
-        event.stopPropagation(); 
-        event.preventDefault();
-        const updatedUrls = [...imageUrls];
-        updatedUrls.splice(index, 1);
-        setImageUrls(updatedUrls);
-        onImagesChange(updatedUrls);
-    };
+  const handleRemoveImage = (event: React.MouseEvent, index: number) => {
+    event.stopPropagation();
+    event.preventDefault();
+    const updatedUrls = [...imageUrls];
+    updatedUrls.splice(index, 1);
+    setImageUrls(updatedUrls);
+    onImagesChange(updatedUrls);
+  };
 
-    return (
-        <UploadContainer>
-            <UploadLabel>
-                {imageUrls.length < maxImages ? (
-                    <>
-                        <HiddenInput
-                            type="file"
-                            multiple={!singleImageMode}
-                            accept="image/*"
-                            onChange={handleFileChange}
-                        />
-                        Drag and Drop images here or <strong>Choose files</strong>
-                    </>
-                ) : (
-                    <span>Maximum {maxImages} images uploaded</span>
-                )}
-            </UploadLabel>
-            <ImagePreview>
-                {imageUrls.map((image, index) => (
-                    <PreviewContainer key={index}>
-                        <PreviewImage
-                            src={image}
-                            alt={`Preview ${index + 1}`}
-                            onClick={() => singleImageMode && handleReplaceImage()}
-                        />
-                        {!singleImageMode && (
-                            <RemoveButton onClick={(event) => handleRemoveImage(event, index)}>×</RemoveButton>
-                        )}
-                    </PreviewContainer>
-                ))}
-            </ImagePreview>
-        </UploadContainer>
-    );
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (active.id !== over?.id) {
+      const oldIndex = imageUrls.findIndex((url) => url === active.id);
+      const newIndex = imageUrls.findIndex((url) => url === over?.id);
+
+      const newImageUrls = arrayMove(imageUrls, oldIndex, newIndex);
+      setImageUrls(newImageUrls);
+      onImagesChange(newImageUrls);
+    }
+  };
+
+  return (
+    <UploadContainer>
+      <UploadLabel htmlFor="file-upload">
+        {(!singleImageMode && imageUrls.length < maxImages) ||
+        (singleImageMode && imageUrls.length === 0) ? (
+          <>
+            <HiddenInput
+              ref={fileInputRef}
+              id="file-upload"
+              type="file"
+              multiple={!singleImageMode}
+              accept="image/*"
+              onChange={handleFileChange}
+            />
+            Drag and Drop images here or <strong>Choose files</strong>
+          </>
+        ) : null}
+      </UploadLabel>
+
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext items={imageUrls} strategy={horizontalListSortingStrategy}>
+          <ImagePreview>
+            {imageUrls.map((image, index) => (
+              <SortableImage
+                key={image}
+                id={image}
+                image={image}
+                index={index}
+                singleImageMode={singleImageMode}
+                handleReplaceImage={handleReplaceImage}
+                handleRemoveImage={handleRemoveImage}
+              />
+            ))}
+          </ImagePreview>
+        </SortableContext>
+      </DndContext>
+    </UploadContainer>
+  );
 };
 
 export default ImageUpload;
+
+interface SortableImageProps {
+    id: string;
+    image: string;
+    index: number;
+    singleImageMode: boolean;
+    handleReplaceImage: () => void;
+    handleRemoveImage: (event: React.MouseEvent, index: number) => void;
+  }
+  
+  export const SortableImage: React.FC<SortableImageProps> = ({
+    id,
+    image,
+    index,
+    singleImageMode,
+    handleReplaceImage,
+    handleRemoveImage,
+  }) => {
+    const {
+      attributes,
+      listeners,
+      setNodeRef,
+      transform,
+      transition,
+    } = useSortable({ id });
+  
+    const style = {
+      transform: CSS.Transform.toString(transform),
+      transition,
+    };
+  
+    return (
+      <PreviewContainer ref={setNodeRef} style={style} {...attributes} {...listeners}>
+        <PreviewImage
+          src={image}
+          alt={`Preview ${index + 1}`}
+          onClick={singleImageMode ? handleReplaceImage : undefined}
+        />
+        <RemoveButton
+          onClick={(event) => {
+            event.stopPropagation();
+            handleRemoveImage(event, index);
+          }}
+        >
+          ×
+        </RemoveButton>
+      </PreviewContainer>
+    );
+  };
+  

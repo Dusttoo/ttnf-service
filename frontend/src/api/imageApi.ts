@@ -12,6 +12,7 @@ export const uploadImage = async (file: File, entity: string, name: string, type
         const response = await axiosWithTimeout.post<ImageResponse>('/images/upload', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
+                isBackgroundRequest: 'true', 
             },
         });
         return response.data;

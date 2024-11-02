@@ -212,24 +212,20 @@ class DogService:
             if dog:
                 logger.info(f"Updating dog with ID: {dog_id}")
 
+                # Update main attributes
                 for var, value in dog_data.dict(exclude_unset=True).items():
                     if var == "gender" and isinstance(value, str):
-                        value = (
-                            GenderEnum(value) if var == "gender" else StatusEnum(value)
-                        )
+                        value = GenderEnum(value)
                     elif var == "status":
                         new_status = StatusEnum(value)
-                        if new_status in [StatusEnum.retired, StatusEnum.sold]:
-                            setattr(dog, "status", new_status)
-                        else:
-                            setattr(dog, "status", StatusEnum.active)
+                        setattr(dog, "status", new_status)
                     else:
                         setattr(dog, var, value)
 
                 logger.info(f"Updated main attributes for dog ID: {dog_id}")
                 await db.commit()
 
-                 # Handle profile photo separately
+                # Handle profile photo separately
                 if dog_data.profile_photo:
                     if dog.profile_photo != dog_data.profile_photo:
                         dog.profile_photo = dog_data.profile_photo
@@ -238,58 +234,73 @@ class DogService:
                             (photo for photo in dog.photos if photo.photo_url == dog.profile_photo),
                             None,
                         )
-                        if profile_photo:
-                            profile_photo.photo_url = dog_data.profile_photo
-                            logger.info(f"Updated profile photo for dog ID: {dog_id}")
-                        else:
+                        if not profile_photo:
                             new_photo = Photo(
                                 dog_id=dog.id,
                                 photo_url=dog_data.profile_photo,
                                 alt=f"{dog.name}",
+                                position=0  # You can set a special position for the profile photo if needed
                             )
                             db.add(new_photo)
                             logger.info(f"Added new profile photo for dog ID: {dog_id}")
                     await db.commit()
 
-                # **Normalize existing and new gallery photo URLs**
-                existing_photo_urls = set(
-                    normalize_url(photo.photo_url) for photo in dog.photos if photo.photo_url != dog.profile_photo
-                )
+                # Update gallery photos with positions
+                if dog_data.gallery_photos:
+                    # Exclude profile photo from gallery
+                    gallery_photos = [
+                        url for url in dog_data.gallery_photos if url != dog_data.profile_photo
+                    ]
 
-                updated_gallery_photo_urls = set(
-                    normalize_url(url) for url in dog_data.gallery_photos if url != dog_data.profile_photo
-                )
+                    # Create a mapping of photo_url to position
+                    updated_gallery_photos = [
+                        {'photo_url': normalize_url(url), 'position': idx + 1}  # Start positions from 1
+                        for idx, url in enumerate(gallery_photos)
+                    ]
 
-                # **Identify photos to delete**
-                photos_to_delete = [
-                    photo for photo in dog.photos
-                    if normalize_url(photo.photo_url) not in updated_gallery_photo_urls and photo.photo_url != dog.profile_photo
-                ]
+                    # Existing photos (excluding profile photo)
+                    existing_photos = {
+                        normalize_url(photo.photo_url): photo
+                        for photo in dog.photos
+                        if photo.photo_url != dog.profile_photo
+                    }
 
-                print("deleting: ", photos_to_delete)
-                # **Delete photos**
-                for photo in photos_to_delete:
-                    await db.delete(photo)
-                    logger.info(f"Deleted photo {photo.photo_url} for dog ID: {dog_id}")
+                    # Update existing photos and add new ones
+                    updated_photo_urls = set()
+                    for photo_data in updated_gallery_photos:
+                        photo_url = photo_data['photo_url']
+                        position = photo_data['position']
+                        updated_photo_urls.add(photo_url)
 
-                # **Identify new photos to add**
-                new_photo_urls = updated_gallery_photo_urls - existing_photo_urls
+                        if photo_url in existing_photos:
+                            photo = existing_photos[photo_url]
+                            photo.position = position
+                            logger.info(f"Updated position for photo {photo_url} to {position}")
+                        else:
+                            # Add new photo
+                            new_photo = Photo(
+                                dog_id=dog.id,
+                                photo_url=photo_url,
+                                alt=f"{dog.name}",
+                                position=position
+                            )
+                            db.add(new_photo)
+                            logger.info(f"Added new gallery photo {photo_url} at position {position} for dog ID: {dog_id}")
 
-                # **Add new photos**
-                for photo_url in new_photo_urls:
-                    gallery_photo = Photo(
-                        dog_id=dog.id,
-                        photo_url=photo_url,
-                        alt=f"{dog.name}",
-                    )
-                    db.add(gallery_photo)
-                    logger.info(f"Added new gallery photo {photo_url} for dog ID: {dog_id}")
+                    # Identify and delete photos that are no longer in the gallery
+                    existing_photo_urls = set(existing_photos.keys())
+                    photos_to_delete_urls = existing_photo_urls - updated_photo_urls
+                    photos_to_delete = [
+                        photo for url, photo in existing_photos.items()
+                        if url in photos_to_delete_urls
+                    ]
+                    for photo in photos_to_delete:
+                        await db.delete(photo)
+                        logger.info(f"Deleted photo {photo.photo_url} for dog ID: {dog_id}")
 
-                logger.info(f"Updated gallery photos for dog ID: {dog_id}")
+                    logger.info(f"Updated gallery photos for dog ID: {dog_id}")
 
-                # Commit the changes to save deletions and additions
-                await db.commit()
-
+                    await db.commit()
 
                 # Add or update production info
                 if dog.parent_male_id or dog.parent_female_id:
@@ -326,6 +337,7 @@ class DogService:
                 await redis_client.delete(cache_key)
                 logger.info(f"Invalidated cache for dog ID: {dog_id}")
 
+                # Refresh dog to get updated photos with positions
                 await db.refresh(
                     dog,
                     attribute_names=[
@@ -336,9 +348,12 @@ class DogService:
                     ],
                 )
 
+                # Ensure photos are ordered by position
+                dog.photos.sort(key=lambda photo: photo.position if photo.position is not None else float('inf'))
+
                 updated_dog_schema = convert_to_dog_schema(dog)
 
-                # Update paginated lists
+                # Update paginated lists in cache
                 pattern = f"all_dogs:*"
                 cache_keys = await redis_client.keys(pattern)
                 for cache_key in cache_keys:
@@ -365,10 +380,10 @@ class DogService:
             return None
         except SQLAlchemyError as e:
             logger.error(f"SQLAlchemyError in update_dog: {e}", exc_info=True)
-            raise HTTPException(status_code=500, detail=f"Internal Server Error: {e}")
+            raise HTTPException(status_code=500, detail="Internal Server Error")
         except Exception as e:
             logger.error(f"Exception in update_dog: {e}", exc_info=True)
-            raise HTTPException(status_code=500, detail=f"Internal Server Error: {e}")
+            raise HTTPException(status_code=500, detail="Internal Server Error")
 
     async def delete_dog(self, dog_id: int, db: AsyncSession) -> bool:
         try:

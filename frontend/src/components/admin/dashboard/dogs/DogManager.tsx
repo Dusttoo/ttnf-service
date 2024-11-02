@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import styled from 'styled-components';
 import { Dog, SelectedFilters } from '../../../../api/types/dog';
 import FilterComponent from '../../../common/Filter';
@@ -7,7 +7,6 @@ import GlobalModal from '../../../common/Modal';
 import DogForm from './DogForm';
 import { useDogs, useDeleteDog, useUpdateDog, useCreateDog } from '../../../../hooks/useDog';
 import { GenderEnum, StatusEnum } from '../../../../api/types/core';
-import LoadingSpinner from '../../../common/LoadingSpinner';
 import NoResults from '../../../common/NoResults';
 import { useModal } from '../../../../context/ModalContext';
 
@@ -121,8 +120,11 @@ const AdminDogList: React.FC<{ defaultGender?: GenderEnum; owned?: boolean }> = 
   const updateDogMutation = useUpdateDog(); 
   const createDogMutation = useCreateDog();
 
-  const filters: SelectedFilters = { gender, status, owned, sire: sire, dam: dam };
-  const { data: dogsData, isLoading } = useDogs(filters, page, pageSize);
+  const filters: SelectedFilters = useMemo(
+    () => ({ gender, status, owned, sire, dam }),
+    [gender, status, owned, sire, dam]
+  );
+  const { data: dogsData } = useDogs(filters, page, pageSize);
 
   const dogs = dogsData?.items ?? [];
   const totalCount = dogsData?.total ?? 0;
@@ -189,9 +191,6 @@ const AdminDogList: React.FC<{ defaultGender?: GenderEnum; owned?: boolean }> = 
               isDamDisabled={false}
           />
           <AddNewDogButton onClick={handleAddNewDog}>Add New Dog</AddNewDogButton>
-          {isLoading ? (
-              <LoadingSpinner />
-          ) : (
               <>
                   {dogs.length > 0 ? (
                       <ListContainer>
@@ -218,7 +217,6 @@ const AdminDogList: React.FC<{ defaultGender?: GenderEnum; owned?: boolean }> = 
                       />
                   </PaginationWrapper>
               </>
-          )}
           <GlobalModal />
       </ListWrapper>
   );

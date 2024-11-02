@@ -26,7 +26,7 @@ const App: React.FC = () => {
                     </Routes>
                 </Router>
             </ThemeProvider>
-            // </Suspense>
+            </Suspense>
     );
 };
 

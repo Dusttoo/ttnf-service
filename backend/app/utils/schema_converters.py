@@ -17,7 +17,8 @@ from app.schemas import (
     ServiceResponse,
     ServiceListResponse,
     ServiceStatus,
-    WaitlistResponse)
+    WaitlistResponse,
+    Photo as PhotoSchema,)
 from app.models import Dog, Litter, Breeding, Production, NavLink, Announcement, Page, Tag, ServiceCategory, Service, \
     WaitlistEntry
 import json
@@ -30,6 +31,10 @@ logger = logging.getLogger(__name__)
 
 
 def convert_to_dog_schema(dog: Dog) -> DogSchema:
+    photos = sorted(
+        dog.photos,
+        key=lambda photo: photo.position if photo.position is not None else float('inf')
+    )
     return DogSchema(
         id=dog.id,
         name=dog.name,
@@ -48,7 +53,16 @@ def convert_to_dog_schema(dog: Dog) -> DogSchema:
         is_production=dog.is_production,
         is_retired=dog.is_retired,
         health_infos=dog.health_infos,
-        photos=dog.photos,
+        photos=[
+            PhotoSchema(
+                id=photo.id,
+                dog_id=photo.dog_id,
+                photo_url=photo.photo_url,
+                alt=photo.alt,
+                position=photo.position
+            )
+            for photo in photos
+        ],
         productions=[convert_to_production_schema(prod) for prod in dog.productions],
         children=[
             DogChildSchema(
