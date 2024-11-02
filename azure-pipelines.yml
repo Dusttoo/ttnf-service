@@ -51,11 +51,11 @@ stages:
               command: 'build'
               Dockerfile: 'frontend/Dockerfile'
               buildContext: './frontend'
-              buildArguments: |
-                REACT_APP_BACKEND_URL=$(REACT_APP_BACKEND_URL)
-                REACT_APP_TINYMCE_API_KEY=$(REACT_APP_TINYMCE_API_KEY)
-                REACT_APP_ENV=development
-                NODE_ENV=development
+              arguments: |
+                --build-arg REACT_APP_BACKEND_URL=$(REACT_APP_BACKEND_URL)
+                --build-arg REACT_APP_TINYMCE_API_KEY=$(REACT_APP_TINYMCE_API_KEY)
+                --build-arg NODE_ENV=production
+                --build-arg REACT_APP_ENV=production
               tags: |
                 $(Build.BuildId)-dev
           - task: Docker@2
