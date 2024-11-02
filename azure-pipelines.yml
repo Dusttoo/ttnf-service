@@ -130,6 +130,7 @@ stages:
                 REACT_APP_ENV=production
               tags: |
                 $(Build.BuildId)-prod
+              arguments: '--no-cache'
 
           - task: AzureWebAppContainer@1
             inputs:
