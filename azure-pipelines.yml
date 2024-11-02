@@ -61,7 +61,7 @@ stages:
           - task: Docker@2
             inputs:
               containerRegistry: 'ttnfdockerservice'
-              repository: 'frontend'
+              repository: 'frontend-dev'
               command: 'push'
               tags: |
                 $(Build.BuildId)-prod
@@ -133,7 +133,7 @@ stages:
               repository: 'frontend' 
               command: 'build'
               Dockerfile: 'frontend/Dockerfile'
-              buildContext: '.'
+              buildContext: './frontend'
               tags: |
                 $(Build.BuildId)-prod
               arguments: |
