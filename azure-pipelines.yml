@@ -137,7 +137,7 @@ stages:
               tags: |
                 $(Build.BuildId)-prod
               arguments: |
-                --build-arg REACT_APP_BACKEND_URL=$(PROD_API_URL)
+                --build-arg REACT_APP_BACKEND_URL=$(REACT_APP_BACKEND_URL)
                 --build-arg REACT_APP_TINYMCE_API_KEY=$(REACT_APP_TINYMCE_API_KEY)
                 --build-arg REACT_APP_ENV=production
                 --build-arg NODE_ENV=production
