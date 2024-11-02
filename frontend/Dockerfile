@@ -14,11 +14,7 @@ RUN npm install
 COPY . .
 
 # Explicitly pass the variables to the npm run build command
-RUN REACT_APP_BACKEND_URL=$REACT_APP_BACKEND_URL \
-    REACT_APP_TINYMCE_API_KEY=$REACT_APP_TINYMCE_API_KEY \
-    NODE_ENV=$NODE_ENV \
-    REACT_APP_ENV=$REACT_APP_ENV \
-    npm run build
+RUN npm run build --build-arg REACT_APP_BACKEND_URL=$REACT_APP_BACKEND_URL --build-arg REACT_APP_TINYMCE_API_KEY=$REACT_APP_TINYMCE_API_KEY --build-arg NODE_ENV=$NODE_ENV --build-arg REACT_APP_ENV=$REACT_APP_ENV
 
 # Stage 2: Serve the built app with Nginx
 FROM nginx:alpine
