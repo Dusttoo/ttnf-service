@@ -54,8 +54,8 @@ stages:
               arguments: |
                 --build-arg REACT_APP_BACKEND_URL=$(REACT_APP_BACKEND_URL)
                 --build-arg REACT_APP_TINYMCE_API_KEY=$(REACT_APP_TINYMCE_API_KEY)
-                --build-arg NODE_ENV=production
-                --build-arg REACT_APP_ENV=production
+                --build-arg NODE_ENV=development
+                --build-arg REACT_APP_ENV=development
               tags: |
                 $(Build.BuildId)-dev
           - task: Docker@2
