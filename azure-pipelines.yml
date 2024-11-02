@@ -4,12 +4,12 @@ trigger:
       - main
 
 pool:
-  vmImage: 'ubuntu-latest'
+  vmImage: "ubuntu-latest"
 
 stages:
   - stage: BuildAndDeployBackendDev
     variables:
-      - group: ttnf-dev  
+      - group: ttnf-dev
     jobs:
       - job: BuildBackend
         steps:
@@ -17,55 +17,55 @@ stages:
 
           - task: Docker@2
             inputs:
-              containerRegistry: 'ttnfdockerservice'
-              repository: 'backend-dev'  
-              command: 'buildAndPush'
-              Dockerfile: 'backend/Dockerfile'
+              containerRegistry: "ttnfdockerservice"
+              repository: "backend-dev"
+              command: "buildAndPush"
+              Dockerfile: "backend/Dockerfile"
               tags: |
                 $(Build.BuildId)-dev
 
           - task: AzureWebAppContainer@1
             inputs:
-              azureSubscription: 'ttnfconnect' 
-              appName: 'ttnf-api-dev'  
-              containers: 'ttnfregistry.azurecr.io/backend-dev:$(Build.BuildId)-dev'
+              azureSubscription: "ttnfconnect"
+              appName: "ttnf-api-dev"
+              containers: "ttnfregistry.azurecr.io/backend-dev:$(Build.BuildId)-dev"
 
   - stage: BuildAndDeployFrontendDev
     variables:
-      - group: ttnf-dev  
+      - group: ttnf-dev
     jobs:
       - job: BuildFrontend
         steps:
           - checkout: self
           - script: echo $(REACT_APP_BACKEND_URL)
-            displayName: 'Verify REACT_APP_BACKEND_URL is set'
-
-          - task: Docker@2
-                inputs:
-                  containerRegistry: 'ttnfdockerservice'
-                  repository: 'frontend-dev'
-                  command: 'build'
-                  Dockerfile: 'frontend/Dockerfile'
-                  buildArguments: |
-                    REACT_APP_BACKEND_URL=$(REACT_APP_BACKEND_URL)
-                    REACT_APP_TINYMCE_API_KEY=$(REACT_APP_TINYMCE_API_KEY)
-                    REACT_APP_ENV=development
-                  tags: |
-                    $(Build.BuildId)-dev
+            displayName: "Verify REACT_APP_BACKEND_URL is set"
 
           - task: Docker@2
             inputs:
-              containerRegistry: 'ttnfdockerservice'
-              repository: 'frontend-dev'
-              command: 'push'
+              containerRegistry: "ttnfdockerservice"
+              repository: "frontend-dev"
+              command: "build"
+              Dockerfile: "frontend/Dockerfile"
+              buildArguments: |
+                REACT_APP_BACKEND_URL=$(REACT_APP_BACKEND_URL)
+                REACT_APP_TINYMCE_API_KEY=$(REACT_APP_TINYMCE_API_KEY)
+                REACT_APP_ENV=development
+              tags: |
+                $(Build.BuildId)-dev
+
+          - task: Docker@2
+            inputs:
+              containerRegistry: "ttnfdockerservice"
+              repository: "frontend-dev"
+              command: "push"
               tags: |
                 $(Build.BuildId)-dev
 
           - task: AzureWebAppContainer@1
             inputs:
-              azureSubscription: 'ttnfconnect'  
-              appName: 'ttnf-dev'  
-              containers: 'ttnfregistry.azurecr.io/frontend-dev:$(Build.BuildId)-dev'
+              azureSubscription: "ttnfconnect"
+              appName: "ttnf-dev"
+              containers: "ttnfregistry.azurecr.io/frontend-dev:$(Build.BuildId)-dev"
 
   - stage: ApprovalGate
     dependsOn:
@@ -77,15 +77,15 @@ stages:
         steps:
           - task: ManualValidation@0
             inputs:
-              instructions: 'Approve to promote to production'
+              instructions: "Approve to promote to production"
 
   - stage: PromoteToProduction
     variables:
-      - group: ttnf 
+      - group: ttnf
     dependsOn: ApprovalGate
     jobs:
       - deployment: DeployBackendProd
-        environment: 'Production'
+        environment: "Production"
         strategy:
           runOnce:
             deploy:
@@ -94,23 +94,23 @@ stages:
 
                 - task: Docker@2
                   inputs:
-                    command: 'login'
-                    containerRegistry: 'ttnfdockerservice'
+                    command: "login"
+                    containerRegistry: "ttnfdockerservice"
 
                 - script: |
                     docker pull ttnfregistry.azurecr.io/backend-dev:$(Build.BuildId)-dev
                     docker tag ttnfregistry.azurecr.io/backend-dev:$(Build.BuildId)-dev ttnfregistry.azurecr.io/backend:$(Build.BuildId)-prod
                     docker push ttnfregistry.azurecr.io/backend:$(Build.BuildId)-prod
-                  displayName: 'Tag and Push Backend Image for Production'
+                  displayName: "Tag and Push Backend Image for Production"
 
                 - task: AzureWebAppContainer@1
                   inputs:
-                    azureSubscription: 'ttnfconnect'
-                    appName: 'ttnfapi'
-                    containers: 'ttnfregistry.azurecr.io/backend:$(Build.BuildId)-prod'
+                    azureSubscription: "ttnfconnect"
+                    appName: "ttnfapi"
+                    containers: "ttnfregistry.azurecr.io/backend:$(Build.BuildId)-prod"
 
       - deployment: DeployFrontendProd
-        environment: 'Production'
+        environment: "Production"
         strategy:
           runOnce:
             deploy:
@@ -120,15 +120,15 @@ stages:
                 # Log in to ACR
                 - task: Docker@2
                   inputs:
-                    command: 'login'
-                    containerRegistry: 'ttnfdockerservice'
+                    command: "login"
+                    containerRegistry: "ttnfdockerservice"
 
                 - task: Docker@2
                   inputs:
-                    containerRegistry: 'ttnfdockerservice'
-                    repository: 'frontend'
-                    command: 'build'
-                    Dockerfile: 'frontend/Dockerfile'
+                    containerRegistry: "ttnfdockerservice"
+                    repository: "frontend"
+                    command: "build"
+                    Dockerfile: "frontend/Dockerfile"
                     buildArguments: |
                       REACT_APP_BACKEND_URL=$(REACT_APP_BACKEND_URL)
                       REACT_APP_TINYMCE_API_KEY=$(REACT_APP_TINYMCE_API_KEY)
@@ -138,14 +138,14 @@ stages:
 
                 - task: Docker@2
                   inputs:
-                    containerRegistry: 'ttnfdockerservice'
-                    repository: 'frontend'
-                    command: 'push'
+                    containerRegistry: "ttnfdockerservice"
+                    repository: "frontend"
+                    command: "push"
                     tags: |
                       $(Build.BuildId)-prod
 
                 - task: AzureWebAppContainer@1
                   inputs:
-                    azureSubscription: 'ttnfconnect'
-                    appName: 'ttnfpub'
-                    containers: 'ttnfregistry.azurecr.io/frontend:$(Build.BuildId)-prod'
+                    azureSubscription: "ttnfconnect"
+                    appName: "ttnfpub"
+                    containers: "ttnfregistry.azurecr.io/frontend:$(Build.BuildId)-prod"
