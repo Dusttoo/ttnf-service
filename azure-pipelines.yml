@@ -48,8 +48,9 @@ stages:
             inputs:
               containerRegistry: 'ttnfdockerservice'
               repository: 'frontend-dev' 
-              command: 'buildAndPush'
+              command: 'build'
               Dockerfile: 'frontend/Dockerfile'
+              buildContext: './frontend'
               buildArguments: |
                 REACT_APP_BACKEND_URL=$(REACT_APP_BACKEND_URL)
                 REACT_APP_TINYMCE_API_KEY=$(REACT_APP_TINYMCE_API_KEY)
@@ -57,6 +58,13 @@ stages:
                 NODE_ENV=development
               tags: |
                 $(Build.BuildId)-dev
+          - task: Docker@2
+            inputs:
+              containerRegistry: 'ttnfdockerservice'
+              repository: 'frontend'
+              command: 'push'
+              tags: |
+                $(Build.BuildId)-prod
 
           - task: AzureWebAppContainer@1
             inputs:
@@ -123,16 +131,24 @@ stages:
             inputs:
               containerRegistry: 'ttnfdockerservice'
               repository: 'frontend' 
-              command: 'buildAndPush'
+              command: 'build'
               Dockerfile: 'frontend/Dockerfile'
-              buildArguments: |
-                REACT_APP_BACKEND_URL=$(PROD_API_URL)
-                REACT_APP_TINYMCE_API_KEY=$(REACT_APP_TINYMCE_API_KEY)
-                REACT_APP_ENV=production
-                NODE_ENV=production
+              buildContext: '.'
               tags: |
                 $(Build.BuildId)-prod
-              arguments: '--no-cache'
+              arguments: |
+                --build-arg REACT_APP_BACKEND_URL=$(PROD_API_URL)
+                --build-arg REACT_APP_TINYMCE_API_KEY=$(REACT_APP_TINYMCE_API_KEY)
+                --build-arg REACT_APP_ENV=production
+                --build-arg NODE_ENV=production
+
+          - task: Docker@2
+            inputs:
+              containerRegistry: 'ttnfdockerservice'
+              repository: 'frontend'
+              command: 'push'
+              tags: |
+                $(Build.BuildId)-prod
 
           - task: AzureWebAppContainer@1
             inputs:
