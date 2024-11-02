@@ -65,8 +65,8 @@ stages:
 
   - stage: ApprovalGate
     dependsOn:
-      - BuildAndDeployBackendDev
-      - BuildAndDeployFrontendDev
+      - BuildBackendDev
+      - BuildFrontendDev
     jobs:
       - job: Approval
         pool: server
