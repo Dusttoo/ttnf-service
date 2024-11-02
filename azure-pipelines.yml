@@ -64,7 +64,7 @@ stages:
               repository: 'frontend-dev'
               command: 'push'
               tags: |
-                $(Build.BuildId)-prod
+                $(Build.BuildId)-dev
 
           - task: AzureWebAppContainer@1
             inputs:
