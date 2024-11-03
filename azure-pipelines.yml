@@ -22,8 +22,8 @@ stages:
   - stage: BuildAndDeployBackendDev
     variables:
       - group: ttnf-dev
-      BackendImageName: backend-dev
-      BackendImageTag: $(BuildId)-dev
+        BackendImageName: backend-dev
+        BackendImageTag: $(BuildId)-dev
     jobs:
       - job: BuildBackend
         displayName: 'Build and Deploy Backend to Dev'
@@ -50,8 +50,8 @@ stages:
   - stage: BuildAndDeployFrontendDev
     variables:
       - group: ttnf-dev
-      FrontendImageName: frontend-dev
-      FrontendImageTag: $(BuildId)-dev
+        FrontendImageName: frontend-dev
+        FrontendImageTag: $(BuildId)-dev
     jobs:
       - job: BuildFrontend
         displayName: 'Build and Deploy Frontend to Dev'
