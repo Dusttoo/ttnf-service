@@ -9,15 +9,6 @@ pool:
 variables:
   BuildId: $(Build.BuildId)
 
-resources:
-  environments:
-    - name: 'Production'
-      environment: 'Production'
-      approvals:
-        - approvalType: 'Manual'
-          approvers:
-            - displayName: 'Dusty' 
-
 stages:
   - stage: BuildAndDeployBackendDev
     variables:
@@ -105,7 +96,7 @@ stages:
     jobs:
       - deployment: DeployBackendProd
         displayName: 'Deploy Backend to Production'
-        environment: Production
+        environment: 'Production'
         strategy:
           runOnce:
             deploy:
@@ -131,7 +122,7 @@ stages:
 
       - deployment: DeployFrontendProd
         displayName: 'Deploy Frontend to Production'
-        environment: Production
+        environment: 'Production'
         strategy:
           runOnce:
             deploy:
