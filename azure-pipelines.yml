@@ -4,89 +4,108 @@ trigger:
       - main
 
 pool:
-  vmImage: "ubuntu-latest"
+  vmImage: 'ubuntu-latest'
+
+variables:
+  BuildId: $(Build.BuildId)
+
+resources:
+  environments:
+    - name: 'Production'
+      environment: 'Production'
+      approvals:
+        - approvalType: 'Manual'
+          approvers:
+            - displayName: 'Dusty' 
 
 stages:
   - stage: BuildAndDeployBackendDev
     variables:
       - group: ttnf-dev
+      BackendImageName: backend-dev
+      BackendImageTag: $(BuildId)-dev
     jobs:
       - job: BuildBackend
+        displayName: 'Build and Deploy Backend to Dev'
         steps:
           - checkout: self
 
           - task: Docker@2
+            displayName: 'Build and Push Backend Image'
             inputs:
-              containerRegistry: "ttnfdockerservice"
-              repository: "backend-dev"
-              command: "buildAndPush"
-              Dockerfile: "backend/Dockerfile"
+              containerRegistry: 'ttnfdockerservice'
+              repository: '$(BackendImageName)'
+              command: 'buildAndPush'
+              Dockerfile: 'backend/Dockerfile'
               tags: |
-                $(Build.BuildId)-dev
+                $(BackendImageTag)
 
           - task: AzureWebAppContainer@1
+            displayName: 'Deploy Backend to Dev'
             inputs:
-              azureSubscription: "ttnfconnect"
-              appName: "ttnf-api-dev"
-              containers: "ttnfregistry.azurecr.io/backend-dev:$(Build.BuildId)-dev"
+              azureSubscription: 'ttnfconnect'
+              appName: 'ttnf-api-dev'
+              containers: 'ttnfregistry.azurecr.io/$(BackendImageName):$(BackendImageTag)'
 
   - stage: BuildAndDeployFrontendDev
     variables:
       - group: ttnf-dev
+      FrontendImageName: frontend-dev
+      FrontendImageTag: $(BuildId)-dev
     jobs:
       - job: BuildFrontend
+        displayName: 'Build and Deploy Frontend to Dev'
         steps:
           - checkout: self
+
           - script: echo $(REACT_APP_BACKEND_URL)
-            displayName: "Verify REACT_APP_BACKEND_URL is set"
+            displayName: 'Verify REACT_APP_BACKEND_URL is set'
 
           - task: Docker@2
+            displayName: 'Build Frontend Image'
             inputs:
-              containerRegistry: "ttnfdockerservice"
-              repository: "frontend-dev"
-              command: "build"
-              Dockerfile: "frontend/Dockerfile"
+              containerRegistry: 'ttnfdockerservice'
+              repository: '$(FrontendImageName)'
+              command: 'build'
+              Dockerfile: 'frontend/Dockerfile'
               arguments: |
                 --build-arg REACT_APP_BACKEND_URL=$(REACT_APP_BACKEND_URL)
                 --build-arg REACT_APP_TINYMCE_API_KEY=$(REACT_APP_TINYMCE_API_KEY)
                 --build-arg REACT_APP_ENV=development
                 --build-arg NODE_ENV=development
               tags: |
-                $(Build.BuildId)-dev
+                $(FrontendImageTag)
 
           - task: Docker@2
+            displayName: 'Push Frontend Image'
             inputs:
-              containerRegistry: "ttnfdockerservice"
-              repository: "frontend-dev"
-              command: "push"
+              containerRegistry: 'ttnfdockerservice'
+              repository: '$(FrontendImageName)'
+              command: 'push'
               tags: |
-                $(Build.BuildId)-dev
+                $(FrontendImageTag)
 
           - task: AzureWebAppContainer@1
+            displayName: 'Deploy Frontend to Dev'
             inputs:
-              azureSubscription: "ttnfconnect"
-              appName: "ttnf-dev"
-              containers: "ttnfregistry.azurecr.io/frontend-dev:$(Build.BuildId)-dev"
+              azureSubscription: 'ttnfconnect'
+              appName: 'ttnf-dev'
+              containers: 'ttnfregistry.azurecr.io/$(FrontendImageName):$(FrontendImageTag)'
 
-  - stage: ApprovalGate
+  - stage: PromoteToProduction
     dependsOn:
       - BuildAndDeployBackendDev
       - BuildAndDeployFrontendDev
-    jobs:
-      - job: Approval
-        pool: server
-        steps:
-          - task: ManualValidation@0
-            inputs:
-              instructions: "Approve to promote to production"
-
-  - stage: PromoteToProduction
     variables:
       - group: ttnf
-    dependsOn: ApprovalGate
+      BackendImageName: backend
+      BackendImageTag: $(BuildId)-prod
+      FrontendImageName: frontend
+      FrontendImageTag: $(BuildId)-prod
     jobs:
       - deployment: DeployBackendProd
-        environment: "Production"
+        displayName: 'Deploy Backend to Production'
+        environment: Production
         strategy:
           runOnce:
             deploy:
@@ -94,60 +113,58 @@ stages:
                 - checkout: self
 
                 - task: Docker@2
+                  displayName: 'Build and Push Backend Image for Production'
                   inputs:
-                    command: "login"
-                    containerRegistry: "ttnfdockerservice"
-
-                - script: |
-                    docker pull ttnfregistry.azurecr.io/backend-dev:$(Build.BuildId)-dev
-                    docker tag ttnfregistry.azurecr.io/backend-dev:$(Build.BuildId)-dev ttnfregistry.azurecr.io/backend:$(Build.BuildId)-prod
-                    docker push ttnfregistry.azurecr.io/backend:$(Build.BuildId)-prod
-                  displayName: "Tag and Push Backend Image for Production"
+                    containerRegistry: 'ttnfdockerservice'
+                    repository: '$(BackendImageName)'
+                    command: 'buildAndPush'
+                    Dockerfile: 'backend/Dockerfile'
+                    tags: |
+                      $(BackendImageTag)
 
                 - task: AzureWebAppContainer@1
+                  displayName: 'Deploy Backend to Production'
                   inputs:
-                    azureSubscription: "ttnfconnect"
-                    appName: "ttnfapi"
-                    containers: "ttnfregistry.azurecr.io/backend:$(Build.BuildId)-prod"
+                    azureSubscription: 'ttnfconnect'
+                    appName: 'ttnfapi'
+                    containers: 'ttnfregistry.azurecr.io/$(BackendImageName):$(BackendImageTag)'
 
       - deployment: DeployFrontendProd
-        environment: "Production"
+        displayName: 'Deploy Frontend to Production'
+        environment: Production
         strategy:
           runOnce:
             deploy:
               steps:
                 - checkout: self
 
-                # Log in to ACR
                 - task: Docker@2
+                  displayName: 'Build Frontend Image for Production'
                   inputs:
-                    command: "login"
-                    containerRegistry: "ttnfdockerservice"
-
-                - task: Docker@2
-                  inputs:
-                    containerRegistry: "ttnfdockerservice"
-                    repository: "frontend"
-                    command: "build"
-                    Dockerfile: "frontend/Dockerfile"
+                    containerRegistry: 'ttnfdockerservice'
+                    repository: '$(FrontendImageName)'
+                    command: 'build'
+                    Dockerfile: 'frontend/Dockerfile'
                     arguments: |
                       --build-arg REACT_APP_BACKEND_URL=$(REACT_APP_BACKEND_URL)
                       --build-arg REACT_APP_TINYMCE_API_KEY=$(REACT_APP_TINYMCE_API_KEY)
                       --build-arg REACT_APP_ENV=production
                       --build-arg NODE_ENV=production
                     tags: |
-                      $(Build.BuildId)-prod
+                      $(FrontendImageTag)
 
                 - task: Docker@2
+                  displayName: 'Push Frontend Image for Production'
                   inputs:
-                    containerRegistry: "ttnfdockerservice"
-                    repository: "frontend"
-                    command: "push"
+                    containerRegistry: 'ttnfdockerservice'
+                    repository: '$(FrontendImageName)'
+                    command: 'push'
                     tags: |
-                      $(Build.BuildId)-prod
+                      $(FrontendImageTag)
 
                 - task: AzureWebAppContainer@1
+                  displayName: 'Deploy Frontend to Production'
                   inputs:
-                    azureSubscription: "ttnfconnect"
-                    appName: "ttnfpub"
-                    containers: "ttnfregistry.azurecr.io/frontend:$(Build.BuildId)-prod"
+                    azureSubscription: 'ttnfconnect'
+                    appName: 'ttnfpub'
+                    containers: 'ttnfregistry.azurecr.io/$(FrontendImageName):$(FrontendImageTag)'
