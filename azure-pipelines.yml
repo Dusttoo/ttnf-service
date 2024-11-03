@@ -98,10 +98,10 @@ stages:
       - BuildAndDeployFrontendDev
     variables:
       - group: ttnf
-      BackendImageName: backend
-      BackendImageTag: $(BuildId)-prod
-      FrontendImageName: frontend
-      FrontendImageTag: $(BuildId)-prod
+        BackendImageName: backend
+        BackendImageTag: $(BuildId)-prod
+        FrontendImageName: frontend
+        FrontendImageTag: $(BuildId)-prod
     jobs:
       - deployment: DeployBackendProd
         displayName: 'Deploy Backend to Production'
