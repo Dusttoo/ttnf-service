@@ -8,6 +8,7 @@ ARG REACT_APP_ENV
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm install
+RUN npm install @types/dompurify
 
 COPY . .
 
