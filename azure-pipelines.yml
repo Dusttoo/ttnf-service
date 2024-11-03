@@ -150,6 +150,7 @@ stages:
                       --build-arg REACT_APP_TINYMCE_API_KEY=$(REACT_APP_TINYMCE_API_KEY)
                       --build-arg REACT_APP_ENV=production
                       --build-arg NODE_ENV=production
+                      --no-cache
                     tags: |
                       $(FrontendImageTag)
 
