@@ -7,14 +7,17 @@ pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  BuildId: $(Build.BuildId)
+  - name: BuildId
+    value: $(Build.BuildId)
 
 stages:
   - stage: BuildAndDeployBackendDev
     variables:
       - group: ttnf-dev
-        BackendImageName: backend-dev
-        BackendImageTag: $(BuildId)-dev
+      - name: BackendImageName
+        value: backend-dev
+      - name: BackendImageTag
+        value: $(BuildId)-dev
     jobs:
       - job: BuildBackend
         displayName: 'Build and Deploy Backend to Dev'
@@ -41,8 +44,10 @@ stages:
   - stage: BuildAndDeployFrontendDev
     variables:
       - group: ttnf-dev
-        FrontendImageName: frontend-dev
-        FrontendImageTag: $(BuildId)-dev
+      - name: FrontendImageName
+        value: frontend-dev
+      - name: FrontendImageTag
+        value: $(BuildId)-dev
     jobs:
       - job: BuildFrontend
         displayName: 'Build and Deploy Frontend to Dev'
@@ -89,10 +94,14 @@ stages:
       - BuildAndDeployFrontendDev
     variables:
       - group: ttnf
-        BackendImageName: backend
-        BackendImageTag: $(BuildId)-prod
-        FrontendImageName: frontend
-        FrontendImageTag: $(BuildId)-prod
+      - name: BackendImageName
+        value: backend
+      - name: BackendImageTag
+        value: $(BuildId)-prod
+      - name: FrontendImageName
+        value: frontend
+      - name: FrontendImageTag
+        value: $(BuildId)-prod
     jobs:
       - deployment: DeployBackendProd
         displayName: 'Deploy Backend to Production'
