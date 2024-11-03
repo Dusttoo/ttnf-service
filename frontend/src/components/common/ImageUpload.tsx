@@ -98,7 +98,6 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 
   useEffect(() => {
     if (!imageUrls.length && initialImages.length) {
-      console.log('Setting back to initial images');
       setImageUrls(initialImages);
     }
   }, [initialImages.length, imageUrls.length]);

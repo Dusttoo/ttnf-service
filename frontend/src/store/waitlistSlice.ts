@@ -9,7 +9,7 @@ import {
     WaitlistEntry,
     WaitlistCreate,
     WaitlistUpdate,
-} from '../api/types/waitlist';
+} from '../api/types/admin';
 
 interface WaitlistState {
     entries: WaitlistEntry[];

@@ -4,7 +4,7 @@ import Textarea from '../common/TextArea';
 import Checkbox from '../common/form/Checkbox';
 import MultiSelect from '../common/MultiSelect';
 import { GenderEnum } from '../../api/types/core';
-import { WaitlistCreate } from '../../api/types/waitlist';
+import { WaitlistCreate } from '../../api/types/admin';
 import SuccessMessage from '../common/SuccessMessage';
 import Button from '../common/form/Button';
 import { useFilteredDogs } from '../../hooks/useDog';

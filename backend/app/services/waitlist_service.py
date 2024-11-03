@@ -252,3 +252,15 @@ class WaitlistService:
         except SQLAlchemyError as e:
             logger.error(f"Error in get_filtered_waitlist_entries: {e}", exc_info=True)
             raise HTTPException(status_code=500, detail="Could not fetch waitlist entries")
+        
+
+
+    async def get_waitlist_submissions_count(self, db: AsyncSession) -> int:
+        try:
+            query = select(func.count(WaitlistEntry.id))
+            result = await db.execute(query)
+            count = result.scalar_one()
+            return count
+        except Exception as e:
+            logger.error(f"Error in get_waitlist_submissions_count: {e}", exc_info=True)
+            raise HTTPException(status_code=500, detail="Could not retrieve waitlist submissions count")

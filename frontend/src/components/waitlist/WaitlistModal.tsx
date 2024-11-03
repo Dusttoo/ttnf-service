@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useModal } from '../../context/ModalContext';
 import WaitlistForm from './WaitlistForm';
-import { WaitlistCreate } from '../../api/types/waitlist';
+import { WaitlistCreate } from '../../api/types/admin';
 import { createWaitlistEntry } from '../../api/waitlistApi';
 import SuccessMessage from '../common/SuccessMessage';
 import GlobalModal from '../common/Modal';

@@ -3,7 +3,7 @@ import {
     WaitlistEntry,
     WaitlistCreate,
     WaitlistUpdate,
-} from './types/waitlist';
+} from './types/admin';
 
 export const fetchWaitlistEntries = async (page: number, pageSize: number) => {
     const response = await axiosWithTimeout.get<{
@@ -11,8 +11,8 @@ export const fetchWaitlistEntries = async (page: number, pageSize: number) => {
         total_count: number;
     }>(`/waitlist?page=${page}&page_size=${pageSize}`, {
         headers: {
-            isBackgroundRequest: 'true', // Set as background request
-        }, // Marked as background
+            isBackgroundRequest: 'true',
+        },
     });
     return response.data;
 };

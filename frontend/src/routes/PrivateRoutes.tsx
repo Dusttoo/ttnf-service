@@ -17,6 +17,8 @@ import Landing from '../components/admin/dashboard/Landing';
 import NotFoundPage from '../pages/404';
 import AdminSettings from '../components/admin/dashboard/settings/AdminSettings';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import ContactSubmissionsPage from '../pages/admin/ContactSubmissionsPage';
+import WaitlistSubmissionsPage from '../pages/admin/WaitlistSubmissionsPage';
 
 interface PrivateRouteProps {
     element: React.ReactElement;
@@ -54,6 +56,10 @@ const PrivateRoutes: React.FC = () => (
             <Route path="litters" element={<AdminLitterList />} />
             <Route path="litters/:litterId/puppies" element={<LitterPuppies />} />
             <Route path="settings" element={<AdminSettings />} />
+            <Route path="contact" element={<ContactSubmissionsPage />} />
+            <Route path="waitlist" element={<WaitlistSubmissionsPage />} />
+
+
             <Route path="*" element={<NotFoundPage />} />
         </Route>
     </Routes>

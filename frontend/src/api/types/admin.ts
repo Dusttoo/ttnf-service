@@ -34,3 +34,23 @@ export interface WaitlistUpdate {
   dam_ids?: number[];
   additional_info?: string;
 }
+
+export interface ContactSubmission {
+  id: number;
+  name: string;
+  email?: string;
+  phone?: string;
+  message: string;
+}
+
+export interface PaginatedResponse<T> {
+  items: T[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+}
+
+export interface DashboardStats {
+  contactSubmissions: number;
+  waitlistSubmissions: number;
+}

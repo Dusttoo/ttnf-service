@@ -6,7 +6,7 @@ import {
   updateWaitlistEntry,
   deleteWaitlistEntry,
 } from '../api/waitlistApi';
-import { WaitlistCreate, WaitlistUpdate } from '../api/types/waitlist';
+import { WaitlistCreate, WaitlistUpdate } from '../api/types/admin';
 
 export const useWaitlist = (params: {
   page: number;

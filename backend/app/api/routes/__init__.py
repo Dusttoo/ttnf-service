@@ -13,3 +13,4 @@ from app.api.routes.website_settings_routes import settings_router
 from app.api.routes.service_routes import service_router
 from app.api.routes.waitlist_routes import waitlist_router
 from app.api.routes.contact_routes import contact_router
+from app.api.routes.admin_routes import admin_router

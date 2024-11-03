@@ -36,15 +36,15 @@ async def get_all_waitlist_entries(
 # Public route to get filtered waitlist entries
 @waitlist_router.get("/filter", response_model=List[WaitlistResponse])
 async def get_filtered_waitlist_entries(
-    sire_id: Optional[int] = None,
-    dam_id: Optional[int] = None,
+    sire_id: Optional[List[int]] = None,
+    dam_id: Optional[List[int]] = None,
     color: Optional[str] = None,
     page: int = 1,
     page_size: int = 10,
     db: AsyncSession = Depends(get_database_session)
 ):
     entries = await waitlist_svc.get_filtered_waitlist_entries(
-        db=db, sire_id=sire_id, dam_id=dam_id, color=color, page=page, page_size=page_size
+        db=db, sire_ids=sire_id, dam_ids=dam_id, color=color, page=page, page_size=page_size
     )
     return [convert_to_waitlist_schema(entry) for entry in entries]
 
