@@ -154,6 +154,7 @@ const AdminBreedingList: React.FC = () => {
     };
 
     const handleCreateLitter = (breeding: Breeding) => {
+        console.log('handleCreateLitter', breeding);
         openModal(
             <MultiStepForm
                 onClose={closeModal}

@@ -18,6 +18,7 @@ from app.models import (
     Production,
     StatusEnum,
     litter_puppies,
+    Photo
 )
 from app.schemas import Litter as LitterSchema
 from app.schemas import LitterCreate, LitterUpdate, PuppyCreate
@@ -420,14 +421,14 @@ class LitterService:
                 await db.refresh(new_puppy)
 
                 # Add gallery photos separately
-                # for photo_url in puppy.gallery_photos:
-                #     gallery_photo = Photo(
-                #         dog_id=new_puppy.id,
-                #         photo_url=photo_url,
-                #         alt=f"{new_puppy.name}",
-                #     )
-                #     db.add(gallery_photo)
-                # await db.commit()
+                for photo_url in puppy.gallery_photos:
+                    gallery_photo = Photo(
+                        dog_id=new_puppy.id,
+                        photo_url=photo_url,
+                        alt=f"{new_puppy.name}",
+                    )
+                    db.add(gallery_photo)
+                await db.commit()
 
                 puppy_objs.append(new_puppy)
 

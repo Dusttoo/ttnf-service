@@ -33,14 +33,10 @@ const Form = styled.form`
 const Input = styled.input`
   padding: 0.75rem;
   background-color: ${(props) => props.theme.colors.neutralBackground};
-  color: ${(props) => props.theme.colors.black};
   border: 1px solid ${(props) => props.theme.colors.primary};
   border-radius: 4px;
   font-size: 1rem;
-
-  &::placeholder {
-    color: ${(props) => props.theme.colors.secondary};
-  }
+  color: ${(props) => props.theme.colors.white};
 `;
 
 const BreedingForm: React.FC<{ onClose: () => void; breedingId?: number }> = ({ onClose, breedingId }) => {
@@ -84,7 +80,19 @@ const BreedingForm: React.FC<{ onClose: () => void; breedingId?: number }> = ({ 
     };
 
     const handleDateChange = (name: 'breedingDate' | 'expectedBirthDate', date: Date | null) => {
-        setFormState((prevState) => ({ ...prevState, [name]: date ? date.toISOString().split('T')[0] : '' }));
+        setFormState((prevState) => ({
+            ...prevState,
+            [name]: date ? date.toISOString().split('T')[0] : '',
+        }));
+
+        if (name === 'breedingDate' && date) {
+            const expectedDate = new Date(date);
+            expectedDate.setDate(expectedDate.getDate() + 63); 
+            setFormState((prevState) => ({
+                ...prevState,
+                expectedBirthDate: expectedDate.toISOString().split('T')[0],
+            }));
+        }
     };
 
     const validate = () => {
@@ -118,7 +126,6 @@ const BreedingForm: React.FC<{ onClose: () => void; breedingId?: number }> = ({ 
         navigate('/admin/dashboard/breedings');
     };
 
-    if (isBreedingLoading) return <LoadingSpinner />;
 
     return (
         <FormContainer>

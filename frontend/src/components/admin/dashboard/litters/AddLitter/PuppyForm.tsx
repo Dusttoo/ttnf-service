@@ -14,7 +14,8 @@ const FormContainer = styled.div`
   flex-direction: column;
   gap: 1rem;
   padding: 2rem;
-  background-color: ${(props) => props.theme.colors.secondaryBackground}; // Darker background for dark theme
+  background-color: ${(props) =>
+    props.theme.colors.secondaryBackground}; // Darker background for dark theme
   border-radius: 8px;
   width: 100%;
   max-width: 600px;
@@ -37,7 +38,8 @@ const InputGroup = styled.div`
 const Input = styled.input`
   padding: 0.75rem;
   border: 1px solid ${(props) => props.theme.colors.primary};
-  background-color: ${(props) => props.theme.colors.secondaryBackground}; // Darker background
+  background-color: ${(props) =>
+    props.theme.colors.secondaryBackground}; // Darker background
   color: ${(props) => props.theme.colors.white}; // White text
   border-radius: 4px;
   font-size: 1rem;
@@ -48,14 +50,16 @@ const Dropdown = styled.select`
   width: 100%;
   padding: 0.75rem;
   border: 1px solid ${(props) => props.theme.colors.primary};
-  background-color: ${(props) => props.theme.colors.secondaryBackground}; // Darker background
+  background-color: ${(props) =>
+    props.theme.colors.secondaryBackground}; // Darker background
   color: ${(props) => props.theme.colors.white}; // White text
   border-radius: 4px;
   font-size: 1rem;
 `;
 
 const DropdownButton = styled.button`
-  background-color: ${(props) => props.theme.colors.secondaryBackground}; // Darker background
+  background-color: ${(props) =>
+    props.theme.colors.secondaryBackground}; // Darker background
   color: ${(props) => props.theme.colors.white}; // White text
   border: 1px solid ${(props) => props.theme.colors.primary};
   border-radius: 4px;
@@ -67,7 +71,8 @@ const DropdownButton = styled.button`
   width: 100%;
 
   &:hover {
-    background-color: ${(props) => props.theme.colors.primary}; // Highlight on hover
+    background-color: ${(props) =>
+      props.theme.colors.primary}; // Highlight on hover
     color: ${(props) => props.theme.colors.white};
   }
 `;
@@ -75,7 +80,8 @@ const DropdownButton = styled.button`
 const DropdownContent = styled.div<{ show: boolean }>`
   display: ${(props) => (props.show ? 'block' : 'none')};
   position: absolute;
-  background-color: ${(props) => props.theme.colors.secondaryBackground}; // Darker background
+  background-color: ${(props) =>
+    props.theme.colors.secondaryBackground}; // Darker background
   border-radius: 4px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
   padding: 1rem;
@@ -106,234 +112,243 @@ const SubmitContainer = styled.div`
 `;
 
 interface PuppyFormProps {
-    onClose: () => void;
-    title?: string;
-    defaultValues?: Partial<PuppyCreate>;
-    onPuppyCreated?: (puppy: PuppyCreate) => void;
+  onClose: () => void;
+  title?: string;
+  defaultValues?: Partial<PuppyCreate>;
+  onPuppyCreated?: (puppy: PuppyCreate) => void;
     onNextStep: () => void;
-    litterData: {
-        breedingId?: number;
-        birthDate?: string;
-        numberOfPuppies?: number;
-        pedigreeUrl: string;
-        parentMaleId?: number;
-        parentFemaleId?: number;
-    };
+  litterData: {
+    breedingId?: number;
+    birthDate?: string;
+    numberOfPuppies?: number;
+    pedigreeUrl: string;
+    parentMaleId?: number;
+    parentFemaleId?: number;
+  };
+  isPartOfMultiStep?: boolean;
 }
 
 const PuppyForm: React.FC<PuppyFormProps> = ({
-                                                 onClose,
-                                                 title = 'Add New Puppy',
-                                                 defaultValues = {},
-                                                 onPuppyCreated,
-                                                 litterData,
-                                             }) => {
-    const [formState, setFormState] = useState<PuppyCreate>({
-        name: '',
-        dob: litterData.birthDate ?? '',
-        gender: '' as GenderEnum,
-        status: StatusEnum.Available,
-        color: '',
-        description: '',
-        profilePhoto: '',
-        parentMaleId: litterData.parentMaleId,
-        parentFemaleId: litterData.parentFemaleId,
-        healthInfos: [],
-        pedigreeLink: litterData.pedigreeUrl,
-        ...defaultValues,
-    });
+  onClose,
+  title = 'Add New Puppy',
+  defaultValues = {},
+  onPuppyCreated,
+  litterData,
+  isPartOfMultiStep = false,
+}) => {
+  const [formState, setFormState] = useState<PuppyCreate>({
+    name: '',
+    dob: litterData.birthDate ?? '',
+    gender: '' as GenderEnum,
+    status: StatusEnum.Available,
+    color: '',
+    description: '',
+    profilePhoto: '',
+    parentMaleId: litterData.parentMaleId,
+    parentFemaleId: litterData.parentFemaleId,
+    healthInfos: [],
+    pedigreeLink: litterData.pedigreeUrl,
+    ...defaultValues,
+  });
 
-    const [errors, setErrors] = useState<{ [key: string]: string }>({});
-    const [galleryPhotos, setGalleryPhotos] = useState<string[]>([]);
-    const [showDropdown, setShowDropdown] = useState(false);
-    const formRef = useRef<HTMLDivElement>(null);
-    const dropdownRef = useRef<HTMLDivElement>(null);
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [galleryPhotos, setGalleryPhotos] = useState<string[]>([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const formRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-    const availableStatuses = Object.values(StatusEnum);
+  const availableStatuses = Object.values(StatusEnum);
 
-    useEffect(() => {
-        setFormState((prevState) => ({
-            ...prevState,
-            dob: litterData.birthDate ?? '',
-            parentMaleId: litterData.parentMaleId,
-            parentFemaleId: litterData.parentFemaleId,
-            pedigreeLink: litterData.pedigreeUrl,
-        }));
-    }, [defaultValues, litterData]);
+  useEffect(() => {
+    setFormState((prevState) => ({
+      ...prevState,
+      dob: litterData.birthDate ?? '',
+      parentMaleId: litterData.parentMaleId,
+      parentFemaleId: litterData.parentFemaleId,
+      pedigreeLink: litterData.pedigreeUrl,
+    }));
+  }, [defaultValues, litterData]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLSelectElement>) => {
-        const { name, value } = e.target;
-        const updatedFormState = { ...formState, [name]: value };
-        setFormState(updatedFormState);
-    };
+    const { name, value } = e.target;
+    const updatedFormState = { ...formState, [name]: value };
+    setFormState(updatedFormState);
+  };
 
-    const handleProfilePhotoChange = async (urls: string[]) => {
-        const updatedFormState = { ...formState, profilePhoto: urls[0] };
-        setFormState(updatedFormState);
-    };
+  const handleProfilePhotoChange = async (urls: string[]) => {
+    const updatedFormState = { ...formState, profilePhoto: urls[0] };
+    setFormState(updatedFormState);
+  };
 
-    const handleGalleryChange = (urls: string[]) => {
-        setGalleryPhotos(urls);
-    };
+  const handleGalleryChange = (urls: string[]) => {
+    setGalleryPhotos(urls);
+  };
 
-    const handleStatusChange = (status: StatusEnum | undefined) => {
-        setFormState((prevState) => ({ ...prevState, status }));
-        setShowDropdown(false);
-    };
+  const handleStatusChange = (status: StatusEnum | undefined) => {
+    setFormState((prevState) => ({ ...prevState, status }));
+    setShowDropdown(false);
+  };
 
-    const validate = () => {
-        const newErrors: { [key: string]: string } = {};
-        if (!formState.name) newErrors.name = 'Name is required.';
-        if (!formState.dob) newErrors.dob = 'Date of Birth is required.';
-        if (!formState.gender) newErrors.gender = 'Gender is required.';
-        if (!formState.status) newErrors.status = 'Status is required.';
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
+  const validate = () => {
+    const newErrors: { [key: string]: string } = {};
+    if (!formState.name) newErrors.name = 'Name is required.';
+    if (!formState.dob) newErrors.dob = 'Date of Birth is required.';
+    if (!formState.gender) newErrors.gender = 'Gender is required.';
+    if (!formState.status) newErrors.status = 'Status is required.';
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (validate() && onPuppyCreated) {
+    if (validate() && onPuppyCreated) {
             onPuppyCreated({ ...formState });
-        }
-    };
+    }
+};
 
-    const handleClickOutside = (event: MouseEvent) => {
-        if (
+  const handleClickOutside = (event: MouseEvent) => {
+    if (
             formRef.current && !formRef.current.contains(event.target as Node) &&
             dropdownRef.current && !dropdownRef.current.contains(event.target as Node)
-        ) {
-            onClose();
-        } else if (
+    ) {
+      onClose();
+    } else if (
             dropdownRef.current && !dropdownRef.current.contains(event.target as Node)
-        ) {
-            setShowDropdown(false);
-        }
+    ) {
+      setShowDropdown(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
     };
+  }, []);
 
-    useEffect(() => {
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, []);
-
-    return (
-        <FormContainer ref={formRef}>
-            <FormTitle>{title}</FormTitle>
-            <form onSubmit={handleSubmit}>
-                <InputGroup>
-                    <Input
-                        type="text"
-                        name="name"
-                        value={formState.name}
-                        onChange={handleChange}
-                        placeholder="Name"
-                    />
-                    {errors.name && <FieldFeedback message={errors.name} />}
-                </InputGroup>
-                <InputGroup>
-                    <DateInput
-                        label="Date of Birth"
-                        selectedDate={formState.dob ? new Date(formState.dob) : null}
+  return (
+    <FormContainer ref={formRef}>
+      <FormTitle>{title}</FormTitle>
+      <form onSubmit={handleSubmit}>
+        <InputGroup>
+          <Input
+            type="text"
+            name="name"
+            value={formState.name}
+            onChange={handleChange}
+            placeholder="Name"
+          />
+          {errors.name && <FieldFeedback message={errors.name} />}
+        </InputGroup>
+        <InputGroup>
+          <DateInput
+            label="Date of Birth"
+            selectedDate={formState.dob ? new Date(formState.dob) : null}
                         onChange={(date) => setFormState({ ...formState, dob: date ? date.toISOString() : '' })}
-                    />
-                    {errors.dob && <FieldFeedback message={errors.dob} />}
-                </InputGroup>
-                <InputGroup>
-                    <Input
-                        type="text"
-                        name="color"
-                        value={formState.color}
-                        onChange={handleChange}
-                        placeholder="Color"
-                    />
-                </InputGroup>
-                <InputGroup>
-                    <Input
-                        type="text"
-                        name="description"
-                        value={formState.description}
-                        onChange={handleChange}
-                        placeholder="Description"
-                    />
-                </InputGroup>
-                <InputGroup>
-                    <Dropdown
-                        name="gender"
-                        value={formState.gender}
-                        onChange={handleChange}
-                    >
-                        <option value="">Select Gender</option>
-                        <option value={GenderEnum.Male}>{GenderEnum.Male}</option>
-                        <option value={GenderEnum.Female}>{GenderEnum.Female}</option>
-                    </Dropdown>
-                    {errors.gender && <FieldFeedback message={errors.gender} />}
-                </InputGroup>
-                <InputGroup ref={dropdownRef}>
+          />
+          {errors.dob && <FieldFeedback message={errors.dob} />}
+        </InputGroup>
+        <InputGroup>
+          <Input
+            type="text"
+            name="color"
+            value={formState.color}
+            onChange={handleChange}
+            placeholder="Color"
+          />
+        </InputGroup>
+        <InputGroup>
+          <Input
+            type="text"
+            name="description"
+            value={formState.description}
+            onChange={handleChange}
+            placeholder="Description"
+          />
+        </InputGroup>
+        <InputGroup>
+          <Dropdown
+            name="gender"
+            value={formState.gender}
+            onChange={handleChange}
+          >
+            <option value="">Select Gender</option>
+            <option value={GenderEnum.Male}>{GenderEnum.Male}</option>
+            <option value={GenderEnum.Female}>{GenderEnum.Female}</option>
+          </Dropdown>
+          {errors.gender && <FieldFeedback message={errors.gender} />}
+        </InputGroup>
+        <InputGroup ref={dropdownRef}>
                     <DropdownButton onClick={(e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        setShowDropdown(!showDropdown);
+              e.stopPropagation();
+              e.preventDefault();
+              setShowDropdown(!showDropdown);
                     }}>
-                        {formState.status ? (
-                            <StatusBadge color="#E76F00">
-                                {formState.status}
+            {formState.status ? (
+              <StatusBadge color="#E76F00">
+                {formState.status}
                                 <span onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleStatusChange(undefined);
+                    e.stopPropagation();
+                    handleStatusChange(undefined);
                                 }}>
-                                    &#x2715;
-                                </span>
-                            </StatusBadge>
-                        ) : (
-                            'Select Status'
-                        )}
-                        <span>&#9660;</span>
-                    </DropdownButton>
+                  &#x2715;
+                </span>
+              </StatusBadge>
+            ) : (
+              'Select Status'
+            )}
+            <span>&#9660;</span>
+          </DropdownButton>
                     <DropdownContent show={showDropdown} onClick={(e) => e.stopPropagation()}>
-                        <FilterLabel>Status:</FilterLabel>
-                        {availableStatuses.map((status) => (
-                            <CheckboxContainer key={status}>
-                                <Checkbox
-                                    type="checkbox"
-                                    value={status}
-                                    checked={formState.status === status}
-                                    onChange={() => handleStatusChange(status as StatusEnum)}
-                                />
-                                <FilterLabel>{status}</FilterLabel>
-                            </CheckboxContainer>
-                        ))}
-                    </DropdownContent>
-                    {errors.status && <FieldFeedback message={errors.status} />}
-                </InputGroup>
-                <ParentSelector
-                    sireId={formState.parentMaleId}
-                    damId={formState.parentFemaleId}
+            <FilterLabel>Status:</FilterLabel>
+            {availableStatuses.map((status) => (
+              <CheckboxContainer key={status}>
+                <Checkbox
+                  type="checkbox"
+                  value={status}
+                  checked={formState.status === status}
+                  onChange={() => handleStatusChange(status as StatusEnum)}
+                />
+                <FilterLabel>{status}</FilterLabel>
+              </CheckboxContainer>
+            ))}
+          </DropdownContent>
+          {errors.status && <FieldFeedback message={errors.status} />}
+        </InputGroup>
+        <ParentSelector
+          sireId={formState.parentMaleId}
+          damId={formState.parentFemaleId}
                     onSireChange={(e) => setFormState((prevState) => ({
-                        ...prevState,
-                        parentMaleId: Number(e.target.value),
+              ...prevState,
+              parentMaleId: Number(e.target.value),
                     }))}
                     onDamChange={(e) => setFormState((prevState) => ({
-                        ...prevState,
-                        parentFemaleId: Number(e.target.value),
+              ...prevState,
+              parentFemaleId: Number(e.target.value),
                     }))}
-                />
-                <InputGroup>
-                    <p>Select 1 profile image</p>
+        />
+        <InputGroup>
+          <p>Select 1 profile image</p>
                     <ImageUpload maxImages={1} onImagesChange={handleProfilePhotoChange}
                                  initialImages={formState.profilePhoto ? [formState.profilePhoto] : []} />
-                </InputGroup>
-                <InputGroup>
-                    <p>Select up to five gallery images</p>
+        </InputGroup>
+        <InputGroup>
+          <p>Select up to five gallery images</p>
                     <ImageUpload maxImages={5} onImagesChange={handleGalleryChange} initialImages={galleryPhotos} />
-                </InputGroup>
-                <SubmitContainer>
-                    <Button type="submit">Save</Button>
-                </SubmitContainer>
-            </form>
-        </FormContainer>
-    );
+        </InputGroup>
+        <SubmitContainer>
+          {!isPartOfMultiStep && (
+            <>
+              <Button type="submit">Save</Button>
+              <Button type="button" onClick={onClose}>
+                Cancel
+              </Button>
+            </>
+          )}
+        </SubmitContainer>
+      </form>
+    </FormContainer>
+  );
 };
 
 export default PuppyForm;

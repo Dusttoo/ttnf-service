@@ -131,24 +131,26 @@ const AdminLitterList: React.FC = () => {
             const initialValues: LitterUpdate = {
                 birthDate: litterToEdit.birthDate,
                 numberOfPuppies: litterToEdit.numberOfPuppies,
-                breedingId: litterToEdit.breedingId,
+                breedingId: litterToEdit.breeding.id,
             };
             openModal(
                 <LitterForm
                     initialValues={initialValues}
-                    onSubmit={async (litterData) => {
+                    onSubmit={async (litterData, pedigreeUrl) => {
                         await updateLitterMutation.mutateAsync({
                             litterId: litterId,
                             litterData: litterData as LitterUpdate,
                         });
                         closeModal();
                         refetch();
+                        return undefined;
                     }}
                     onCancel={closeModal}
                 />,
             );
         }
     };
+    
 
     const handleDelete = (litterId: number) => {
         if (window.confirm('Are you sure you want to delete this litter?')) {
@@ -169,10 +171,11 @@ const AdminLitterList: React.FC = () => {
         openModal(
             <LitterForm
                 initialValues={initialValues}
-                onSubmit={async (litterData) => {
+                onSubmit={async (litterData, pedigreeUrl) => {
                     await createLitterMutation.mutateAsync(litterData as LitterCreate);
                     closeModal();
                     refetch();
+                    return undefined; 
                 }}
                 onCancel={closeModal}
             />,
