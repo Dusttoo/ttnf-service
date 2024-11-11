@@ -136,6 +136,7 @@ export interface ProductionCreate {
     dob?: string;
     profilePhoto: string;
     owner?: string;
+    description?: string;
     parentMaleId?: number;
     parentFemaleId?: number;
     gender: GenderEnum;
@@ -146,6 +147,7 @@ export interface ProductionUpdate {
     dob?: string;
     profilePhoto?: string;
     owner?: string;
+    description?: string;
     parentMaleId?: number;
     parentFemaleId?: number;
     gender?: GenderEnum;

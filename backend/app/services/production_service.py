@@ -72,7 +72,6 @@ class ProductionService:
                 "items": [convert_to_production_schema(production).dict() for production in productions],
                 "total_count": total_count,
             }
-
             # Cache the result with filters included
             await redis_client.set(cache_key, json.dumps(data, cls=DateTimeEncoder), ex=3600)
             return data
@@ -82,114 +81,144 @@ class ProductionService:
             raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
-async def get_production_by_id(
-    self, production_id: int, db: AsyncSession
-) -> Optional[Production]:
-    try:
-        redis_client = await get_redis_client()
-        cache_key = f"production:{production_id}:{settings.env}"
-        cached_data = await redis_client.get(cache_key)
+    async def get_production_by_id(
+        self, production_id: int, db: AsyncSession
+    ) -> Optional[Production]:
+        try:
+            redis_client = await get_redis_client()
+            cache_key = f"production:{production_id}:{settings.env}"
+            cached_data = await redis_client.get(cache_key)
 
-        if cached_data:
-            return Production(**json.loads(cached_data))
+            if cached_data:
+                return Production(**json.loads(cached_data))
 
-        result = await db.execute(
-            select(Production)
-            .filter(Production.id == production_id)
-            .options(selectinload(Production.dogs))
-        )
-        production = result.scalars().first()
-        production_schema = (
-            convert_to_production_schema(production) if production else None
-        )
-
-        if production_schema:
-            await redis_client.set(
-                cache_key, production_schema.json(), ex=3600
-            )  # Cache for 1 hour
-
-        return production_schema
-    except SQLAlchemyError as e:
-        logger.error(f"Error in get_production_by_id: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Internal Server Error: {e}")
-
-
-async def create_production(
-    self, production_data: ProductionCreate, db: AsyncSession
-) -> Production:
-    try:
-        new_production = Production(
-            name=production_data.name,
-            owner=production_data.owner,
-            dob=production_data.dob,
-            description=production_data.description,
-            sire_id=production_data.sire_id,
-            dam_id=production_data.dam_id,
-            gender=GenderEnum(production_data.gender),
-            profile_photo=production_data.profile_photo,
-        )
-        db.add(new_production)
-        await db.commit()
-        await db.refresh(new_production)
-        return new_production
-    except SQLAlchemyError as e:
-        logger.error(f"SQLAlchemyError in create_dog: {str(e)}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Internal Server Error: {e}")
-    except Exception as e:
-        logger.error(f"Exception in create_dog: {str(e)}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Internal Server Error: {e}")
-
-
-async def update_production(
-    self, production_id: int, production_data: ProductionUpdate, db: AsyncSession
-) -> Optional[Production]:
-    try:
-        result = await db.execute(
-            select(Production).filter(Production.id == production_id)
-        )
-        production = result.scalars().first()
-        if production:
-            for var, value in production_data.dict(exclude_unset=True).items():
-                setattr(production, var, value)
-            await db.commit()
-            await db.refresh(production)
-            return production
-        return None
-    except SQLAlchemyError as e:
-        logger.error(f"Error in update_production: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Internal Server Error: {e}")
-
-
-async def delete_production(self, production_id: int, db: AsyncSession) -> bool:
-    try:
-        result = await db.execute(
-            select(Production).filter(Production.id == production_id)
-        )
-        production = result.scalars().first()
-        if production:
-            await db.delete(production)
-            await db.commit()
-            return True
-        return False
-    except SQLAlchemyError as e:
-        logger.error(f"Error in delete_production: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Internal Server Error: {e}")
-
-
-async def get_productions_by_parent(
-    self, parent_id: int, db: AsyncSession
-) -> List[Production]:
-    try:
-        query = (
-            select(Production)
-            .join(dog_production_link)
-            .filter(
-                (dog_production_link.c.dog_id == parent_id)
-                & (dog_production_link.c.production_id == Production.id)
+            result = await db.execute(
+                select(Production)
+                .filter(Production.id == production_id)
+                .options(selectinload(Production.dogs))
             )
-        ).options(selectinload(Production.dogs))
-        result = await db.execute(query)
-        return result.scalars().all()
-    except SQLAlchemyError as e:
-        logger.error(f"Error in get_productions_by_parent: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Internal Server Error: {e}")
+            production = result.scalars().first()
+            production_schema = (
+                convert_to_production_schema(production) if production else None
+            )
+            print(f'\n\n\n{production_schema}\n\n\n')
+
+            if production_schema:
+                await redis_client.set(
+                    cache_key, production_schema.json(), ex=3600
+                )  # Cache for 1 hour
+
+            return production_schema
+        except SQLAlchemyError as e:
+            logger.error(f"Error in get_production_by_id: {e}", exc_info=True)
+            raise HTTPException(status_code=500, detail=f"Internal Server Error: {e}")
+
+
+    async def create_production(
+        self, production_data: ProductionCreate, db: AsyncSession
+    ) -> Production:
+        try:
+            new_production = Production(
+                name=production_data.name,
+                owner=production_data.owner,
+                dob=production_data.dob,
+                description=production_data.description,
+                sire_id=production_data.sire_id,
+                dam_id=production_data.dam_id,
+                gender=GenderEnum(production_data.gender),
+                profile_photo=production_data.profile_photo,
+            )
+            db.add(new_production)
+            await db.commit()
+            await db.refresh(new_production)
+
+            redis_client = await get_redis_client()
+            cache_key = f"production:{new_production.id}:{settings.env}"
+            production_schema = convert_to_production_schema(new_production)
+            await redis_client.set(cache_key, production_schema.json(), ex=3600)
+
+            paginated_cache_prefix = f"all_productions:*:{settings.env}"
+            for key in await redis_client.keys(paginated_cache_prefix):
+                await redis_client.delete(key)
+
+            return new_production
+        except SQLAlchemyError as e:
+            logger.error(f"SQLAlchemyError in create_production: {str(e)}", exc_info=True)
+            raise HTTPException(status_code=500, detail=f"Internal Server Error: {e}")
+        except Exception as e:
+            logger.error(f"Exception in create_production: {str(e)}", exc_info=True)
+            raise HTTPException(status_code=500, detail=f"Internal Server Error: {e}")
+
+
+    async def update_production(
+        self, production_id: int, production_data: ProductionUpdate, db: AsyncSession
+    ) -> Optional[Production]:
+        try:
+            result = await db.execute(
+                select(Production).filter(Production.id == production_id)
+            )
+            production = result.scalars().first()
+            if production:
+                for var, value in production_data.dict(exclude_unset=True).items():
+                    setattr(production, var, value)
+
+                await db.commit()
+                await db.refresh(production)
+
+                redis_client = await get_redis_client()
+                cache_key = f"production:{production_id}:{settings.env}"
+                paginated_cache_prefix = f"all_productions:*:{settings.env}"
+
+                production_schema = convert_to_production_schema(production)
+                await redis_client.set(cache_key, production_schema.json(), ex=3600)
+
+                for key in await redis_client.keys(paginated_cache_prefix):
+                    await redis_client.delete(key)
+
+                return production
+            return None
+        except SQLAlchemyError as e:
+            logger.error(f"Error in update_production: {e}", exc_info=True)
+            raise HTTPException(status_code=500, detail=f"Internal Server Error: {e}")
+
+    async def delete_production(self, production_id: int, db: AsyncSession) -> bool:
+        try:
+            result = await db.execute(
+                select(Production).filter(Production.id == production_id)
+            )
+            production = result.scalars().first()
+            if production:
+                await db.delete(production)
+                await db.commit()
+
+                redis_client = await get_redis_client()
+                cache_key = f"production:{production_id}:{settings.env}"
+                await redis_client.delete(cache_key)
+                
+                paginated_cache_prefix = f"all_productions:*:{settings.env}"
+                for key in await redis_client.keys(paginated_cache_prefix):
+                    await redis_client.delete(key)
+
+                return True
+            return False
+        except SQLAlchemyError as e:
+            logger.error(f"Error in delete_production: {e}", exc_info=True)
+            raise HTTPException(status_code=500, detail=f"Internal Server Error: {e}")
+
+    async def get_productions_by_parent(
+        self, parent_id: int, db: AsyncSession
+    ) -> List[Production]:
+        try:
+            query = (
+                select(Production)
+                .join(dog_production_link)
+                .filter(
+                    (dog_production_link.c.dog_id == parent_id)
+                    & (dog_production_link.c.production_id == Production.id)
+                )
+            ).options(selectinload(Production.dogs))
+            result = await db.execute(query)
+            return result.scalars().all()
+        except SQLAlchemyError as e:
+            logger.error(f"Error in get_productions_by_parent: {e}", exc_info=True)
+            raise HTTPException(status_code=500, detail=f"Internal Server Error: {e}")

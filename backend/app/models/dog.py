@@ -49,7 +49,7 @@ dog_production_link = Table(
 
 class Production(Base):
     __tablename__ = "productions"
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     name = Column(String(255), nullable=False)
 
     dob = Column(Date, nullable=True)
