@@ -11,6 +11,7 @@ interface InputProps {
     id?: string;
     required?: boolean;
     error?: string;
+    style?: React.CSSProperties;
 }
 
 const StyledInputWrapper = styled.div`
@@ -54,6 +55,7 @@ const Input: React.FC<InputProps> = ({
                                          id,
                                          required = false,
                                          error,
+                                         style
                                      }) => {
     return (
         <StyledInputWrapper>
@@ -72,6 +74,7 @@ const Input: React.FC<InputProps> = ({
                 width={width}
                 required={required}
                 error={error}
+                style={style}
             />
             {error && <ErrorMessage>{error}</ErrorMessage>} {/* Displaying the error message */}
         </StyledInputWrapper>

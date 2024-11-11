@@ -58,7 +58,7 @@ export interface ImageCarouselSettings {
 }
 
 export interface CarouselImage {
-    id: number;
+    id: number | string;
     src: string;
     alt: string;
 }

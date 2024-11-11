@@ -3,69 +3,64 @@ import styled from 'styled-components';
 import { CarouselImage as CarouselImageType } from '../../../../../api/types/core';
 import { Page } from '../../../../../api/types/page';
 import {
-  faArrowUp,
-  faArrowDown,
-  faFloppyDisk,
-} from '@fortawesome/free-solid-svg-icons';
-import { IconButton, DeleteButton } from '../../../../common/Buttons';
-import Input from '../../../../common/Input';
+  DndContext,
+  useSensor,
+  useSensors,
+  PointerSensor,
+  closestCenter,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  arrayMove,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faGripVertical, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import ImageUpload from '../../../../common/ImageUpload';
+import Input from '../../../../common/Input';
 
 const CarouselEditContainer = styled.div`
   padding: 1rem;
 `;
 
-const CarouselImagesContainer = styled.div<{ isColumn: boolean }>`
+const CarouselImagesContainer = styled.div`
   display: flex;
-  flex-direction: ${(props) => (props.isColumn ? 'column' : 'row')};
-  gap: 1.5rem;
+  flex-direction: column;
+  gap: 1rem;
   padding: 2rem;
   border-radius: 8px;
-  flex-wrap: wrap;
+  background-color: ${(props) => props.theme.colors.secondaryBackground};
 `;
 
-const ImageWrapper = styled.div<{ isColumn: boolean }>`
+const SortableItem = styled.div<{ isDragging: boolean }>`
   display: flex;
-  justify-content: space-between;
   align-items: center;
   padding: 1rem;
   border: 1px solid ${(props) => props.theme.colors.border};
   border-radius: 8px;
-  background-color: #fff;
+  background-color: ${(props) =>
+    props.isDragging
+      ? props.theme.colors.secondary
+      : props.theme.colors.secondaryBackground};
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  box-sizing: border-box;
-  width: 100%;
-  flex-direction: ${(props) => (props.isColumn ? 'column' : 'row')};
-
-  /* Responsive layout */
-  @media (max-width: 768px) {
-    flex-direction: column;
-    align-items: center;
-  }
-`;
-
-const ImagePreview = styled.div<{ isColumn: boolean }>`
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-left: ${(props) => (props.isColumn ? '0' : '5px')};
-  flex-direction: ${(props) => (props.isColumn ? 'column' : 'row')};
+  cursor: grab;
 `;
 
 const ImageThumbnail = styled.img`
   width: 100px;
-  height: auto;
+  height: 100px;
   object-fit: cover;
   border-radius: 8px;
+  margin-right: 1rem;
 `;
 
-const ControlsContainer = styled.div<{ isColumn: boolean }>`
+const ControlsContainer = styled.div`
   display: flex;
-  flex-direction: ${(props) => (props.isColumn ? 'row' : 'column')};
-  justify-content: ${(props) => (props.isColumn ? 'space-between' : 'center')};
   align-items: center;
-  gap: 0.5rem;
+  margin-left: auto;
 `;
 
 const SaveButton = styled.button`
@@ -84,7 +79,10 @@ const SaveButton = styled.button`
 
 interface CarouselEditProps {
   page: Page;
-  onSaveCarousel: (carouselSpeed: number, updatedCarouselImages: CarouselImageType[]) => void;
+  onSaveCarousel: (
+    carouselSpeed: number,
+    updatedCarouselImages: CarouselImageType[]
+  ) => void;
   isInsideParent?: boolean;
   isSidebarOpen: boolean;
 }
@@ -96,43 +94,46 @@ const CarouselEdit: React.FC<CarouselEditProps> = ({
   isInsideParent = false,
 }) => {
   const [carouselImages, setCarouselImages] = useState<CarouselImageType[]>([]);
-  const [isColumnLayout, setIsColumnLayout] = useState(true);
   const contentAreaRef = useRef<HTMLDivElement>(null);
   const [carouselSpeed, setCarouselSpeed] = useState(3000);
 
+  // Initialize carousel images from the page prop
   useEffect(() => {
-    if (page.customValues?.carouselImages && carouselImages.length === 0) {
-      setCarouselImages(
-        page.customValues.carouselImages.map(
-          (image: CarouselImageType, index: number) => ({
-            ...image,
-            id: image.id || index,
-          })
-        )
-      );
-    } else if (page.carousel && carouselImages.length === 0) {
-      setCarouselImages(
-        page.carousel.map((image, index) => ({
-          ...image,
-          id: image.id || index,
-        }))
-      );
-    } else if (page.customValues?.heroContent?.carouselImages && carouselImages.length === 0) {
-      setCarouselImages(
-        page.customValues.heroContent.carouselImages.map(
-          (image: CarouselImageType, index: number) => ({
-            ...image,
-            id: image.id || index,
-          })
-        )
-      );
+    if (carouselImages.length === 0) {
+      if (page.customValues?.carouselImages) {
+        setCarouselImages(
+          page.customValues.carouselImages.map(
+            (image: CarouselImageType, index: number) => ({
+              ...image,
+              id: image.id || `carousel-image-${index}`, // Ensure id is string or number
+            })
+          )
+        );
+      } else if (page.carousel) {
+        setCarouselImages(
+          page.carousel.map((image: CarouselImageType, index: number) => ({
+            id: `carousel-image-${index}`, // Assign unique string IDs
+            src: image.src, // Access src from CarouselImageType
+            alt: image.alt || `Carousel Image ${index + 1}`, // Use existing alt or default
+          }))
+        );
+      } else if (page.customValues?.heroContent?.carouselImages) {
+        setCarouselImages(
+          page.customValues.heroContent.carouselImages.map(
+            (image: CarouselImageType, index: number) => ({
+              ...image,
+              id: image.id || `hero-carousel-image-${index}`,
+            })
+          )
+        );
+      }
     }
   }, [page, carouselImages.length]);
 
+  // Handle responsive layout if needed (currently using column direction)
   useEffect(() => {
     const updateLayout = () => {
-      const contentAreaWidth = contentAreaRef.current?.offsetWidth || 0;
-      setIsColumnLayout(contentAreaWidth < 578);
+      // Placeholder for any responsive logic if needed
     };
 
     window.addEventListener('resize', updateLayout);
@@ -141,76 +142,69 @@ const CarouselEdit: React.FC<CarouselEditProps> = ({
     return () => window.removeEventListener('resize', updateLayout);
   }, [isSidebarOpen]);
 
-  const handleMoveUp = (index: number) => {
-    if (index === 0) return;
-    const newImages = [...carouselImages];
-    [newImages[index - 1], newImages[index]] = [
-      newImages[index],
-      newImages[index - 1],
-    ];
-    setCarouselImages(newImages);
-  };
+  // Initialize dnd-kit sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    })
+  );
 
-  const handleMoveDown = (index: number) => {
-    if (index === carouselImages.length - 1) return;
-    const newImages = [...carouselImages];
-    [newImages[index], newImages[index + 1]] = [
-      newImages[index + 1],
-      newImages[index],
-    ];
-    setCarouselImages(newImages);
-  };
+  // Handle drag end event
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
 
-  const handleImageUpload = (urls: string[]) => {
-    const newImages = urls.map((url, index) => ({
-      id: Date.now() + index,
-      src: url,
-      alt: `Uploaded Image ${index + 1}`,
-    }));
+    if (active.id !== over?.id) {
+      const oldIndex = carouselImages.findIndex(
+        (image) => image.id === active.id
+      );
+      const newIndex = carouselImages.findIndex(
+        (image) => image.id === over?.id
+      );
 
-    setCarouselImages(newImages);
-
-    onSaveCarousel(carouselSpeed, newImages);
-  };
-
-  const handleSpeedChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const newSpeed = Number(e.target.value);
-    setCarouselSpeed(newSpeed);
-
-    // Immediately propagate the speed change to the parent
-    onSaveCarousel(newSpeed, carouselImages);
-  };
-
-  const handlePositionChange = (e: ChangeEvent<HTMLInputElement>, index: number) => {
-    const newPosition = parseInt(e.target.value, 10) - 1;
-    if (newPosition >= 0 && newPosition < carouselImages.length) {
-      const newImages = [...carouselImages];
-      const [movedImage] = newImages.splice(index, 1);
-      newImages.splice(newPosition, 0, movedImage);
+      const newImages = arrayMove(carouselImages, oldIndex, newIndex);
       setCarouselImages(newImages);
-
-      // Call onSaveCarousel to update the parent immediately
       onSaveCarousel(carouselSpeed, newImages);
     }
   };
 
-  const handleRemoveImage = (id: number) => {
-    const updatedImages = carouselImages.filter((image) => image.id !== id);
-    setCarouselImages(updatedImages);
+  // Handle image upload
+  const handleImageUpload = (urls: string[]) => {
+    const newImages = urls.map((url, index) => ({
+      id: `uploaded-${Date.now()}-${index}`,
+      src: url,
+      alt: `Uploaded Image ${index + 1}`,
+    }));
 
-    // Call onSaveCarousel to update the parent immediately
+    const updatedImages = [...carouselImages, ...newImages].slice(0, 10); // Ensure max 10 images
+    setCarouselImages(updatedImages);
     onSaveCarousel(carouselSpeed, updatedImages);
   };
 
-  const handleAltTextChange = (e: ChangeEvent<HTMLInputElement>, index: number) => {
-    const newImages = [...carouselImages];
-    newImages[index] = {
-      ...newImages[index],
-      alt: e.target.value,
-    };
-    setCarouselImages(newImages);
+  // Handle carousel speed change
+  const handleSpeedChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const newSpeed = Number(e.target.value);
+    setCarouselSpeed(newSpeed);
+    onSaveCarousel(newSpeed, carouselImages);
+  };
 
-    // Call onSaveCarousel to update the parent immediately
+  // Handle removing an image
+  const handleRemoveImage = (id: string | number) => {
+    const updatedImages = carouselImages.filter((image) => image.id !== id);
+    setCarouselImages(updatedImages);
+    onSaveCarousel(carouselSpeed, updatedImages);
+  };
+
+  // Handle alt text change
+  const handleAltTextChange = (
+    e: ChangeEvent<HTMLInputElement>,
+    id: string | number
+  ) => {
+    const newImages = carouselImages.map((image) =>
+      image.id === id ? { ...image, alt: e.target.value } : image
+    );
+    setCarouselImages(newImages);
     onSaveCarousel(carouselSpeed, newImages);
   };
 
@@ -221,61 +215,113 @@ const CarouselEdit: React.FC<CarouselEditProps> = ({
         type="number"
         value={carouselSpeed.toString()}
         onChange={handleSpeedChange}
-        width="100px"
+        width="150px"
         label="Carousel Speed (ms)"
         placeholder="3000"
       />
       <ImageUpload
-        maxImages={10}
+        maxImages={10 - carouselImages.length}
         onImagesChange={handleImageUpload}
         initialImages={carouselImages.map((img) => img.src)}
+        singleImageMode={false}
       />
 
-      <CarouselImagesContainer isColumn={isColumnLayout}>
-        {carouselImages.map((image, index) => (
-          <ImageWrapper key={image.id} isColumn={isColumnLayout}>
-            <div>
-              <Input
-                type="number"
-                value={(index + 1).toString()}
-                onChange={(e) => handlePositionChange(e, index)}
-                width="50px"
-                label="Position"
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext
+          items={carouselImages.map((image) => image.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          <CarouselImagesContainer>
+            {carouselImages.map((image) => (
+              <SortableCarouselImage
+                key={image.id}
+                id={image.id}
+                image={image}
+                handleRemoveImage={handleRemoveImage}
+                handleAltTextChange={handleAltTextChange}
               />
-            </div>
-            <ImagePreview isColumn={isColumnLayout}>
-              <ImageThumbnail src={image.src} alt={image.alt} />
-              <div>
-                <Input
-                  type="text"
-                  value={image.alt}
-                  onChange={(e) => handleAltTextChange(e, index)}
-                  placeholder="Alt Text"
-                  label="Alt Text"
-                />
-              </div>
-            </ImagePreview>
+            ))}
+          </CarouselImagesContainer>
+        </SortableContext>
+      </DndContext>
 
-            <ControlsContainer isColumn={isColumnLayout}>
-              <IconButton
-                icon={faArrowUp}
-                onClick={() => handleMoveUp(index)}
-                disabled={index === 0}
-                title="Move up"
-              />
-              <DeleteButton onClick={() => handleRemoveImage(image.id)} />
-              <IconButton
-                icon={faArrowDown}
-                onClick={() => handleMoveDown(index)}
-                disabled={index === carouselImages.length - 1}
-                title="Move down"
-              />
-            </ControlsContainer>
-          </ImageWrapper>
-        ))}
-      </CarouselImagesContainer>
+      {isInsideParent && (
+        <SaveButton
+          onClick={() => onSaveCarousel(carouselSpeed, carouselImages)}
+        >
+          Save Carousel
+        </SaveButton>
+      )}
     </CarouselEditContainer>
   );
 };
 
 export default CarouselEdit;
+
+interface SortableCarouselImageProps {
+  id: string | number;
+  image: CarouselImageType;
+  handleRemoveImage: (id: string | number) => void;
+  handleAltTextChange: (
+    e: ChangeEvent<HTMLInputElement>,
+    id: string | number
+  ) => void;
+}
+
+const SortableCarouselImage: React.FC<SortableCarouselImageProps> = ({
+  id,
+  image,
+  handleRemoveImage,
+  handleAltTextChange,
+}) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <SortableItem
+      ref={setNodeRef}
+      style={style}
+      isDragging={isDragging}
+      {...attributes}
+      {...listeners}
+    >
+      <FontAwesomeIcon
+        icon={faGripVertical}
+        style={{ cursor: 'grab', marginRight: '1rem' }}
+      />
+      <ImageThumbnail src={image.src} alt={image.alt} />
+      <Input
+        type="text"
+        value={image.alt}
+        onChange={(e) => handleAltTextChange(e, id)}
+        placeholder="Alt Text"
+        label="Alt Text"
+        style={{ flex: 1, marginRight: '1rem' }}
+      />
+      <ControlsContainer>
+        <FontAwesomeIcon
+          icon={faTrashAlt}
+          onClick={() => handleRemoveImage(id)}
+          style={{ color: 'red', cursor: 'pointer' }}
+          title="Remove Image"
+        />
+      </ControlsContainer>
+    </SortableItem>
+  );
+};

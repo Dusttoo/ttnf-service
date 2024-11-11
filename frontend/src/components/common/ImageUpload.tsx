@@ -24,6 +24,7 @@ const UploadContainer = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  margin: 1rem 0;
   width: 100%;
   padding: 1rem;
   border: 2px dashed ${theme.colors.primary};

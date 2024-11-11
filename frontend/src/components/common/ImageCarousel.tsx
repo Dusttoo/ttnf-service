@@ -35,7 +35,7 @@ const CarouselImage = styled.img<{ height?: string }>`
 `;
 
 interface ImageCarouselProps {
-    images: { id: number; src: string; alt: string }[];
+    images: { id: number | string; src: string; alt: string }[];
     initialIndex?: number;
     settings?: any;
     width?: string;

@@ -201,7 +201,7 @@ const PageEditor: React.FC = () => {
                             <CarouselEdit
                                 page={page}
                                 onSaveCarousel={handleSaveStandaloneCarousel}
-                                isInsideParent={false}
+                                isInsideParent={true}
                                 isSidebarOpen={isSidebarOpen}
                             />
                         )}
