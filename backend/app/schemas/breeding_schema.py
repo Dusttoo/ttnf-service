@@ -9,8 +9,8 @@ from app.schemas import Dog
 class BreedingBase(BaseModel):
     female_dog_id: int
     male_dog_id: Optional[int] = None  # Nullable for manual sire details
-    breeding_date: date
-    expected_birth_date: date
+    breeding_date: Optional[date]
+    expected_birth_date: Optional[date]
     description: Optional[str] = None
 
     # Manual sire details

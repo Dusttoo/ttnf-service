@@ -20,6 +20,28 @@ logger = logging.getLogger(__name__)
 
 
 class BreedingService:
+    async def _load_breeding_with_relations(self, breeding_id: int, db: AsyncSession) -> Breeding:
+        """Helper to load a Breeding with related fields eagerly loaded."""
+        result = await db.execute(
+            select(Breeding)
+            .options(
+                selectinload(Breeding.female_dog).options(
+                    selectinload(Dog.health_infos),
+                    selectinload(Dog.photos),
+                    selectinload(Dog.productions),
+                    selectinload(Dog.children),
+                ),
+                selectinload(Breeding.male_dog).options(
+                    selectinload(Dog.health_infos),
+                    selectinload(Dog.photos),
+                    selectinload(Dog.productions),
+                    selectinload(Dog.children),
+                ),
+            )
+            .filter(Breeding.id == breeding_id)
+        )
+        return result.scalars().first()
+
     async def get_all_breedings(
         self, page: int, page_size: int, db: AsyncSession
     ) -> Dict[str, any]:
@@ -123,12 +145,9 @@ class BreedingService:
         self, breeding_data: BreedingCreate, db: AsyncSession
     ) -> Breeding:
         try:
-            # If manual sire details are provided, set male_dog_id to None
             new_breeding = Breeding(
-                **breeding_data.dict(exclude={"manual_sire_name", "manual_sire_color", "manual_sire_image_url",
-                                              "manual_sire_pedigree_link"})
+                **breeding_data.dict(exclude={"manual_sire_name", "manual_sire_color", "manual_sire_image_url", "manual_sire_pedigree_link"})
             )
-            # Assign manual sire details if present
             if not breeding_data.male_dog_id and (
                 breeding_data.manual_sire_name
                 or breeding_data.manual_sire_color
@@ -142,98 +161,81 @@ class BreedingService:
 
             db.add(new_breeding)
             await db.commit()
-            await db.refresh(new_breeding)
 
-            await db.refresh(new_breeding, attribute_names=["female_dog", "male_dog"])
+            # Reload with relationships
+            breeding_with_relations = await self._load_breeding_with_relations(new_breeding.id, db)
+            breeding_schema = convert_to_breeding_schema(breeding_with_relations)
 
-            result = await db.execute(
-                select(Breeding)
-                .options(
-                    selectinload(Breeding.female_dog).options(
-                        selectinload(Dog.health_infos),
-                        selectinload(Dog.photos),
-                        selectinload(Dog.productions),
-                        selectinload(Dog.children),
-                    ),
-                    selectinload(Breeding.male_dog).options(
-                        selectinload(Dog.health_infos),
-                        selectinload(Dog.photos),
-                        selectinload(Dog.productions),
-                        selectinload(Dog.children),
-                    ),
-                )
-                .filter(Breeding.id == new_breeding.id)
-            )
+            # Clear cached breedings list
+            redis_client = await get_redis_client()
+            keys_to_delete = await redis_client.keys(f"all_breedings:*:{settings.env}")
+            if keys_to_delete:
+                await redis_client.delete(*keys_to_delete)
 
-            return convert_to_breeding_schema(result.scalars().first())
+            return breeding_schema
         except SQLAlchemyError as e:
             logger.error(f"Error in create_breeding: {e}", exc_info=True)
-            raise HTTPException(status_code=500, detail=f"Internal Server Error: {e}")
+            raise HTTPException(status_code=500, detail="Internal Server Error")
 
     async def update_breeding(
         self, breeding_id: int, breeding_data: BreedingUpdate, db: AsyncSession
     ) -> Optional[Breeding]:
         try:
-            result = await db.execute(select(Breeding).filter(Breeding.id == breeding_id))
-            breeding = result.scalars().first()
+            breeding = await self._load_breeding_with_relations(breeding_id, db)
             if breeding:
                 for var, value in breeding_data.dict(exclude_unset=True).items():
                     setattr(breeding, var, value)
-                # Assign or clear manual sire details based on update data
+
                 if not breeding_data.male_dog_id:
                     breeding.manual_sire_name = breeding_data.manual_sire_name
                     breeding.manual_sire_color = breeding_data.manual_sire_color
                     breeding.manual_sire_image_url = breeding_data.manual_sire_image_url
                     breeding.manual_sire_pedigree_link = breeding_data.manual_sire_pedigree_link
                 else:
-                    # Clear manual sire details if a male dog ID is provided
                     breeding.manual_sire_name = None
                     breeding.manual_sire_color = None
                     breeding.manual_sire_image_url = None
                     breeding.manual_sire_pedigree_link = None
 
                 await db.commit()
-                await db.refresh(breeding, attribute_names=["female_dog", "male_dog"])
-                result = await db.execute(
-                    select(Breeding)
-                    .options(
-                        selectinload(Breeding.female_dog).options(
-                            selectinload(Dog.health_infos),
-                            selectinload(Dog.photos),
-                            selectinload(Dog.productions),
-                            selectinload(Dog.children),
-                        ),
-                        selectinload(Breeding.male_dog).options(
-                            selectinload(Dog.health_infos),
-                            selectinload(Dog.photos),
-                            selectinload(Dog.productions),
-                            selectinload(Dog.children),
-                        ),
-                    )
-                    .filter(Breeding.id == breeding.id)
-                )
 
-                return convert_to_breeding_schema(result.scalars().first())
+                # Reload with relationships
+                updated_breeding_with_relations = await self._load_breeding_with_relations(breeding.id, db)
+                breeding_schema = convert_to_breeding_schema(updated_breeding_with_relations)
+
+                # Clear breeding-specific and list caches
+                redis_client = await get_redis_client()
+                await redis_client.delete(f"breeding:{breeding_id}:{settings.env}")
+                keys_to_delete = await redis_client.keys(f"all_breedings:*:{settings.env}")
+                if keys_to_delete:
+                    await redis_client.delete(*keys_to_delete)
+
+                return breeding_schema
             return None
         except SQLAlchemyError as e:
             logger.error(f"Error in update_breeding: {e}", exc_info=True)
-            raise HTTPException(status_code=500, detail=f"Internal Server Error: {e}")
+            raise HTTPException(status_code=500, detail="Internal Server Error")
+
 
     async def delete_breeding(self, breeding_id: int, db: AsyncSession) -> bool:
         try:
-            result = await db.execute(
-                select(Breeding).filter(Breeding.id == breeding_id)
-            )
-            breeding = result.scalars().first()
+            breeding = await self._load_breeding_with_relations(breeding_id, db)
             if breeding:
                 await db.delete(breeding)
                 await db.commit()
+
+                # Clear breeding-specific and list caches
+                redis_client = await get_redis_client()
+                await redis_client.delete(f"breeding:{breeding_id}:{settings.env}")
+                keys_to_delete = await redis_client.keys(f"all_breedings:*:{settings.env}")
+                if keys_to_delete:
+                    await redis_client.delete(*keys_to_delete)
+
                 return True
             return False
         except SQLAlchemyError as e:
             logger.error(f"Error in delete_breeding: {e}", exc_info=True)
-            raise HTTPException(status_code=500, detail=f"Internal Server Error: {e}")
-
+            raise HTTPException(status_code=500, detail="Internal Server Error")
     async def get_breedings_by_parent(
         self, parent_id: int, db: AsyncSession
     ) -> List[Breeding]:

@@ -72,8 +72,8 @@ const BreedingForm: React.FC<{ onClose: () => void; breedingId?: number }> = ({ 
         if (breedingId && breeding) {
             setFormState({
                 ...breeding,
-                breedingDate: new Date(breeding.breedingDate).toISOString().split('T')[0],
-                expectedBirthDate: new Date(breeding.expectedBirthDate).toISOString().split('T')[0],
+                breedingDate: breeding.breedingDate ? new Date(breeding.breedingDate).toISOString().split('T')[0] : '',
+                expectedBirthDate: breeding.expectedBirthDate ? new Date(breeding.expectedBirthDate).toISOString().split('T')[0] : '',
             });
         }
     }, [breedingId, breeding]);
@@ -89,9 +89,6 @@ const BreedingForm: React.FC<{ onClose: () => void; breedingId?: number }> = ({ 
 
     const validate = () => {
         const newErrors: { breedingDate?: string; expectedBirthDate?: string; manualSireName?: string } = {};
-        if (!formState.breedingDate) newErrors.breedingDate = 'Breeding Date is required.';
-        if (!formState.expectedBirthDate) newErrors.expectedBirthDate = 'Expected Birth Date is required.';
-
         // Validate manual sire fields if `useManualSire` is true
         if (useManualSire && !formState.manualSireName) newErrors.manualSireName = 'Manual sire name is required.';
 
@@ -101,24 +98,24 @@ const BreedingForm: React.FC<{ onClose: () => void; breedingId?: number }> = ({ 
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
-        if (validate()) {
-            const breedingData = {
-                ...formState,
-                maleDogId: useManualSire ? undefined : formState.maleDogId, // Only send `maleDogId` if not using manual sire
-            };
-
-            if (breedingId) {
-                await updateBreedingMutation.mutateAsync({
-                    breedingId: Number(breedingId),
-                    breedingData: breedingData as BreedingUpdate,
-                });
-            } else {
-                await createBreedingMutation.mutateAsync(breedingData as BreedingCreate);
-            }
-            onClose();
-            navigate('/admin/dashboard/breedings');
+    
+        const breedingData = {
+            ...formState,
+            breedingDate: formState.breedingDate ? formState.breedingDate : null,
+            expectedBirthDate: formState.expectedBirthDate ? formState.expectedBirthDate : null,
+            maleDogId: useManualSire ? undefined : formState.maleDogId, 
+        };
+    
+        if (breedingId) {
+            await updateBreedingMutation.mutateAsync({
+                breedingId: Number(breedingId),
+                breedingData: breedingData as BreedingUpdate,
+            });
+        } else {
+            await createBreedingMutation.mutateAsync(breedingData as BreedingCreate);
         }
+        onClose();
+        navigate('/admin/dashboard/breedings');
     };
 
     if (isBreedingLoading) return <LoadingSpinner />;
@@ -191,15 +188,14 @@ const BreedingForm: React.FC<{ onClose: () => void; breedingId?: number }> = ({ 
                         selectedDate={formState.breedingDate ? new Date(formState.breedingDate) : null}
                         onChange={(date) => handleDateChange('breedingDate', date)}
                     />
-                    {errors.breedingDate && <FieldFeedback message={errors.breedingDate} />}
                 </div>
                 <div>
                     <DateInput
                         label="Expected Birth Date"
                         selectedDate={formState.expectedBirthDate ? new Date(formState.expectedBirthDate) : null}
                         onChange={(date) => handleDateChange('expectedBirthDate', date)}
+                    
                     />
-                    {errors.expectedBirthDate && <FieldFeedback message={errors.expectedBirthDate} />}
                 </div>
                 <Input
                     type="text"

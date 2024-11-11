@@ -5,8 +5,8 @@ export interface Breeding {
     id: number;
     femaleDogId: number;
     maleDogId?: number;
-    breedingDate: string;
-    expectedBirthDate: string;
+    breedingDate?: string;
+    expectedBirthDate?: string;
     description?: string;
     actualBirthDate?: string;
     litters: Litter[];
