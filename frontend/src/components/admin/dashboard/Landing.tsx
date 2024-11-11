@@ -134,11 +134,11 @@ const AdminLayout: React.FC = () => {
             </ClickableStatCard>
 
             {/* Pending Tasks Stat Card (Optional: Make it dynamic later) */}
-            <NonClickableStatCard>
+            {/* <NonClickableStatCard>
               <FontAwesomeIcon icon={faTasks} size="2x" color="#F5A623" />
               <StatNumber>3</StatNumber>
               <StatDescription>Pending Tasks</StatDescription>
-            </NonClickableStatCard>
+            </NonClickableStatCard> */}
           </>
         )}
       </QuickStatsSection>

@@ -14,6 +14,7 @@ const MainContent = styled.div`
   flex-grow: 1;
   padding: 2rem;
   background-color: ${(props) => props.theme.colors.neutralBackground};
+  text-align: center;
 `;
 
 const AdminLayout: React.FC = () => {
