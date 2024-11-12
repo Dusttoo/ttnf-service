@@ -1,4 +1,4 @@
-import React, { useState, useEffect, ChangeEvent } from 'react';
+import React, { useState, useEffect, ChangeEvent, useCallback, useRef } from 'react';
 import styled from 'styled-components';
 import { CarouselImage as CarouselImageType } from '../../../../../api/types/core';
 import {
@@ -25,19 +25,17 @@ const CarouselEditContainer = styled.div`
   padding: 0.5rem;
 `;
 
-
 const CarouselImagesContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.5rem; 
+  gap: 0.5rem;
   padding: 1rem;
   border-radius: 8px;
   background-color: ${(props) => props.theme.colors.secondaryBackground};
-  max-height: 300px; 
-  overflow-y: auto; 
+  max-height: 300px;
+  overflow-y: auto;
   box-sizing: border-box;
 `;
-
 
 const SortableItem = styled.div<{ isDragging: boolean }>`
   display: flex;
@@ -75,7 +73,7 @@ const SaveButton = styled.button`
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  width: 100%; 
+  width: 100%;
   text-align: center;
 
   &:hover {
@@ -99,6 +97,7 @@ const CarouselEdit: React.FC<CarouselEditProps> = ({
 }) => {
   const [images, setImages] = useState<CarouselImageType[]>(carouselImages);
   const [speed, setSpeed] = useState<number>(carouselSpeed);
+  const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     setImages(carouselImages);
@@ -120,6 +119,7 @@ const CarouselEdit: React.FC<CarouselEditProps> = ({
       const newIndex = images.findIndex((image) => image.id === over?.id);
       const reorderedImages = arrayMove(images, oldIndex, newIndex);
       setImages(reorderedImages);
+      onSaveCarousel(speed, reorderedImages);
     }
   };
 
@@ -131,26 +131,41 @@ const CarouselEdit: React.FC<CarouselEditProps> = ({
     }));
     const updatedImages = [...images, ...newImages].slice(0, 10);
     setImages(updatedImages);
+    onSaveCarousel(speed, updatedImages); // Trigger save on upload
   };
 
   const handleSpeedChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setSpeed(Number(e.target.value));
-  };
+    const newSpeed = Number(e.target.value);
+    setSpeed(newSpeed);
 
+    // Clear any existing debounce timeouts
+    if (debounceTimeout.current) {
+      clearTimeout(debounceTimeout.current);
+    }
+
+    // Set a new debounce timeout
+    debounceTimeout.current = setTimeout(() => {
+      onSaveCarousel(newSpeed, images);
+    }, 600); // Adjust debounce delay as needed
+  };
+  
   const handleRemoveImage = (id: string | number) => {
-    setImages(images.filter((image) => image.id !== id));
+    const updatedImages = images.filter((image) => image.id !== id);
+    setImages(updatedImages);
+    onSaveCarousel(speed, updatedImages); // Save immediately on remove
   };
 
   const handleAltTextChange = (
     e: ChangeEvent<HTMLInputElement>,
     id: string | number
   ) => {
-    setImages(
-      images.map((image) =>
-        image.id === id ? { ...image, alt: e.target.value } : image
-      )
+    const updatedImages = images.map((image) =>
+      image.id === id ? { ...image, alt: e.target.value } : image
     );
+    setImages(updatedImages);
+    onSaveCarousel(speed, updatedImages); // Save immediately on alt text change
   };
+
 
   const handleSave = () => {
     onSaveCarousel(speed, images);
@@ -158,46 +173,44 @@ const CarouselEdit: React.FC<CarouselEditProps> = ({
 
   return (
     <CarouselEditContainer>
-      <h3>Edit Carousel</h3>
-      <Input
-        type="number"
-        value={speed.toString()}
-        onChange={handleSpeedChange}
-        width="150px"
-        label="Carousel Speed (ms)"
-        placeholder="3000"
-      />
-      <ImageUpload
-        maxImages={10 - images.length}
-        onImagesChange={handleImageUpload}
-        initialImages={images.map((img) => img.src)}
-        singleImageMode={false}
-      />
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
+    <h3>Edit Carousel</h3>
+    <Input
+      type="number"
+      value={speed.toString()}
+      onChange={handleSpeedChange}
+      width="150px"
+      label="Carousel Speed (ms)"
+      placeholder="3000"
+    />
+    <ImageUpload
+      maxImages={10 - images.length}
+      onImagesChange={handleImageUpload}
+      initialImages={images.map((img) => img.src)}
+      singleImageMode={false}
+    />
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragEnd={handleDragEnd}
+    >
+      <SortableContext
+        items={images.map((image) => image.id)}
+        strategy={verticalListSortingStrategy}
       >
-        <SortableContext
-          items={images.map((image) => image.id)}
-          strategy={verticalListSortingStrategy}
-        >
-          <CarouselImagesContainer>
-            {images.map((image) => (
-              <SortableCarouselImage
-                key={image.id}
-                id={image.id}
-                image={image}
-                handleRemoveImage={handleRemoveImage}
-                handleAltTextChange={handleAltTextChange}
-              />
-            ))}
-          </CarouselImagesContainer>
-        </SortableContext>
-      </DndContext>
-
-      <SaveButton onClick={handleSave}>Save Carousel</SaveButton>
-    </CarouselEditContainer>
+        <CarouselImagesContainer>
+          {images.map((image) => (
+            <SortableCarouselImage
+              key={image.id}
+              id={image.id}
+              image={image}
+              handleRemoveImage={handleRemoveImage}
+              handleAltTextChange={handleAltTextChange}
+            />
+          ))}
+        </CarouselImagesContainer>
+      </SortableContext>
+    </DndContext>
+  </CarouselEditContainer>
   );
 };
 

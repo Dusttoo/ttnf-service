@@ -22,7 +22,7 @@ import Toolbar from './EditorToolbar';
 
 const LEFT_SIDEBAR_WIDTH = 150;
 const RIGHT_SIDEBAR_OPEN_WIDTH = 350;
-const DEBOUNCE_DELAY = 6000; // 60 seconds
+const DEBOUNCE_DELAY = 60000; // 60 seconds
 const TOOLBAR_HEIGHT = 60;
 
 const EditorContainer = styled.div`
