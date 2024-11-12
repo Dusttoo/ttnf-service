@@ -10,8 +10,9 @@ const ToolbarContainer = styled.div`
   border-bottom: 1px solid ${(props) => props.theme.colors.border};
   position: fixed;
   top: 0;
-  width: 100%;
+  width: calc(100% - 300px);
   z-index: 10;
+  padding-right: 350px;
 `;
 
 const LastSavedText = styled.span`
@@ -21,7 +22,10 @@ const LastSavedText = styled.span`
 
 const SaveButton = styled.button<{ isActive: boolean }>`
   padding: 0.5rem 1rem;
-  background-color: ${(props) => (props.isActive ? props.theme.colors.primary : props.theme.colors.secondaryBackground)};
+  background-color: ${(props) =>
+    props.isActive
+      ? props.theme.colors.primary
+      : props.theme.colors.secondaryBackground};
   color: ${(props) => (props.isActive ? '#fff' : props.theme.colors.text)};
   border: none;
   border-radius: 4px;
@@ -35,13 +39,51 @@ interface ToolbarProps {
   onSave: () => void;
 }
 
-const Toolbar: React.FC<ToolbarProps> = ({ lastSaved, isSaveActive, onSave }) => (
-  <ToolbarContainer>
-    <LastSavedText>Last saved: {lastSaved}</LastSavedText>
-    <SaveButton isActive={isSaveActive} onClick={isSaveActive ? onSave : undefined}>
-      Save
-    </SaveButton>
-  </ToolbarContainer>
-);
+const Toolbar: React.FC<ToolbarProps> = ({
+  lastSaved,
+  isSaveActive,
+  onSave,
+}) => {
+  const getLastSavedText = () => {
+    if (!lastSaved) return 'N/A';
+
+    const savedDate = new Date(lastSaved);
+    const now = new Date();
+    const nowUTC = new Date(now.getTime() + now.getTimezoneOffset() * 60000);
+
+    console.log('lastSaved', lastSaved, 'now: ', nowUTC);
+
+    const diffInMinutes = Math.floor(
+      (nowUTC.getTime() - savedDate.getTime()) / 60000
+    );
+
+    if (diffInMinutes < 1) {
+      return 'Last saved just now';
+    } else if (diffInMinutes < 60) {
+      return `Last saved: ${diffInMinutes} minute${diffInMinutes === 1 ? '' : 's'} ago`;
+    } else {
+      return `Last saved: ${savedDate.toLocaleDateString(undefined, {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })} at ${savedDate.toLocaleTimeString(undefined, {
+        hour: '2-digit',
+        minute: '2-digit',
+      })}`;
+    }
+  };
+
+  return (
+    <ToolbarContainer>
+      <LastSavedText>{getLastSavedText()}</LastSavedText>
+      <SaveButton
+        isActive={isSaveActive}
+        onClick={isSaveActive ? onSave : undefined}
+      >
+        Save
+      </SaveButton>
+    </ToolbarContainer>
+  );
+};
 
 export default Toolbar;

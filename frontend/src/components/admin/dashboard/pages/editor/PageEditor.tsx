@@ -192,8 +192,11 @@ const PageEditor: React.FC = () => {
 
   // Manual save handler
   const manualSave = () => {
+    if (debounceTimeout.current) {
+      clearTimeout(debounceTimeout.current); // Clear debounce on manual save
+    }
     if (hasChanges) {
-      saveChanges();
+      handleSaveContent();
     }
   };
 
@@ -236,12 +239,13 @@ const PageEditor: React.FC = () => {
   if (error) return <ErrorComponent message={error} />;
   if (!page) return <ErrorComponent message="Could not find page." />;
 
+  console.log(hasChanges)
   return (
     <EditorContainer>
       <Toolbar
         lastSaved={lastUpdated || 'Never'}
         isSaveActive={hasChanges}
-        onSave={handleSaveContent}
+        onSave={manualSave} // Trigger manual save
       />
 
       <ContentContainer isSidebarOpen={isSidebarOpen}>

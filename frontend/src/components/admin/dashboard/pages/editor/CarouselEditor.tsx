@@ -131,28 +131,26 @@ const CarouselEdit: React.FC<CarouselEditProps> = ({
     }));
     const updatedImages = [...images, ...newImages].slice(0, 10);
     setImages(updatedImages);
-    onSaveCarousel(speed, updatedImages); // Trigger save on upload
+    onSaveCarousel(speed, updatedImages); 
   };
 
   const handleSpeedChange = (e: ChangeEvent<HTMLInputElement>) => {
     const newSpeed = Number(e.target.value);
     setSpeed(newSpeed);
 
-    // Clear any existing debounce timeouts
     if (debounceTimeout.current) {
       clearTimeout(debounceTimeout.current);
     }
 
-    // Set a new debounce timeout
     debounceTimeout.current = setTimeout(() => {
       onSaveCarousel(newSpeed, images);
-    }, 600); // Adjust debounce delay as needed
+    }, 600); 
   };
   
   const handleRemoveImage = (id: string | number) => {
     const updatedImages = images.filter((image) => image.id !== id);
     setImages(updatedImages);
-    onSaveCarousel(speed, updatedImages); // Save immediately on remove
+    onSaveCarousel(speed, updatedImages); 
   };
 
   const handleAltTextChange = (
@@ -163,7 +161,7 @@ const CarouselEdit: React.FC<CarouselEditProps> = ({
       image.id === id ? { ...image, alt: e.target.value } : image
     );
     setImages(updatedImages);
-    onSaveCarousel(speed, updatedImages); // Save immediately on alt text change
+    onSaveCarousel(speed, updatedImages); 
   };
 
 
