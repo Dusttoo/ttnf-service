@@ -34,7 +34,11 @@ export const createPage = async (pageData: Partial<Page>): Promise<Page> => {
 };
 
 export const updatePage = async (id: string, page: Page): Promise<void> => {
-    await axiosWithTimeout.put(`/pages/${id}`, page);
+    await axiosWithTimeout.put(`/pages/${id}`, page, {
+        headers: {
+            isBackgroundRequest: 'true', 
+        },
+    });
 };
 
 export const deletePage = async (id: string): Promise<void> => {

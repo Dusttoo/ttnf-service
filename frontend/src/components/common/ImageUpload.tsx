@@ -31,6 +31,7 @@ const UploadContainer = styled.div`
   border-radius: 8px;
   background-color: ${theme.colors.secondaryBackground};
   cursor: pointer;
+  box-sizing: border-box;
   &:hover {
     background-color: ${theme.colors.neutralBackground};
   }

@@ -32,11 +32,14 @@ const RequiredAsterisk = styled.span`
 `;
 
 const StyledInput = styled.input<Partial<InputProps>>`
-  padding: 10px;
+  padding: 0.75rem;
   border: 1px solid ${(props) =>
     props.error ? props.theme.colors.error : props.theme.colors.primary}; // Red border for error
   border-radius: 4px;
   width: ${(props) => props.width || '100%'};
+  background-color: ${(props) => props.theme.colors.neutralBackground};
+  font-size: 1rem;
+  color: ${(props) => props.theme.colors.white};
 `;
 
 const ErrorMessage = styled.span`
