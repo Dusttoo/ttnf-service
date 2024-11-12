@@ -1,5 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
+import { IconButton } from '../../../../common/Buttons';
+import { faEdit, faEye } from '@fortawesome/free-solid-svg-icons';
 
 const ToolbarContainer = styled.div`
   display: flex;
@@ -33,16 +35,25 @@ const SaveButton = styled.button<{ isActive: boolean }>`
   opacity: ${(props) => (props.isActive ? 1 : 0.6)};
 `;
 
+const ButtonContainer = styled.div`
+  display: flex;
+  gap: 0.5rem;
+`;
+
 interface ToolbarProps {
   lastSaved: string;
   isSaveActive: boolean;
+  previewMode: boolean;
   onSave: () => void;
+  togglePreviewMode: () => void;
 }
 
 const Toolbar: React.FC<ToolbarProps> = ({
   lastSaved,
   isSaveActive,
+  previewMode,
   onSave,
+  togglePreviewMode,
 }) => {
   const getLastSavedText = () => {
     if (!lastSaved) return 'N/A';
@@ -76,12 +87,20 @@ const Toolbar: React.FC<ToolbarProps> = ({
   return (
     <ToolbarContainer>
       <LastSavedText>{getLastSavedText()}</LastSavedText>
-      <SaveButton
-        isActive={isSaveActive}
-        onClick={isSaveActive ? onSave : undefined}
-      >
-        Save
-      </SaveButton>
+      <ButtonContainer>
+        <IconButton
+          icon={previewMode ? faEdit : faEye}
+          onClick={togglePreviewMode}
+          hoverBackgroundColor={previewMode ? 'primaryDark' : 'secondary'}
+          title={previewMode ? 'Switch to Edit Mode' : 'Switch to Preview Mode'}
+        />
+        <SaveButton
+          isActive={isSaveActive}
+          onClick={isSaveActive ? onSave : undefined}
+        >
+          Save
+        </SaveButton>
+      </ButtonContainer>
     </ToolbarContainer>
   );
 };

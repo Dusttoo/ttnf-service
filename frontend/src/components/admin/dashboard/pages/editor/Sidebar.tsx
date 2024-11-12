@@ -71,6 +71,12 @@ const Sidebar: React.FC<SidebarProps> = ({
     setLocalCarouselSpeed(carouselSpeed);
   }, [carouselImages, carouselSpeed]);
 
+  useEffect(() => {
+    if (activeComponent === 'carousel') {
+      setActiveTab('block');
+    }
+  }, [activeComponent]);
+
   // Handle changes from CarouselEdit
   const handleCarouselChange = (updatedSpeed: number, updatedImages: CarouselImageType[]) => {
     setLocalCarouselImages(updatedImages);

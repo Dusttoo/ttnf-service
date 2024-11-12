@@ -116,6 +116,7 @@ const PageEditor: React.FC = () => {
   );
   const [hasChanges, setHasChanges] = useState(false);
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
+  const [previewMode, setPreviewMode] = useState(false);
 
   // Sync with page data
   useEffect(() => {
@@ -144,6 +145,10 @@ const PageEditor: React.FC = () => {
 
     fetchSettings();
   }, []);
+
+  const togglePreviewMode = () => {
+    setPreviewMode((prev) => !prev);
+  };
 
   // Handle debounced content save
   const handleContentChange = () => {
@@ -203,6 +208,9 @@ const PageEditor: React.FC = () => {
   // Handle active component click
   const handleComponentClick = (componentName: string) => {
     setActiveComponent(componentName);
+    if (!isSidebarOpen) {
+      handleToggleSidebar();
+    }
   };
 
   const handleSaveContent = () => {
@@ -245,7 +253,9 @@ const PageEditor: React.FC = () => {
       <Toolbar
         lastSaved={lastUpdated || 'Never'}
         isSaveActive={hasChanges}
-        onSave={manualSave} // Trigger manual save
+        onSave={handleSaveContent}
+        previewMode={previewMode}
+        togglePreviewMode={togglePreviewMode}
       />
 
       <ContentContainer isSidebarOpen={isSidebarOpen}>
@@ -277,6 +287,7 @@ const PageEditor: React.FC = () => {
                     handleContentChange();
                   }}
                   handleComponentClick={handleComponentClick}
+                  previewMode={previewMode}
                 />
             )}
             {page.customValues?.aboutContent && (
