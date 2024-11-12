@@ -33,6 +33,18 @@ class Announcement(BaseModel):
     class Config:
         from_attributes = True
 
+class AnnouncementCreate(BaseModel):
+    title: str
+    date: str
+    message: str
+    category: Optional[AnnouncementType] = AnnouncementType.ANNOUNCEMENT
+
+class AnnouncementUpdate(BaseModel):
+    title: Optional[str] = None
+    date: Optional[str] = None
+    message: Optional[str] = None
+    category: Optional[AnnouncementType] = None
+
 
 class IMeta(BaseModel):
     title: Optional[str] = None

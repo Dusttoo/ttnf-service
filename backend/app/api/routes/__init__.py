@@ -14,3 +14,4 @@ from app.api.routes.service_routes import service_router
 from app.api.routes.waitlist_routes import waitlist_router
 from app.api.routes.contact_routes import contact_router
 from app.api.routes.admin_routes import admin_router
+from app.api.routes.announcement_routes import announcement_router

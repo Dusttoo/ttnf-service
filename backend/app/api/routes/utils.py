@@ -13,3 +13,4 @@ async def clear_cache(redis=Depends(get_redis_client)):
         return {"message": "Redis cache cleared successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error clearing cache: {e}")
+    

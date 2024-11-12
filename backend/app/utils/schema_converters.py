@@ -239,6 +239,16 @@ def convert_to_page_schema(page: Union[Page, dict]) -> PageSchema:
         carousel_images=carousel_images
     )
 
+def convert_to_announcement_schema(announcement: Announcement) -> AnnouncementSchema:
+    return AnnouncementSchema(
+        id=announcement.id,
+        title=announcement.title,
+        date=announcement.date.isoformat(),
+        message=announcement.message,
+        category=announcement.category,
+        page_id=announcement.page_id,
+    )
+
 
 def convert_to_tag_schema(tag: Tag) -> TagResponse:
     return TagResponse(

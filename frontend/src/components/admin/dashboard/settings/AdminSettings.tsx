@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import ClearCacheComponent from './ClearCache';
+import AnnouncementManager from './Announcements';
 
 const SettingsWrapper = styled.div`
   padding: 24px;
@@ -40,9 +41,15 @@ const Tab = styled.div<{ active?: boolean }>`
   margin-right: 16px;
 `;
 
+const TabContent = styled.div`
+  margin-top: 16px;
+`;
+
 const AdminSettings: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<string>('Calls');
+
   const handleTabClick = (tab: string) => {
-    console.log(`Switched to ${tab} tab`);
+    setActiveTab(tab);
   };
 
   return (
@@ -51,15 +58,34 @@ const AdminSettings: React.FC = () => {
       <Description>Manage different settings for your website and pages.</Description>
 
       <TabsContainer>
-        <Tab active={true} onClick={() => handleTabClick('Calls')}>
+        {/* <Tab active={activeTab === 'Calls'} onClick={() => handleTabClick('Calls')}>
           Calls
         </Tab>
-        <Tab onClick={() => handleTabClick('Messages')}>Messages</Tab>
-        <Tab onClick={() => handleTabClick('Users')}>Users</Tab>
-        <Tab onClick={() => handleTabClick('Integrations')}>Integrations</Tab>
+        <Tab active={activeTab === 'Messages'} onClick={() => handleTabClick('Messages')}>
+          Messages
+        </Tab>
+        <Tab active={activeTab === 'Users'} onClick={() => handleTabClick('Users')}>
+          Users
+        </Tab>
+        <Tab active={activeTab === 'Integrations'} onClick={() => handleTabClick('Integrations')}>
+          Integrations
+        </Tab> */}
+        <Tab active={activeTab === 'Announcements'} onClick={() => handleTabClick('Announcements')}>
+          Announcements
+        </Tab>
+        <Tab active={activeTab === 'Cache'} onClick={() => handleTabClick('Cache')}>
+          Cache
+        </Tab>
       </TabsContainer>
 
-      <ClearCacheComponent />
+      <TabContent>
+        {/* {activeTab === 'Calls' && <p>Calls settings content goes here...</p>}
+        {activeTab === 'Messages' && <p>Messages settings content goes here...</p>}
+        {activeTab === 'Users' && <p>Users settings content goes here...</p>}
+        {activeTab === 'Integrations' && <p>Integrations settings content goes here...</p>} */}
+        {activeTab === 'Announcements' && <AnnouncementManager />}
+        {activeTab === 'Cache' && <ClearCacheComponent />}
+      </TabContent>
     </SettingsWrapper>
   );
 };

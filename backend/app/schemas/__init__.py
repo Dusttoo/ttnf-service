@@ -7,7 +7,7 @@ from app.schemas.image_schema import ImageResponse, VideoResponse, MediaResponse
 from app.schemas.global_schema import PaginatedResponse, WebsiteSettingsSchema, UpdateWebsiteSettingsSchema
 from app.schemas.search_schema import DogOut, ProductionOut, BreedingOut, LitterOut, SearchResponse, SearchResult
 from app.schemas.page_schema import PageCreate, Page, PageUpdate, Author, IMeta, Translation, AnnouncementType, \
-    Announcement
+    Announcement, AnnouncementCreate, AnnouncementUpdate
 from app.schemas.navigation_schema import NavLink, NavLinkUpdate, NavLinkCreate
 from app.schemas.service_schema import ServiceStatus, ShippingType, TagCreate, TagResponse, ServiceCategoryCreate, \
     ServiceCategoryResponse, ShippingInfo, ServiceCreate, ServiceResponse, ServiceListResponse

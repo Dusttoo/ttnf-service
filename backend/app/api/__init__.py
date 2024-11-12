@@ -18,7 +18,8 @@ def setup_routes(app: FastAPI):
         service_router,
         waitlist_router,
         contact_router,
-        admin_router
+        admin_router,
+        announcement_router
     )
 
     app.include_router(auth_router, prefix="/api/v1/auth", tags=["Auth"])
@@ -39,4 +40,5 @@ def setup_routes(app: FastAPI):
     app.include_router(settings_router, prefix="/api/v1/settings", tags=["Utilities"])
     app.include_router(contact_router, prefix="/api/v1/contact", tags=["Contact"])
     app.include_router(admin_router, prefix="/api/v1/admin", tags=["Utilities"])
+    app.include_router(announcement_router, prefix="/api/v1/announcements", tags=["Announcements"])
 
