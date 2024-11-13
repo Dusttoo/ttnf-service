@@ -175,6 +175,7 @@ const ProductionForm: React.FC<ProductionFormProps> = ({ onClose, productionId }
         <InputGroup>
           <p>Select 1 profile image</p>
           <ImageUpload
+            id="profile"
             maxImages={1}
             onImagesChange={handleProfilePhotoChange}
             initialImages={formState.profilePhoto ? [formState.profilePhoto] : []}

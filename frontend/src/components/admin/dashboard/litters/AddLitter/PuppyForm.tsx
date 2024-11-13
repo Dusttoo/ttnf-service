@@ -9,6 +9,7 @@ import FieldFeedback from '../../../../common/form/FieldFeedback';
 import DateInput from '../../../../common/form/DateInput';
 import ParentSelector from '../../../../common/form/ParentSelector';
 import { getStatusColor } from '../../../../../utils/dogUtils';
+import ImageUploadContainer from '../../../../common/ImageUploadContainer';
 
 const FormContainer = styled.div`
   display: flex;
@@ -116,6 +117,12 @@ const Label = styled.label`
   margin-right: 0.5rem;
 `;
 
+const SectionTitle = styled.h2`
+  color: ${(props) => props.theme.colors.primary};
+  font-size: 1.2rem;
+  margin-top: 1rem;
+`;
+
 interface PuppyFormProps {
   onClose: () => void;
   title?: string;
@@ -184,8 +191,8 @@ const PuppyForm: React.FC<PuppyFormProps> = ({
     setFormState(updatedFormState);
   };
 
-  const handleProfilePhotoChange = async (urls: string[]) => {
-    const updatedFormState = { ...formState, profilePhoto: urls[0] };
+  const handleProfilePhotoChange = async (url: string) => {
+    const updatedFormState = { ...formState, profilePhoto: url };
     setFormState(updatedFormState);
   };
 
@@ -349,24 +356,13 @@ const PuppyForm: React.FC<PuppyFormProps> = ({
             }))
           }
         />
-        <InputGroup>
-          <p>Select 1 profile image</p>
-          <ImageUpload
-            maxImages={1}
-            onImagesChange={handleProfilePhotoChange}
-            initialImages={
-              formState.profilePhoto ? [formState.profilePhoto] : []
-            }
-          />
-        </InputGroup>
-        <InputGroup>
-          <p>Select up to five gallery images</p>
-          <ImageUpload
-            maxImages={5}
-            onImagesChange={handleGalleryChange}
-            initialImages={galleryPhotos}
-          />
-        </InputGroup>
+       <SectionTitle>Photos</SectionTitle>
+        <ImageUploadContainer
+          profilePhoto={formState.profilePhoto}
+          onProfilePhotoChange={handleProfilePhotoChange}
+          galleryPhotos={galleryPhotos}
+          onGalleryPhotosChange={handleGalleryChange}
+        />
         <SubmitContainer>
           {!isPartOfMultiStep && (
             <>

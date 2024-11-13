@@ -178,10 +178,21 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     }
   };
 
+  const handleOpenFilePicker = () => {
+    console.log("handleOpenFilePicker");
+    if (fileInputRef.current) {
+      console.log("fileInputRef.current");
+      fileInputRef.current.click();
+    }
+  };
+
   return (
     <UploadContainer
       onDrop={handleDrop}
       onDragOver={(e) => e.preventDefault()}
+      ref={fileInputRef}
+      onClick={handleOpenFilePicker}
+      onChange={handleFileChange}
     >
       <UploadLabel htmlFor="file-upload">
         {imageUrls.length < maxImages ? (

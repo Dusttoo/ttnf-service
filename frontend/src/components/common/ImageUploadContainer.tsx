@@ -33,7 +33,7 @@ const ImageUploadContainer: React.FC<ImageUploadContainerProps> = ({
     <div>
       <h3>Profile Photo</h3>
       <ImageUpload
-        id="profile" // Unique identifier for the profile upload
+        id="profile" 
         maxImages={1}
         onImagesChange={(urls) => onProfilePhotoChange(urls[0])}
         initialImages={profilePhoto ? [profilePhoto] : []}
@@ -43,7 +43,7 @@ const ImageUploadContainer: React.FC<ImageUploadContainerProps> = ({
 
       <h3>Gallery Photos</h3>
       <ImageUpload
-        id="gallery" // Unique identifier for the gallery upload
+        id="gallery" 
         maxImages={50}
         onImagesChange={onGalleryPhotosChange}
         initialImages={galleryPhotos}
