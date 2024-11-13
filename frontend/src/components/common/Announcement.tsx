@@ -8,7 +8,7 @@ import DOMPurify from 'dompurify';
 
 const AnnouncementContainer = styled.div`
   background: ${(props) => props.theme.colors.secondaryBackground};
-  border: 5px solid ${(props) => props.theme.colors.primary};
+  border: 8px solid ${(props) => props.theme.colors.primary};
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   margin: 2rem 0;
