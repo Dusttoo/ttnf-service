@@ -70,13 +70,13 @@ INSTRUMENTATION_KEY = settings.instrumentation_key
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-logger.addHandler(
-    AzureLogHandler(connection_string=f"InstrumentationKey={INSTRUMENTATION_KEY}")
-)
+# logger.addHandler(
+#     AzureLogHandler(connection_string=f"InstrumentationKey={INSTRUMENTATION_KEY}")
+# )
 
-exporter = AzureExporter(connection_string=f"InstrumentationKey={INSTRUMENTATION_KEY}")
-sampler = ProbabilitySampler(1.0)
-FastAPIMiddleware(app, exporter=exporter, sampler=sampler)
+# exporter = AzureExporter(connection_string=f"InstrumentationKey={INSTRUMENTATION_KEY}")
+# sampler = ProbabilitySampler(1.0)
+FastAPIMiddleware(app)
 
 
 @app.middleware("http")

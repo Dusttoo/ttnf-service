@@ -9,15 +9,14 @@ import {
     PointerSensor,
     closestCenter,
     DragEndEvent,
-  } from '@dnd-kit/core';
-  import {
+} from '@dnd-kit/core';
+import {
     SortableContext,
     arrayMove,
     useSortable,
     horizontalListSortingStrategy,
-  } from '@dnd-kit/sortable';
-  import { CSS } from '@dnd-kit/utilities';
-import ErrorComponent from './Error';
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 const UploadContainer = styled.div`
   display: flex;
@@ -87,6 +86,8 @@ interface ImageUploadProps {
   onImagesChange: (urls: string[]) => void;
   initialImages?: string[];
   singleImageMode?: boolean;
+  handleDropToProfilePhoto?: (url: string) => void;
+  handleDropToGallery?: (url: string) => void;
 }
 
 const ImageUpload: React.FC<ImageUploadProps> = ({
@@ -94,8 +95,11 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   onImagesChange,
   initialImages = [],
   singleImageMode = false,
+  handleDropToProfilePhoto,
+  handleDropToGallery,
 }) => {
   const [imageUrls, setImageUrls] = useState<string[]>(initialImages);
+  const [draggedImage, setDraggedImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -112,40 +116,19 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 
     const files = event.target.files;
     if (files && files.length > 0) {
-      if (singleImageMode) {
-        const file = files[0];
+      const uploadedUrls: string[] = [];
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
         try {
           const response = await uploadImage(file, 'dogs', file.name, 'image');
-          const newImageUrls = [response.url];
-          setImageUrls(newImageUrls);
-          onImagesChange(newImageUrls);
+          uploadedUrls.push(response.url);
         } catch (error) {
           console.error('Error uploading image:', error);
         }
-      } else {
-        if (files.length + imageUrls.length <= maxImages) {
-          const uploadedUrls: string[] = [];
-          for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-            try {
-              const response = await uploadImage(
-                file,
-                'dogs',
-                file.name,
-                'image'
-              );
-              uploadedUrls.push(response.url);
-            } catch (error) {
-              console.error('Error uploading image:', error);
-            }
-          }
-          const newImageUrls = [...imageUrls, ...uploadedUrls];
-          setImageUrls(newImageUrls);
-          onImagesChange(newImageUrls);
-        } else {
-          alert(`You can upload up to ${maxImages} images.`);
-        }
       }
+      const newImageUrls = singleImageMode ? [uploadedUrls[0]] : [...imageUrls, ...uploadedUrls];
+      setImageUrls(newImageUrls);
+      onImagesChange(newImageUrls);
       event.target.value = '';
     }
   };
@@ -154,13 +137,28 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     fileInputRef.current?.click();
   };
 
-  const handleRemoveImage = (event: React.MouseEvent, index: number) => {
-    event.stopPropagation();
-    event.preventDefault();
+  const handleRemoveImage = (index: number) => {
     const updatedUrls = [...imageUrls];
-    updatedUrls.splice(index, 1);
+    const removedUrl = updatedUrls.splice(index, 1)[0];
     setImageUrls(updatedUrls);
     onImagesChange(updatedUrls);
+    if (singleImageMode && handleDropToGallery) handleDropToGallery(removedUrl);
+  };
+
+  const handleDragStart = (image: string) => {
+    setDraggedImage(image);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    if (draggedImage) {
+      if (singleImageMode && handleDropToGallery) {
+        handleDropToGallery(draggedImage);
+      } else if (!singleImageMode && handleDropToProfilePhoto) {
+        handleDropToProfilePhoto(draggedImage);
+      }
+      setDraggedImage(null);
+    }
   };
 
   const sensors = useSensors(
@@ -177,7 +175,6 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     if (active.id !== over?.id) {
       const oldIndex = imageUrls.findIndex((url) => url === active.id);
       const newIndex = imageUrls.findIndex((url) => url === over?.id);
-
       const newImageUrls = arrayMove(imageUrls, oldIndex, newIndex);
       setImageUrls(newImageUrls);
       onImagesChange(newImageUrls);
@@ -185,10 +182,12 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   };
 
   return (
-    <UploadContainer>
+    <UploadContainer
+      onDrop={handleDrop}
+      onDragOver={(e) => e.preventDefault()}
+    >
       <UploadLabel htmlFor="file-upload">
-        {(!singleImageMode && imageUrls.length < maxImages) ||
-        (singleImageMode && imageUrls.length === 0) ? (
+        {imageUrls.length < maxImages ? (
           <>
             <HiddenInput
               ref={fileInputRef}
@@ -216,9 +215,8 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
                 id={image}
                 image={image}
                 index={index}
-                singleImageMode={singleImageMode}
-                handleReplaceImage={handleReplaceImage}
-                handleRemoveImage={handleRemoveImage}
+                onRemove={() => handleRemoveImage(index)}
+                onDragStart={() => handleDragStart(image)}
               />
             ))}
           </ImagePreview>
@@ -231,51 +229,44 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 export default ImageUpload;
 
 interface SortableImageProps {
-    id: string;
-    image: string;
-    index: number;
-    singleImageMode: boolean;
-    handleReplaceImage: () => void;
-    handleRemoveImage: (event: React.MouseEvent, index: number) => void;
-  }
-  
-  export const SortableImage: React.FC<SortableImageProps> = ({
-    id,
-    image,
-    index,
-    singleImageMode,
-    handleReplaceImage,
-    handleRemoveImage,
-  }) => {
-    const {
-      attributes,
-      listeners,
-      setNodeRef,
-      transform,
-      transition,
-    } = useSortable({ id });
-  
-    const style = {
-      transform: CSS.Transform.toString(transform),
-      transition,
-    };
-  
-    return (
-      <PreviewContainer ref={setNodeRef} style={style} {...attributes} {...listeners}>
-        <PreviewImage
-          src={image}
-          alt={`Preview ${index + 1}`}
-          onClick={singleImageMode ? handleReplaceImage : undefined}
-        />
-        <RemoveButton
-          onClick={(event) => {
-            event.stopPropagation();
-            handleRemoveImage(event, index);
-          }}
-        >
-          ×
-        </RemoveButton>
-      </PreviewContainer>
-    );
+  id: string;
+  image: string;
+  index: number;
+  onRemove: () => void;
+  onDragStart: () => void;
+}
+
+export const SortableImage: React.FC<SortableImageProps> = ({
+  id,
+  image,
+  onRemove,
+  onDragStart,
+}) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
   };
-  
+
+  return (
+    <PreviewContainer
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      onDragStart={onDragStart}
+    >
+      <PreviewImage src={image} alt="Preview" />
+      <RemoveButton onClick={(event) => { event.stopPropagation(); onRemove(); }}>
+        ×
+      </RemoveButton>
+    </PreviewContainer>
+  );
+};

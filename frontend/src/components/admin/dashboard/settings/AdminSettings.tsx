@@ -6,7 +6,7 @@ import AnnouncementManager from './Announcements';
 const SettingsWrapper = styled.div`
   padding: 24px;
   background-color: ${({ theme }) => theme.colors.background};
-  color: ${({ theme }) => theme.colors.text};
+  color: ${({ theme }) => theme.colors.white};
   max-width: 900px;
   height: 90vh;
   margin: 0 auto;
@@ -46,7 +46,7 @@ const TabContent = styled.div`
 `;
 
 const AdminSettings: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<string>('Calls');
+  const [activeTab, setActiveTab] = useState<string>('Announcements');
 
   const handleTabClick = (tab: string) => {
     setActiveTab(tab);

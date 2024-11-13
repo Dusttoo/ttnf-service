@@ -26,16 +26,15 @@ class AnnouncementService:
 
     async def get_announcements_by_page(self, db: AsyncSession, page_id: UUID) -> List[AnnouncementSchema]:
         result = await db.execute(select(Announcement).filter(Announcement.page_id == page_id))
-        announcements = result.scalars().first()
+        announcements = result.scalars().all()
         return [convert_to_announcement_schema(a) for a in announcements]
 
 
     async def create_announcement(self, db: AsyncSession, data: AnnouncementCreate) -> AnnouncementSchema:
         new_announcement = Announcement(
             title=data.title,
-            date=data.date or datetime.utcnow(),
             message=data.message,
-            category=data.category,
+            category=AnnouncementType[data.category.value.upper()] if data.category else AnnouncementType.ANNOUNCEMENT,
             page_id=data.page_id,
         )
         db.add(new_announcement)
@@ -57,7 +56,7 @@ class AnnouncementService:
             return convert_to_announcement_schema(announcement)
         return None
 
-    async def delete_announcement(self, db: AsyncSession, announcement_id: UUID) -> Optional[AnnouncementSchema]:
+    async def delete_announcement(self, db: AsyncSession, announcement_id: int) -> Optional[AnnouncementSchema]:
         result = await db.execute(select(Announcement).filter(Announcement.id == announcement_id))
         announcement = result.scalars().first()
 

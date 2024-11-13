@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Route, Routes, Navigate } from 'react-router-dom';
+import { Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import DynamicPage from '../components/public/DynamicPage';
 import { fetchPages } from '../store/pageSlice';
@@ -26,6 +26,7 @@ const PublicRoutes = () => {
     const dispatch: AppDispatch = useDispatch();
     const { pages } = useSelector((state: RootState) => state.pages);
     const isLoading = useSelector(selectIsLoading);
+    const location = useLocation();
 
     useEffect(() => {
         if (pages.length === 0) {
@@ -36,6 +37,10 @@ const PublicRoutes = () => {
     if (isLoading) {
         return <LoadingSpinner />;
     }
+
+    // Get the current page’s ID based on the route
+    const currentPage = pages.find(page => `/${page.slug}` === location.pathname);
+    const pageId = currentPage?.id;
 
     const pageComponentMap: { [key: string]: React.FC<{ slug?: string }> } = {
         males: MalesPage,
@@ -50,7 +55,7 @@ const PublicRoutes = () => {
 
     return (
         <Routes>
-            <Route path="/" element={<Layout />}>
+            <Route path="/" element={<Layout pageId={pageId ?? ''} />}>
                 <Route path="/landing" element={<HomePage />} />
                 <Route path="/home" element={<Navigate to="/landing" />} />
                 <Route path="/" element={<Navigate to="/landing" />} />
@@ -60,7 +65,6 @@ const PublicRoutes = () => {
                 <Route path="/dogs/:name" element={<DogDetailPage />} />
                 <Route path="/males/:name" element={<DogDetailPage />} />
                 <Route path="/females/:name" element={<DogDetailPage />} />
-
 
                 {pages.map((page) => {
                     const Component = pageComponentMap[page.slug] || DynamicPage;

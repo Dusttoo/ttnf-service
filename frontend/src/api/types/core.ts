@@ -77,9 +77,11 @@ export enum GenderEnum {
 export enum StatusEnum {
     Available = 'Available',
     Sold = 'Sold',
-    Stud = 'Stud',
+    Stud = 'Available For Stud',
     Retired = 'Retired',
-    Active = 'Active'
+    Active = 'Active',
+    Production = 'Production',
+    AbkcChampion = 'ABKC Champion'
 }
 
 export enum AnnouncementCategory {

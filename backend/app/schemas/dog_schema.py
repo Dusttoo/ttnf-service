@@ -1,11 +1,8 @@
 from datetime import date
 from enum import Enum
-from typing import TYPE_CHECKING, List, Optional
+from typing import List, Optional
 
 from pydantic import BaseModel
-
-if TYPE_CHECKING:
-    from app.schemas import Dog
 
 
 class GenderEnum(str, Enum):
@@ -20,6 +17,7 @@ class StatusEnum(str, Enum):
     retired = "Retired"
     active = "Active"
     abkc_champion = "ABKC Champion"
+    production = "Production"
 
 
 class HealthInfoBase(BaseModel):
@@ -95,7 +93,7 @@ class DogBase(BaseModel):
     dob: Optional[date] = None
     gender: GenderEnum
     color: Optional[str] = None
-    status: Optional[StatusEnum] = None
+    statuses: Optional[List[StatusEnum]] = []
     profile_photo: Optional[str] = None
     stud_fee: Optional[int] = None
     sale_fee: Optional[int] = None
@@ -119,7 +117,7 @@ class DogUpdate(BaseModel):
     dob: Optional[date] = None
     gender: Optional[GenderEnum] = None
     color: Optional[str] = None
-    status: Optional[StatusEnum] = None
+    statuses: Optional[List[StatusEnum]] = []
     profile_photo: Optional[str] = None
     stud_fee: Optional[int] = None
     sale_fee: Optional[int] = None

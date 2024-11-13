@@ -5,6 +5,7 @@ import {
   createAnnouncement,
   updateAnnouncement,
   deleteAnnouncement,
+  getAnnouncementByPageId,
 } from '../api/announcementApi';
 import { AnnouncementUpdate, AnnouncementCreate, Announcement } from '../api/types/announcements';
 
@@ -23,6 +24,18 @@ export const useAnnouncement = (announcementId: number) => {
     () => getAnnouncementById(announcementId),
     {
       enabled: !!announcementId, // only fetch if ID is present
+      staleTime: 0,
+    }
+  );
+};
+
+// Fetch announcements by page ID
+export const useAnnouncementsByPageId = (pageId: string) => {
+  return useQuery<Announcement[], Error>(
+    ['announcements', pageId],
+    () => getAnnouncementByPageId(pageId),
+    {
+      enabled: !!pageId, // Only fetch if pageId is present
       staleTime: 0,
     }
   );

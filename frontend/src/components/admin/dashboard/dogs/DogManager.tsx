@@ -197,7 +197,7 @@ const AdminDogList: React.FC<{ defaultGender?: GenderEnum; owned?: boolean }> = 
                           {dogs.map((dog: Dog) => (
                               <DogCard key={dog.id}>
                                   <DogImage src={dog.profilePhoto} alt={dog.name} />
-                                  <a href={`/dogs/${dog.id}`}><DogName>{dog.name}</DogName></a>
+                                  <a href={`/admin/dashboard/dogs/${dog.id}`}><DogName>{dog.name}</DogName></a>
                                   <ButtonContainer>
                                       <Button onClick={() => handleEdit(dog.id)}>Edit</Button>
                                       <Button onClick={() => handleDelete(dog.id)}>Delete</Button>

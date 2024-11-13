@@ -18,7 +18,7 @@ from app.models import (
     Production,
     StatusEnum,
     litter_puppies,
-    Photo
+    Photo,
 )
 from app.schemas import Litter as LitterSchema
 from app.schemas import LitterCreate, LitterUpdate, PuppyCreate
@@ -52,8 +52,11 @@ class LitterService:
                             selectinload(Production.sire), selectinload(Production.dam)
                         ),
                         selectinload(Dog.children).options(
-                            selectinload(Dog.health_infos), selectinload(Dog.photos)
+                            selectinload(Dog.statuses),
+                            selectinload(Dog.health_infos),
+                            selectinload(Dog.photos),
                         ),
+                        selectinload(Dog.statuses),
                     ),
                     selectinload(Litter.breeding).options(
                         selectinload(Breeding.female_dog).options(
@@ -61,12 +64,14 @@ class LitterService:
                             selectinload(Dog.photos),
                             selectinload(Dog.productions),
                             selectinload(Dog.children),
+                            selectinload(Dog.statuses),
                         ),
                         selectinload(Breeding.male_dog).options(
                             selectinload(Dog.health_infos),
                             selectinload(Dog.photos),
                             selectinload(Dog.productions),
                             selectinload(Dog.children),
+                            selectinload(Dog.statuses),
                         ),
                     ),
                 )
@@ -122,8 +127,11 @@ class LitterService:
                             selectinload(Production.sire), selectinload(Production.dam)
                         ),
                         selectinload(Dog.children).options(
-                            selectinload(Dog.health_infos), selectinload(Dog.photos)
+                            selectinload(Dog.statuses),
+                            selectinload(Dog.health_infos),
+                            selectinload(Dog.photos),
                         ),
+                        selectinload(Dog.statuses),
                     ),
                     selectinload(Litter.breeding).options(
                         selectinload(Breeding.female_dog).options(
@@ -131,12 +139,14 @@ class LitterService:
                             selectinload(Dog.photos),
                             selectinload(Dog.productions),
                             selectinload(Dog.children),
+                            selectinload(Dog.statuses),
                         ),
                         selectinload(Breeding.male_dog).options(
                             selectinload(Dog.health_infos),
                             selectinload(Dog.photos),
                             selectinload(Dog.productions),
                             selectinload(Dog.children),
+                            selectinload(Dog.statuses),
                         ),
                     ),
                 )
@@ -183,12 +193,14 @@ class LitterService:
                             selectinload(Dog.photos),
                             selectinload(Dog.productions),
                             selectinload(Dog.children),
+                            selectinload(Dog.statuses),
                         ),
                         selectinload(Breeding.male_dog).options(
                             selectinload(Dog.health_infos),
                             selectinload(Dog.photos),
                             selectinload(Dog.productions),
                             selectinload(Dog.children),
+                            selectinload(Dog.statuses),
                         ),
                     ),
                 )
@@ -215,7 +227,9 @@ class LitterService:
                             selectinload(Production.sire), selectinload(Production.dam)
                         ),
                         selectinload(Dog.children).options(
-                            selectinload(Dog.health_infos), selectinload(Dog.photos)
+                            selectinload(Dog.statuses),
+                            selectinload(Dog.health_infos),
+                            selectinload(Dog.photos),
                         ),
                     ),
                     selectinload(Litter.breeding).options(
@@ -224,12 +238,14 @@ class LitterService:
                             selectinload(Dog.photos),
                             selectinload(Dog.productions),
                             selectinload(Dog.children),
+                            selectinload(Dog.statuses),
                         ),
                         selectinload(Breeding.male_dog).options(
                             selectinload(Dog.health_infos),
                             selectinload(Dog.photos),
                             selectinload(Dog.productions),
                             selectinload(Dog.children),
+                            selectinload(Dog.statuses),
                         ),
                     ),
                 )
@@ -254,8 +270,11 @@ class LitterService:
                                 selectinload(Production.dam),
                             ),
                             selectinload(Dog.children).options(
-                                selectinload(Dog.health_infos), selectinload(Dog.photos)
+                                selectinload(Dog.statuses),
+                                selectinload(Dog.health_infos),
+                                selectinload(Dog.photos),
                             ),
+                            selectinload(Dog.statuses),
                         ),
                         selectinload(Litter.breeding).options(
                             selectinload(Breeding.female_dog).options(
@@ -263,12 +282,14 @@ class LitterService:
                                 selectinload(Dog.photos),
                                 selectinload(Dog.productions),
                                 selectinload(Dog.children),
+                                selectinload(Dog.statuses),
                             ),
                             selectinload(Breeding.male_dog).options(
                                 selectinload(Dog.health_infos),
                                 selectinload(Dog.photos),
                                 selectinload(Dog.productions),
                                 selectinload(Dog.children),
+                                selectinload(Dog.statuses),
                             ),
                         ),
                     )
@@ -341,11 +362,16 @@ class LitterService:
                         selectinload(Dog.health_infos),
                         selectinload(Dog.photos),
                         selectinload(Dog.productions).options(
-                            selectinload(Production.sire), selectinload(Production.dam)
+                            selectinload(Dog.statuses),
+                            selectinload(Production.sire),
+                            selectinload(Production.dam),
                         ),
                         selectinload(Dog.children).options(
-                            selectinload(Dog.health_infos), selectinload(Dog.photos)
+                            selectinload(Dog.statuses),
+                            selectinload(Dog.health_infos),
+                            selectinload(Dog.photos),
                         ),
+                        selectinload(Dog.statuses),
                     ),
                     selectinload(Litter.breeding).options(
                         selectinload(Breeding.female_dog).options(
@@ -353,12 +379,14 @@ class LitterService:
                             selectinload(Dog.photos),
                             selectinload(Dog.productions),
                             selectinload(Dog.children),
+                            selectinload(Dog.statuses),
                         ),
                         selectinload(Breeding.male_dog).options(
                             selectinload(Dog.health_infos),
                             selectinload(Dog.photos),
                             selectinload(Dog.productions),
                             selectinload(Dog.children),
+                            selectinload(Dog.statuses),
                         ),
                     ),
                 )
@@ -448,6 +476,7 @@ class LitterService:
                         selectinload(Dog.photos),
                         selectinload(Dog.productions),
                         selectinload(Dog.children),
+                        selectinload(Dog.statuses),
                     )
                 )
             )

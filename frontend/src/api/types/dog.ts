@@ -8,7 +8,7 @@ export interface Dog {
     dob: string;
     gender: GenderEnum;
     color?: string;
-    status: StatusEnum;
+    statuses: StatusEnum[] | undefined;
     profilePhoto: string;
     studFee?: number;
     saleFee?: number;
@@ -37,7 +37,7 @@ export interface DogCreate {
     dob: string;
     gender: GenderEnum;
     color?: string;
-    status?: StatusEnum;
+    statuses?: StatusEnum[] | undefined;
     profilePhoto: string;
     studFee?: number;
     saleFee?: number;
@@ -48,6 +48,9 @@ export interface DogCreate {
     parentFemaleId?: number;
     healthInfos?: HealthInfoCreate[];
     galleryPhotos?: string[];
+    isRetired?: boolean;
+    isProduction?: boolean;
+
 }
 
 export interface DogUpdate {
@@ -55,7 +58,7 @@ export interface DogUpdate {
     dob?: string;
     gender?: GenderEnum;
     color?: string;
-    status?: StatusEnum;
+    statuses?: StatusEnum[] | undefined;
     profilePhoto?: string;
     studFee?: number;
     saleFee?: number;
@@ -66,6 +69,9 @@ export interface DogUpdate {
     parentFemaleId?: number;
     healthInfos?: HealthInfoCreate[];
     galleryPhotos?: string[];
+    isRetired?: boolean;
+    isProduction?: boolean;
+
 
 }
 

@@ -41,7 +41,7 @@ def convert_to_dog_schema(dog: Dog) -> DogSchema:
         dob=dog.dob,
         gender=dog.gender,
         color=dog.color,
-        status=dog.status,
+        statuses=[status.status for status in dog.statuses], 
         profile_photo=dog.profile_photo,
         stud_fee=dog.stud_fee,
         sale_fee=dog.sale_fee,
@@ -175,14 +175,7 @@ def convert_to_page_schema(page: Union[Page, dict]) -> PageSchema:
     announcements = page["announcements"] if isinstance(page, dict) else page.announcements
     if announcements and isinstance(announcements, list):
         announcements = [
-            AnnouncementSchema(
-                id=announcement.get("id") if isinstance(announcement, dict) else announcement.id,
-                title=announcement.get("title") if isinstance(announcement, dict) else announcement.title,
-                date=announcement["date"] if isinstance(announcement, dict)
-                else (announcement.date.isoformat() if isinstance(announcement.date, datetime) else announcement.date),
-                message=announcement.get("message") if isinstance(announcement, dict) else announcement.message,
-                category=announcement.get("category") if isinstance(announcement, dict) else announcement.category
-            )
+            convert_to_announcement_schema(announcement)
             for announcement in announcements
         ]
 
@@ -241,12 +234,12 @@ def convert_to_page_schema(page: Union[Page, dict]) -> PageSchema:
 
 def convert_to_announcement_schema(announcement: Announcement) -> AnnouncementSchema:
     return AnnouncementSchema(
-        id=announcement.id,
-        title=announcement.title,
-        date=announcement.date.isoformat(),
-        message=announcement.message,
-        category=announcement.category,
-        page_id=announcement.page_id,
+        id=announcement["id"] if isinstance(announcement, dict) else announcement.id,
+        title=announcement["title"] if isinstance(announcement, dict) else announcement.title,
+        date=announcement["date"] if isinstance(announcement, dict) else announcement.date.isoformat(),
+        message=announcement["message"] if isinstance(announcement, dict) else announcement.message,
+        category=announcement["category"] if isinstance(announcement, dict) else announcement.category,
+        page_id=str(announcement["page_id"]) if isinstance(announcement, dict) and announcement["page_id"] else str(announcement.page_id) if announcement.page_id else None,
     )
 
 

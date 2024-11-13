@@ -6,6 +6,7 @@ import styled from 'styled-components';
 import { StatusBadge } from '../common/StatusBadge';
 import ImageGallery from '../common/ImageGallery';
 import LoadingSpinner from '../common/LoadingSpinner';
+import { getStatusColor } from '../../utils/dogUtils';
 
 const DogDetailContainer = styled.div`
   padding: 2rem;
@@ -56,89 +57,80 @@ const PedigreeLink = styled.a`
 `;
 
 const DogDetailPage: React.FC = () => {
-    const { name } = useParams<{ name: string }>();
-    const [searchParams] = useSearchParams();
-    const [dog, setDog] = useState<Dog | null>(null);
+  const { name } = useParams<{ name: string }>();
+  const [searchParams] = useSearchParams();
+  const [dog, setDog] = useState<Dog | null>(null);
 
-    useEffect(() => {
-        const fetchDog = async () => {
-            if (name) {
-                const id = searchParams.get('id') || '0';
-                const data = await getDogById(parseInt(id));
-                setDog(data);
-            }
-        };
-        fetchDog();
-    }, [name]);
-
-    if (!dog) return <LoadingSpinner />;
-
-    const getStatusColor = (status: string): string => {
-        switch (status) {
-            case 'Available For Stud':
-                return '#28a745'; // green
-            case 'Sold':
-                return '#6c757d'; // gray
-            case 'Stud':
-                return '#007bff'; // blue
-            case 'Retired':
-                return '#dc3545'; // red
-            default:
-                return '#E0E0E0';
-        }
+  useEffect(() => {
+    const fetchDog = async () => {
+      if (name) {
+        const id = searchParams.get('id') || '0';
+        const data = await getDogById(parseInt(id));
+        setDog(data);
+      }
     };
+    fetchDog();
+  }, [name]);
 
-    return (
-        <DogDetailContainer>
-            <Header>{dog.name}</Header>
-            <ImageContainer>
-                <Image
-                    src={dog.profilePhoto ? dog.profilePhoto : 'https://ttnfas.blob.core.windows.net/ttnf/dogs/logo.af08c321461d0f484883.png'}
-                    alt={dog.name} />
-            </ImageContainer>
-            <Section>
-                {dog.status && (
-                    <StatusBadge color={getStatusColor(dog.status)}>
-                        {dog.status.charAt(0).toUpperCase() + dog.status.slice(1)}
-                    </StatusBadge>
-                )}
-                <Detail>
-                    <strong>Age:</strong> {dog.dob}
-                </Detail>
-                <Detail>
-                    <strong>Gender:</strong> {dog.gender}
-                </Detail>
-                <Detail>
-                    <strong>Color:</strong> {dog.color}
-                </Detail>
-                {dog.studFee && (
-                    <Detail>
-                        <strong>Stud Fee:</strong> ${dog.studFee}
-                    </Detail>
-                )}
-                {dog.saleFee && (
-                    <Detail>
-                        <strong>Sale Fee:</strong> ${dog.saleFee}
-                    </Detail>
-                )}
-                <Detail>
-                    <strong>Description:</strong> {dog.description}
-                </Detail>
-                {dog.pedigreeLink && (
-                    <Detail>
-                        <PedigreeLink
-                            href={dog.pedigreeLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            Pedigree Link
-                        </PedigreeLink>
-                    </Detail>
-                )}
-                <ImageGallery images={dog.photos} />
-            </Section>
-        </DogDetailContainer>
-    );
+  if (!dog) return <LoadingSpinner />;
+
+  return (
+    <DogDetailContainer>
+      <Header>{dog.name}</Header>
+      <ImageContainer>
+        <Image
+          src={
+            dog.profilePhoto
+              ? dog.profilePhoto
+              : 'https://ttnfas.blob.core.windows.net/ttnf/dogs/logo.af08c321461d0f484883.png'
+          }
+          alt={dog.name}
+        />
+      </ImageContainer>
+      <Section>
+        {dog?.statuses &&
+          dog.statuses.map((status) => (
+            <StatusBadge key={status} color={getStatusColor(status)}>
+              {status}
+            </StatusBadge>
+          ))}
+        <Detail>
+          <strong>Age:</strong> {dog.dob}
+        </Detail>
+        <Detail>
+          <strong>Gender:</strong> {dog.gender}
+        </Detail>
+        <Detail>
+          <strong>Color:</strong> {dog.color}
+        </Detail>
+        {dog.studFee && (
+          <Detail>
+            <strong>Stud Fee:</strong> ${dog.studFee}
+          </Detail>
+        )}
+        {dog.saleFee && (
+          <Detail>
+            <strong>Sale Fee:</strong> ${dog.saleFee}
+          </Detail>
+        )}
+        <Detail>
+          <strong>Description:</strong> {dog.description}
+        </Detail>
+        {dog.pedigreeLink && (
+          <Detail>
+            <PedigreeLink
+              href={dog.pedigreeLink}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Pedigree Link
+            </PedigreeLink>
+          </Detail>
+        )}
+        <ImageGallery images={dog.photos} />
+      </Section>
+    </DogDetailContainer>
+  );
 };
 
 export default DogDetailPage;

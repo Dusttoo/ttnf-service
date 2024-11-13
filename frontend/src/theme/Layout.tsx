@@ -6,6 +6,8 @@ import AdminToolbar from '../components/admin/Toolbar';
 import { Outlet } from 'react-router-dom';
 import ErrorBoundary from '../components/common/ErrorBoundary';
 import Breadcrumb from '../components/common/Breadcrumb';
+import AnnouncementSection from '../components/common/Announcement';
+import { useAnnouncementsByPageId } from '../hooks/useAnnouncements';
 
 const PageContainer = styled.div`
   display: flex;
@@ -19,9 +21,13 @@ const ContentContainer = styled.div`
   display: flex;
   flex-direction: column;
   margin-top: 3rem;
+  align-items: center;
 `;
 
-const Layout: React.FC = () => {
+const Layout: React.FC<{ pageId: string }> = ({ pageId }) => {
+  // Fetch announcements for the current page
+  const { data: announcements = [] } = useAnnouncementsByPageId(pageId);
+
   return (
     <PageContainer>
       <AdminToolbar />
@@ -29,6 +35,12 @@ const Layout: React.FC = () => {
       <ContentContainer>
         <Breadcrumb />
         <ErrorBoundary>
+          {announcements.length > 0 && (
+            <AnnouncementSection
+              title="Latest Announcements"
+              announcements={announcements}
+            />
+          )}
           <Outlet />
         </ErrorBoundary>
       </ContentContainer>

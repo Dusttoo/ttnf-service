@@ -5,6 +5,7 @@ export const NavContainer = styled.nav`
     flex-direction: column;
     background-color: ${({ theme }) => theme.colors.primary};
     padding: 1rem;
+    width: 100%;
     
     @media (min-width: 768px) {
         flex-direction: row;

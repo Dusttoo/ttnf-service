@@ -1,6 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
 import { LitterCreate, PuppyCreate } from '../../../../../api/types/breeding';
+import { StatusBadge } from '../../../../common/StatusBadge';
+import { getStatusColor } from '../../../../../utils/dogUtils';
 
 interface ReviewFormProps {
     litterData: LitterCreate;
@@ -92,7 +94,11 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ litterData, puppyList, onSubmit
                         <p>Name: {puppy.name}</p>
                         <p>Date of Birth: {puppy.dob}</p>
                         <p>Gender: {puppy.gender}</p>
-                        <p>Status: {puppy.status}</p>
+                        <p>Status: {puppy?.statuses ? puppy.statuses.map((status) => (
+                  <StatusBadge key={status} color={getStatusColor(status)}>
+                    {status}
+                  </StatusBadge>
+                )) : "No active status"}</p>
                         <p>Color: {puppy.color}</p>
                         <p>Description: {puppy.description}</p>
                     </PuppyInfo>

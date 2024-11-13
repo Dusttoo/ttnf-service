@@ -13,7 +13,7 @@ const CachePageContainer = styled.div`
 `;
 
 const SectionTitle = styled.h2`
-  color: ${(props) => props.theme.colors.secondary};
+  color: ${(props) => props.theme.colors.white};
   font-family: ${(props) => props.theme.fonts.secondary};
   margin-bottom: 16px;
 `;

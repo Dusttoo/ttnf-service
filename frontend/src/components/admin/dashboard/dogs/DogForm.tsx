@@ -8,6 +8,8 @@ import ParentSelector from '../../../common/form/ParentSelector';
 import ImageUpload from '../../../common/ImageUpload';
 import FieldFeedback from '../../../common/form/FieldFeedback';
 import { useDog } from '../../../../hooks/useDog';
+import Checkbox from '../../../common/form/Checkbox';
+import ImageUploadContainer from '../../../common/ImageUploadContainer';
 
 const FormContainer = styled.div`
   display: flex;
@@ -54,6 +56,28 @@ const Form = styled.form`
   gap: 1rem;
 `;
 
+const Section = styled.div`
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+`;
+
+const CheckboxContainer = styled.div`
+  display: flex;
+  justify-content: space-evenly;
+`;
+
+const Label = styled.label`
+  margin-right: 0.5rem;
+`;
+
+const SelectContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+`;
+
 interface DogFormProps {
   onClose: () => void;
   dogId?: number;
@@ -63,6 +87,8 @@ interface DogFormProps {
   onDogCreated?: (dog: DogCreate) => void;
   onDogUpdated?: (dog: DogUpdate) => void;
 }
+
+// Import statements remain the same...
 
 const DogForm: React.FC<DogFormProps> = ({
   onClose,
@@ -80,10 +106,15 @@ const DogForm: React.FC<DogFormProps> = ({
     name: '',
     dob: '',
     gender: '' as GenderEnum,
-    status: undefined,
+    statuses: [] as StatusEnum[],
     color: '',
     description: '',
     profilePhoto: '',
+    studFee: undefined,
+    saleFee: undefined,
+    pedigreeLink: '',
+    isRetired: false,
+    isProduction: false,
     parentMaleId: undefined,
     parentFemaleId: undefined,
     healthInfos: [],
@@ -94,8 +125,33 @@ const DogForm: React.FC<DogFormProps> = ({
   const [galleryPhotos, setGalleryPhotos] = useState<string[]>([]);
   const [errors, setErrors] = useState<{ name?: string; gender?: string }>({});
 
-  const isFormInitialized = useRef(false);
+  const handleStatusChange = (status: StatusEnum) => {
+    setFormState((prevState) => {
+      const updatedStatuses = prevState.statuses ? [...prevState.statuses] : [];
 
+      if (updatedStatuses.includes(status)) {
+        const newStatuses = updatedStatuses.filter((s) => s !== status);
+        return {
+          ...prevState,
+          statuses: newStatuses,
+          isRetired:
+            status === StatusEnum.Retired ? false : prevState.isRetired,
+          isProduction:
+            status === StatusEnum.Production ? false : prevState.isProduction,
+        };
+      } else {
+        return {
+          ...prevState,
+          statuses: [...updatedStatuses, status],
+          isRetired: status === StatusEnum.Retired ? true : prevState.isRetired,
+          isProduction:
+            status === StatusEnum.Production ? true : prevState.isProduction,
+        };
+      }
+    });
+  };
+
+  const isFormInitialized = useRef(false);
   useEffect(() => {
     if (dog && !isFormInitialized.current) {
       setFormState({
@@ -103,13 +159,22 @@ const DogForm: React.FC<DogFormProps> = ({
         name: dog.name,
         dob: dog.dob,
         gender: dog.gender as GenderEnum,
-        status: dog.status as StatusEnum,
+        statuses: Array.isArray(dog.statuses)
+          ? dog.statuses.filter(
+              (status): status is StatusEnum => status !== undefined
+            )
+          : [],
         color: dog.color,
         description: dog.description,
         profilePhoto: dog.profilePhoto || '',
         parentMaleId: dog.parentMaleId,
         parentFemaleId: dog.parentFemaleId,
         healthInfos: dog.healthInfos,
+        studFee: dog.studFee,
+        saleFee: dog.saleFee,
+        pedigreeLink: dog.pedigreeLink,
+        isRetired: dog.isRetired,
+        isProduction: dog.isProduction,
       });
       const sortedGalleryPhotos = dog.photos
         .filter((photo) => photo.photoUrl !== dog.profilePhoto)
@@ -122,8 +187,8 @@ const DogForm: React.FC<DogFormProps> = ({
     }
   }, [dog]);
 
-  const handleProfilePhotoChange = (urls: string[]) => {
-    setFormState({ ...formState, profilePhoto: urls[0] || '' });
+  const handleProfilePhotoChange = (url: string) => {
+    setFormState({ ...formState, profilePhoto: url });
   };
 
   const handleGalleryPhotosChange = (urls: string[]) => {
@@ -160,7 +225,7 @@ const DogForm: React.FC<DogFormProps> = ({
     <FormContainer>
       <h1>{title}</h1>
       <Form onSubmit={handleSubmit}>
-        {/* Form fields */}
+        {/* Name Field */}
         <Input
           type="text"
           name="name"
@@ -171,6 +236,7 @@ const DogForm: React.FC<DogFormProps> = ({
         />
         {errors.name && <FieldFeedback message={errors.name} />}
 
+        {/* Date of Birth Field */}
         <Input
           type="date"
           name="dob"
@@ -179,6 +245,7 @@ const DogForm: React.FC<DogFormProps> = ({
           onChange={(e) => setFormState({ ...formState, dob: e.target.value })}
         />
 
+        {/* Gender Dropdown */}
         <Dropdown
           name="gender"
           value={formState.gender}
@@ -192,6 +259,27 @@ const DogForm: React.FC<DogFormProps> = ({
         </Dropdown>
         {errors.gender && <FieldFeedback message={errors.gender} />}
 
+        {/* Status Dropdown */}
+        <Section>
+          <SectionTitle>Status</SectionTitle>
+          <CheckboxContainer>
+            {Object.values(StatusEnum).map((status) => (
+              <SelectContainer key={status}>
+                <Label>{status}</Label>
+                <Checkbox
+                  checked={
+                    formState.statuses
+                      ? formState.statuses.includes(status)
+                      : false
+                  }
+                  onChange={() => handleStatusChange(status)}
+                />
+              </SelectContainer>
+            ))}
+          </CheckboxContainer>
+        </Section>
+
+        {/* Color Field */}
         <Input
           type="text"
           name="color"
@@ -202,6 +290,7 @@ const DogForm: React.FC<DogFormProps> = ({
           }
         />
 
+        {/* Description Field */}
         <Input
           type="text"
           name="description"
@@ -212,6 +301,50 @@ const DogForm: React.FC<DogFormProps> = ({
           }
         />
 
+        {/* Stud Fee Field */}
+        <Input
+          type="number"
+          name="studFee"
+          placeholder="Stud Fee"
+          value={dog?.studFee ? dog.studFee : formState.studFee || ''}
+          onChange={(e) =>
+            setFormState({
+              ...formState,
+              studFee: Number(e.target.value) || undefined,
+            })
+          }
+        />
+
+        {/* Sale Fee Field */}
+        <Input
+          type="number"
+          name="saleFee"
+          placeholder="Sale Fee"
+          value={dog?.saleFee ? dog.saleFee : formState.saleFee || ''}
+          onChange={(e) =>
+            setFormState({
+              ...formState,
+              saleFee: Number(e.target.value) || undefined,
+            })
+          }
+        />
+
+        {/* Pedigree Link Field */}
+        <Input
+          type="url"
+          name="pedigreeLink"
+          placeholder="Pedigree Link"
+          value={
+            dog?.pedigreeLink ? dog.pedigreeLink : formState.pedigreeLink || ''
+          }
+          onChange={(e) =>
+            setFormState({ ...formState, pedigreeLink: e.target.value })
+          }
+        />
+
+        {/* Retired Checkbox */}
+
+        {/* Parent Selector */}
         <ParentSelector
           sireId={formState.parentMaleId}
           damId={formState.parentFemaleId}
@@ -229,22 +362,16 @@ const DogForm: React.FC<DogFormProps> = ({
           }
         />
 
-        <SectionTitle>Profile Photo</SectionTitle>
-        <ImageUpload
-          key={formState.profilePhoto}
-          maxImages={1}
-          onImagesChange={handleProfilePhotoChange}
-          initialImages={formState.profilePhoto ? [formState.profilePhoto] : []}
-          singleImageMode={true}
+        {/* Profile Photo Upload */}
+        <SectionTitle>Photos</SectionTitle>
+        <ImageUploadContainer
+          profilePhoto={formState.profilePhoto}
+          onProfilePhotoChange={handleProfilePhotoChange}
+          galleryPhotos={galleryPhotos}
+          onGalleryPhotosChange={handleGalleryPhotosChange}
         />
 
-        <SectionTitle>Gallery Photos</SectionTitle>
-        <ImageUpload
-          maxImages={50}
-          onImagesChange={handleGalleryPhotosChange}
-          initialImages={galleryPhotos}
-        />
-
+        {/* Form Buttons */}
         <ButtonContainer>
           <Button $variant="primary" type="submit">
             Save

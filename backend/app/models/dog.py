@@ -17,6 +17,15 @@ class StatusEnum(enum.Enum):
     retired = "Retired"
     active = "Active"
     abkc_champion = "ABKC Champion"
+    production = "Production"
+
+class DogStatusAssociation(Base):
+    __tablename__ = "dog_status_association"
+    dog_id = Column(Integer, ForeignKey("dogs.id", ondelete="CASCADE"), primary_key=True)
+    status = Column(Enum(StatusEnum), primary_key=True)
+
+    dog = relationship("Dog", back_populates="statuses")
+
 
 
 class HealthInfo(Base):
@@ -97,3 +106,4 @@ class Dog(Base):
     productions = relationship(
         "Production", secondary=dog_production_link, back_populates="dogs"
     )
+    statuses = relationship("DogStatusAssociation", back_populates="dog", cascade="all, delete-orphan")

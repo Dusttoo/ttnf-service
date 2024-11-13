@@ -5,6 +5,7 @@ import { Dog } from '../../api/types/dog';
 import { GenderEnum } from '../../api/types/core';
 import { StatusBadge } from '../common/StatusBadge';
 import { LinkComponent } from '../common/Link';
+import { getStatusColor } from '../../utils/dogUtils';
 
 const Tile = styled.div`
   background-color: ${(props) => props.theme.colors.cardBackground};
@@ -122,20 +123,7 @@ const Description = styled(Detail)`
 `;
 
 const DogTile: React.FC<{ dog: Dog }> = ({ dog }) => {
-    const getStatusColor = (status: string): string => {
-        switch (status) {
-            case 'Available For Stud':
-                return '#28a745'; // green
-            case 'Sold':
-                return '#6c757d'; // gray
-            case 'Stud':
-                return '#007bff'; // blue
-            case 'Retired':
-                return '#dc3545'; // red
-            default:
-                return '#E0E0E0';
-        }
-    };
+
     const slug = dog.gender === GenderEnum.Male ? 'males' : 'females';
 
     return (
@@ -173,13 +161,11 @@ const DogTile: React.FC<{ dog: Dog }> = ({ dog }) => {
                     >
                         View Profile
                     </ViewProfileLink>
-                    {dog.status && (
-                        <StatusContainer>
-                            <StatusBadge color={getStatusColor(dog.status)}>
-                                {dog.status}
-                            </StatusBadge>
-                        </StatusContainer>
-                    )}
+                    {dog?.statuses ? dog.statuses.map((status) => (
+                  <StatusBadge key={status} color={getStatusColor(status)}>
+                    {status}
+                  </StatusBadge>
+                )) : "No active status"}
                 </div>
             </Info>
         </Tile>

@@ -27,16 +27,15 @@ class Announcement(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, nullable=False)
-    date = Column(DateTime(timezone=True), server_default=func.now())
+    date = Column(DateTime(timezone=True), server_default=func.now(), nullable=True)
     message = Column(Text, nullable=False)
     category = Column(SQLAlchemyEnum(AnnouncementType), nullable=False)
     page_id = Column(ForeignKey("pages.id"))
 
     def __init__(
-        self, title: str, date: datetime, message: str, category: AnnouncementType, page_id: str
+        self, title: str, message: str, category: AnnouncementType, page_id: str
     ):
         self.title = title
-        self.date = date
         self.message = message
         self.category = category
         self.page_id = page_id

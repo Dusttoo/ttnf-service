@@ -26,24 +26,27 @@ class AnnouncementType(str, Enum):
 class Announcement(BaseModel):
     id: int
     title: str
-    date: str
+    date: datetime
     message: str
-    category: Optional[AnnouncementType] = AnnouncementType.ANNOUNCEMENT
+    category: Optional[AnnouncementType]
+    page_id: Optional[str] = None
 
     class Config:
         from_attributes = True
 
 class AnnouncementCreate(BaseModel):
     title: str
-    date: str
     message: str
-    category: Optional[AnnouncementType] = AnnouncementType.ANNOUNCEMENT
+    category: Optional[AnnouncementType]
+    page_id: str
+
 
 class AnnouncementUpdate(BaseModel):
     title: Optional[str] = None
-    date: Optional[str] = None
     message: Optional[str] = None
     category: Optional[AnnouncementType] = None
+    page_id: str
+
 
 
 class IMeta(BaseModel):

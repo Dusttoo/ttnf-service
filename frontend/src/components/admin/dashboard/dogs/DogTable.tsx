@@ -1,6 +1,8 @@
 import React from 'react';
 import { Dog } from '../../../../api/types/dog';
 import { Table, TableBody, TableCell, TableHead, TableRow, TableContainer, TableSortLabel } from '@mui/material';
+import { StatusBadge } from '../../../common/StatusBadge';
+import { getStatusColor } from '../../../../utils/dogUtils';
 
 interface DogTableProps {
   dogs: Dog[];
@@ -27,7 +29,13 @@ const DogTable: React.FC<DogTableProps> = ({ dogs, onEdit, onDelete }) => {
               <TableCell>{dog.name}</TableCell>
               <TableCell>{dog.gender}</TableCell>
               <TableCell>{dog.color}</TableCell>
-              <TableCell>{dog.status}</TableCell>
+              <TableCell>
+                {dog?.statuses ? dog.statuses.map((status) => (
+                  <StatusBadge key={status} color={getStatusColor(status)}>
+                    {status}
+                  </StatusBadge>
+                )) : "No active status"}
+              </TableCell>
               <TableCell>
                 <button onClick={() => onEdit(dog.id)}>Edit</button>
                 <button onClick={() => onDelete(dog.id)}>Delete</button>

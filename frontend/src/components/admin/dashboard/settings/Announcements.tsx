@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useAnnouncements, useCreateAnnouncement, useUpdateAnnouncement, useDeleteAnnouncement } from '../../../../hooks/useAnnouncements';
-import { AnnouncementUpdate, Announcement, AnnouncementCreate } from '../../../../api/types/announcements';
+import { usePages } from '../../../../hooks/usePages';
+import { AnnouncementCreate, AnnouncementUpdate, Announcement } from '../../../../api/types/announcements';
 import { AnnouncementCategory } from '../../../../api/types/core';
 import { useModal } from '../../../../context/ModalContext';
 import ErrorComponent from '../../../common/Error';
@@ -9,6 +10,7 @@ import GlobalModal from '../../../common/Modal';
 import Input from '../../../common/Input';
 import Dropdown from '../../../common/form/Dropdown';
 import ContentArea from '../pages/editor/ContentArea';
+import { Page } from '../../../../api/types/page';
 
 const AnnouncementManagerContainer = styled.div`
   background-color: ${(props) => props.theme.colors.neutralBackground};
@@ -18,7 +20,7 @@ const AnnouncementManagerContainer = styled.div`
 `;
 
 const SectionTitle = styled.h2`
-  color: ${(props) => props.theme.colors.secondary};
+  color: ${(props) => props.theme.colors.white};
   font-family: ${(props) => props.theme.fonts.secondary};
   margin-bottom: 16px;
 `;
@@ -63,36 +65,65 @@ const Button = styled.button`
   }
 `;
 
+const Attributes = styled.div`
+  display: flex;
+  gap: 12px;
+  flex-direction: column;
+  margin-bottom: 20px;
+  align-items: center;
+  justify-content: center;
+`;
+
 const AnnouncementManager = () => {
   const { data: announcements, isError, error } = useAnnouncements();
+  const { data: pages } = usePages();
   const createAnnouncement = useCreateAnnouncement();
   const updateAnnouncement = useUpdateAnnouncement();
   const deleteAnnouncement = useDeleteAnnouncement();
   const { openModal, closeModal } = useModal();
 
-  const [newAnnouncement, setNewAnnouncement] = useState<AnnouncementCreate>({
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [announcementData, setAnnouncementData] = useState<AnnouncementCreate>({
     title: '',
     message: '',
     category: AnnouncementCategory.ANNOUNCEMENT,
+    pageId: undefined,
   });
 
-  const handleCreateAnnouncement = async () => {
+  const handleSaveAnnouncement = async () => {
     try {
-      await createAnnouncement.mutateAsync(newAnnouncement);
-      setNewAnnouncement({ title: '', message: '', category: AnnouncementCategory.ANNOUNCEMENT });
+      const dataToSend = { ...announcementData }; 
+  
+      if (editingId) {
+        await updateAnnouncement.mutateAsync({
+          announcementId: editingId,
+          announcementData: dataToSend,
+        });
+      } else {
+        await createAnnouncement.mutateAsync(dataToSend);
+      }
+  
+      setAnnouncementData({
+        title: '',
+        message: '',
+        category: AnnouncementCategory.ANNOUNCEMENT,
+        pageId: undefined,
+      });
+      setEditingId(null);
     } catch (error) {
-      console.error('Failed to create announcement:', error);
-      openModal(<ErrorComponent message="Failed to create announcement. Please try again." />);
+      console.error('Failed to save announcement:', error);
+      openModal(<ErrorComponent message="Failed to save announcement. Please try again." />);
     }
   };
 
-  const handleUpdateAnnouncement = async (announcementId: number, updatedData: AnnouncementUpdate) => {
-    try {
-      await updateAnnouncement.mutateAsync({ announcementId, announcementData: updatedData });
-    } catch (error) {
-      console.error('Failed to update announcement:', error);
-      openModal(<ErrorComponent message="Failed to update announcement. Please try again." />);
-    }
+  const handleEditAnnouncement = (announcement: Announcement) => {
+    setAnnouncementData({
+      title: announcement.title || '',
+      message: announcement.message || '',
+      category: announcement.category || AnnouncementCategory.ANNOUNCEMENT,
+      pageId: announcement.pageId || undefined,
+    });
+    setEditingId(announcement.id);
   };
 
   const handleDeleteAnnouncement = async (announcementId: number) => {
@@ -107,27 +138,35 @@ const AnnouncementManager = () => {
   return (
     <AnnouncementManagerContainer>
       <SectionTitle>Announcements Manager</SectionTitle>
-
       <AnnouncementForm>
         <Input
           type="text"
-          value={newAnnouncement.title}
+          value={announcementData.title}
           placeholder="Title"
-          onChange={(e) => setNewAnnouncement({ ...newAnnouncement, title: e.target.value })}
+          onChange={(e) => setAnnouncementData({ ...announcementData, title: e.target.value })}
+        />
+        <ContentArea
+          content={announcementData.message}
+          setContent={(content) => setAnnouncementData({ ...announcementData, message: content })}
+          placeholder="Write your announcement message..."
         />
         <Dropdown
           name="category"
           options={Object.values(AnnouncementCategory)}
-          value={newAnnouncement.category}
+          value={announcementData.category}
+          onChange={(e) => setAnnouncementData({ ...announcementData, category: e.target.value as AnnouncementCategory })}
           label="Category"
-          onChange={(e) => setNewAnnouncement({ ...newAnnouncement, category: e.target.value as AnnouncementCategory })}
         />
-        <ContentArea
-          content={newAnnouncement.message}
-          setContent={(content) => setNewAnnouncement({ ...newAnnouncement, message: content })}
-          placeholder="Enter announcement message..."
-        />
-        <Button onClick={handleCreateAnnouncement}>Add Announcement</Button>
+        {pages && (
+          <Dropdown
+            name="pageId"
+            options={pages.map((page) => ({ value: page.id, label: page.name }))}
+            value={announcementData.pageId || ''}
+            onChange={(e) => setAnnouncementData({ ...announcementData, pageId: e.target.value })}
+            label="Select Page"
+          />
+        )}
+        <Button onClick={handleSaveAnnouncement}>{editingId ? 'Update' : 'Add'} Announcement</Button>
       </AnnouncementForm>
 
       {isError ? (
@@ -139,9 +178,15 @@ const AnnouncementManager = () => {
               <div>
                 <h3>{announcement.title}</h3>
                 <div dangerouslySetInnerHTML={{ __html: announcement.message }} />
-                <small>Category: {announcement.category}</small>
+                <Attributes>
+                  <small>Category: {announcement.category}</small>
+                  <small>Page: {pages?.find((page: Page) => page.id === announcement.pageId)?.name || 'Not assigned'}</small>
+                </Attributes>
               </div>
-              <Button onClick={() => handleDeleteAnnouncement(announcement.id)}>Delete</Button>
+              <div>
+                <Button onClick={() => handleEditAnnouncement(announcement)}>Edit</Button>
+                <Button onClick={() => handleDeleteAnnouncement(announcement.id)}>Delete</Button>
+              </div>
             </AnnouncementItem>
           ))}
         </AnnouncementList>
@@ -150,5 +195,6 @@ const AnnouncementManager = () => {
     </AnnouncementManagerContainer>
   );
 };
+
 
 export default AnnouncementManager;

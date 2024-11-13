@@ -20,7 +20,9 @@ logger = logging.getLogger(__name__)
 
 
 class BreedingService:
-    async def _load_breeding_with_relations(self, breeding_id: int, db: AsyncSession) -> Breeding:
+    async def _load_breeding_with_relations(
+        self, breeding_id: int, db: AsyncSession
+    ) -> Breeding:
         """Helper to load a Breeding with related fields eagerly loaded."""
         result = await db.execute(
             select(Breeding)
@@ -30,12 +32,14 @@ class BreedingService:
                     selectinload(Dog.photos),
                     selectinload(Dog.productions),
                     selectinload(Dog.children),
+                    selectinload(Dog.statuses),
                 ),
                 selectinload(Breeding.male_dog).options(
                     selectinload(Dog.health_infos),
                     selectinload(Dog.photos),
                     selectinload(Dog.productions),
                     selectinload(Dog.children),
+                    selectinload(Dog.statuses),
                 ),
             )
             .filter(Breeding.id == breeding_id)
@@ -62,12 +66,14 @@ class BreedingService:
                         selectinload(Dog.photos),
                         selectinload(Dog.productions),
                         selectinload(Dog.children),
+                        selectinload(Dog.statuses),
                     ),
                     selectinload(Breeding.male_dog).options(
                         selectinload(Dog.health_infos),
                         selectinload(Dog.photos),
                         selectinload(Dog.productions),
                         selectinload(Dog.children),
+                        selectinload(Dog.statuses),
                     ),
                 )
                 .offset(offset)
@@ -116,12 +122,14 @@ class BreedingService:
                         selectinload(Dog.photos),
                         selectinload(Dog.productions),
                         selectinload(Dog.children),
+                        selectinload(Dog.statuses),
                     ),
                     selectinload(Breeding.male_dog).options(
                         selectinload(Dog.health_infos),
                         selectinload(Dog.photos),
                         selectinload(Dog.productions),
                         selectinload(Dog.children),
+                        selectinload(Dog.statuses),
                     ),
                 )
                 .filter(Breeding.id == breeding_id)
@@ -146,7 +154,14 @@ class BreedingService:
     ) -> Breeding:
         try:
             new_breeding = Breeding(
-                **breeding_data.dict(exclude={"manual_sire_name", "manual_sire_color", "manual_sire_image_url", "manual_sire_pedigree_link"})
+                **breeding_data.dict(
+                    exclude={
+                        "manual_sire_name",
+                        "manual_sire_color",
+                        "manual_sire_image_url",
+                        "manual_sire_pedigree_link",
+                    }
+                )
             )
             if not breeding_data.male_dog_id and (
                 breeding_data.manual_sire_name
@@ -157,13 +172,17 @@ class BreedingService:
                 new_breeding.manual_sire_name = breeding_data.manual_sire_name
                 new_breeding.manual_sire_color = breeding_data.manual_sire_color
                 new_breeding.manual_sire_image_url = breeding_data.manual_sire_image_url
-                new_breeding.manual_sire_pedigree_link = breeding_data.manual_sire_pedigree_link
+                new_breeding.manual_sire_pedigree_link = (
+                    breeding_data.manual_sire_pedigree_link
+                )
 
             db.add(new_breeding)
             await db.commit()
 
             # Reload with relationships
-            breeding_with_relations = await self._load_breeding_with_relations(new_breeding.id, db)
+            breeding_with_relations = await self._load_breeding_with_relations(
+                new_breeding.id, db
+            )
             breeding_schema = convert_to_breeding_schema(breeding_with_relations)
 
             # Clear cached breedings list
@@ -190,7 +209,9 @@ class BreedingService:
                     breeding.manual_sire_name = breeding_data.manual_sire_name
                     breeding.manual_sire_color = breeding_data.manual_sire_color
                     breeding.manual_sire_image_url = breeding_data.manual_sire_image_url
-                    breeding.manual_sire_pedigree_link = breeding_data.manual_sire_pedigree_link
+                    breeding.manual_sire_pedigree_link = (
+                        breeding_data.manual_sire_pedigree_link
+                    )
                 else:
                     breeding.manual_sire_name = None
                     breeding.manual_sire_color = None
@@ -200,13 +221,19 @@ class BreedingService:
                 await db.commit()
 
                 # Reload with relationships
-                updated_breeding_with_relations = await self._load_breeding_with_relations(breeding.id, db)
-                breeding_schema = convert_to_breeding_schema(updated_breeding_with_relations)
+                updated_breeding_with_relations = (
+                    await self._load_breeding_with_relations(breeding.id, db)
+                )
+                breeding_schema = convert_to_breeding_schema(
+                    updated_breeding_with_relations
+                )
 
                 # Clear breeding-specific and list caches
                 redis_client = await get_redis_client()
                 await redis_client.delete(f"breeding:{breeding_id}:{settings.env}")
-                keys_to_delete = await redis_client.keys(f"all_breedings:*:{settings.env}")
+                keys_to_delete = await redis_client.keys(
+                    f"all_breedings:*:{settings.env}"
+                )
                 if keys_to_delete:
                     await redis_client.delete(*keys_to_delete)
 
@@ -215,7 +242,6 @@ class BreedingService:
         except SQLAlchemyError as e:
             logger.error(f"Error in update_breeding: {e}", exc_info=True)
             raise HTTPException(status_code=500, detail="Internal Server Error")
-
 
     async def delete_breeding(self, breeding_id: int, db: AsyncSession) -> bool:
         try:
@@ -227,7 +253,9 @@ class BreedingService:
                 # Clear breeding-specific and list caches
                 redis_client = await get_redis_client()
                 await redis_client.delete(f"breeding:{breeding_id}:{settings.env}")
-                keys_to_delete = await redis_client.keys(f"all_breedings:*:{settings.env}")
+                keys_to_delete = await redis_client.keys(
+                    f"all_breedings:*:{settings.env}"
+                )
                 if keys_to_delete:
                     await redis_client.delete(*keys_to_delete)
 
@@ -236,6 +264,7 @@ class BreedingService:
         except SQLAlchemyError as e:
             logger.error(f"Error in delete_breeding: {e}", exc_info=True)
             raise HTTPException(status_code=500, detail="Internal Server Error")
+
     async def get_breedings_by_parent(
         self, parent_id: int, db: AsyncSession
     ) -> List[Breeding]:
@@ -248,12 +277,14 @@ class BreedingService:
                         selectinload(Dog.photos),
                         selectinload(Dog.productions),
                         selectinload(Dog.children),
+                        selectinload(Dog.statuses),
                     ),
                     selectinload(Breeding.male_dog).options(
                         selectinload(Dog.health_infos),
                         selectinload(Dog.photos),
                         selectinload(Dog.productions),
                         selectinload(Dog.children),
+                        selectinload(Dog.statuses),
                     ),
                 )
                 .filter(

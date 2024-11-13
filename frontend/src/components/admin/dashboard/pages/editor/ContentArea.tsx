@@ -1,5 +1,6 @@
 import React from 'react';
 import { Editor } from '@tinymce/tinymce-react';
+import { theme } from '../../../../../theme/theme';
 
 interface ContentAreaProps {
   content: string;
@@ -27,17 +28,20 @@ const ContentArea: React.FC<ContentAreaProps> = ({
     setContent(newContent);
   };
 
+  const styleString =
+    "body { background-color: #1F1F1F; color: #E0E0E0; font-family: 'Roboto', Arial, sans-serif; line-height: 1.6; } p { color: #E0E0E0; margin-bottom: 1em; } h1, h2, h3, h4, h5, h6 { color: #E76F00; font-family: 'Oswald', sans-serif; } a { color: #a84824; text-decoration: underline; } a:hover { color: #E76F00; } ul, ol { color: #E0E0E0; } ul li::marker, ol li::marker { color: #E76F00; } blockquote { color: #A0A0A0; border-left: 4px solid #E76F00; padding-left: 1em; margin-left: 0; } pre { background-color: #393939; padding: 1em; color: #E0E0E0; border-radius: 4px; } code { background-color: #4A4A4A; padding: 0.2em 0.4em; border-radius: 3px; color: #F8F9EE; } button { background-color: #E76F00; color: #F8F9EE; padding: 0.4em 0.8em; border: none; border-radius: 3px; } button:hover { background-color: #a84824; color: #F8F9EE; } table { border-collapse: collapse; width: 100%; background-color: #393939; color: #E0E0E0; } th, td { border: 1px solid #4A4A4A; padding: 0.5em; } th { background-color: #2D2D2D; color: #F8F9EE; } td { background-color: #4A4A4A; } .tox-statusbar, .tox .tox-statusbar__path-item, .tox-toolbar__group, .tox-toolbar__primary { background-color: #2D2D2D; color: #F8F9EE; } .tox .tox-mbtn__select-chevron, .tox .tox-tbtn__icon-wrap svg { fill: #E76F00; } .tox-tbtn:hover .tox-tbtn__icon-wrap svg { fill: #a84824; }";
+
   return (
     <Editor
       apiKey={process.env.REACT_APP_TINYMCE_API_KEY}
-      initialValue={content || ''} // Use initial value or empty
       value={content}
       init={{
         height,
         menubar: true,
         plugins,
         toolbar: toolbarOptions,
-        placeholder, // Add placeholder text
+        placeholder,
+        content_style: styleString,
         image_title: true,
         automatic_uploads: true,
         file_picker_types: 'image',

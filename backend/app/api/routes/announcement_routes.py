@@ -49,7 +49,7 @@ async def update_announcement(
 
 
 @announcement_router.delete("/{announcement_id}", response_model=Announcement)
-async def delete_announcement(announcement_id: UUID, db: AsyncSession = Depends(get_database_session)):
+async def delete_announcement(announcement_id: int, db: AsyncSession = Depends(get_database_session)):
     deleted_announcement = await announcement_service.delete_announcement(db, announcement_id)
     if not deleted_announcement:
         raise HTTPException(status_code=404, detail="Announcement not found")

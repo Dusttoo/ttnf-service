@@ -141,18 +141,9 @@ const HomePage: React.FC = () => {
   if (!settings) return <ErrorComponent message={'Error loading settings'} />;
 
   const sanitizedContent = DOMPurify.sanitize(page.content);
-  const announcements = page.announcements || [];
 
   return (
     <HomePageContainer>
-      {/* Announcements */}
-      {announcements.length > 0 && (
-        <AnnouncementSection
-          title="Latest Announcements"
-          announcements={announcements}
-        />
-      )}
-
       {/* Hero Section */}
       {heroContent && (
         <HeroSection

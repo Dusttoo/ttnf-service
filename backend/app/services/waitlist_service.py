@@ -32,11 +32,15 @@ class WaitlistService:
 
             # Load the related sires and dams if provided
             if waitlist_data.sire_ids:
-                sires = await db.execute(select(Dog).filter(Dog.id.in_(waitlist_data.sire_ids)))
+                sires = await db.execute(
+                    select(Dog).filter(Dog.id.in_(waitlist_data.sire_ids))
+                )
                 new_entry.sires = sires.scalars().all()
 
             if waitlist_data.dam_ids:
-                dams = await db.execute(select(Dog).filter(Dog.id.in_(waitlist_data.dam_ids)))
+                dams = await db.execute(
+                    select(Dog).filter(Dog.id.in_(waitlist_data.dam_ids))
+                )
                 new_entry.dams = dams.scalars().all()
 
             db.add(new_entry)
@@ -52,14 +56,16 @@ class WaitlistService:
                         selectinload(Dog.photos),
                         selectinload(Dog.productions),
                         selectinload(Dog.children),
+                        selectinload(Dog.statuses),
                     ),
                     selectinload(WaitlistEntry.dams).options(
                         selectinload(Dog.health_infos),
                         selectinload(Dog.photos),
                         selectinload(Dog.productions),
                         selectinload(Dog.children),
+                        selectinload(Dog.statuses),
                     ),
-                    selectinload(WaitlistEntry.breeding)
+                    selectinload(WaitlistEntry.breeding),
                 )
             )
             refreshed_entry = result.scalars().first()
@@ -67,7 +73,9 @@ class WaitlistService:
             return convert_to_waitlist_schema(refreshed_entry)
         except SQLAlchemyError as e:
             logger.error(f"Error in create_waitlist_entry: {e}", exc_info=True)
-            raise HTTPException(status_code=500, detail="Could not create waitlist entry")
+            raise HTTPException(
+                status_code=500, detail="Could not create waitlist entry"
+            )
 
     # Public method to get all waitlist entries (admin functionality)
     async def get_all_waitlist_entries(
@@ -75,20 +83,27 @@ class WaitlistService:
     ) -> Dict[str, any]:
         try:
             offset = (page - 1) * page_size
-            query = select(WaitlistEntry).offset(offset).limit(page_size).options(
-                selectinload(WaitlistEntry.sires).options(
-                    selectinload(Dog.health_infos),
-                    selectinload(Dog.photos),
-                    selectinload(Dog.productions),
-                    selectinload(Dog.children),
-                ),
-                selectinload(WaitlistEntry.dams).options(
-                    selectinload(Dog.health_infos),
-                    selectinload(Dog.photos),
-                    selectinload(Dog.productions),
-                    selectinload(Dog.children),
-                ),
-                selectinload(WaitlistEntry.breeding),
+            query = (
+                select(WaitlistEntry)
+                .offset(offset)
+                .limit(page_size)
+                .options(
+                    selectinload(WaitlistEntry.sires).options(
+                        selectinload(Dog.health_infos),
+                        selectinload(Dog.photos),
+                        selectinload(Dog.productions),
+                        selectinload(Dog.children),
+                        selectinload(Dog.statuses),
+                    ),
+                    selectinload(WaitlistEntry.dams).options(
+                        selectinload(Dog.health_infos),
+                        selectinload(Dog.photos),
+                        selectinload(Dog.productions),
+                        selectinload(Dog.children),
+                        selectinload(Dog.statuses),
+                    ),
+                    selectinload(WaitlistEntry.breeding),
+                )
             )
             result = await db.execute(query)
             entries = result.scalars().all()
@@ -98,12 +113,16 @@ class WaitlistService:
             total_count = total_count_result.scalar_one()
 
             return {
-                "items": [convert_to_waitlist_schema(entry).dict() for entry in entries],
+                "items": [
+                    convert_to_waitlist_schema(entry).dict() for entry in entries
+                ],
                 "total_count": total_count,
             }
         except SQLAlchemyError as e:
             logger.error(f"Error in get_all_waitlist_entries: {e}", exc_info=True)
-            raise HTTPException(status_code=500, detail="Could not fetch waitlist entries")
+            raise HTTPException(
+                status_code=500, detail="Could not fetch waitlist entries"
+            )
 
     # Public method to get a specific waitlist entry by ID
     async def get_waitlist_entry_by_id(
@@ -119,12 +138,14 @@ class WaitlistService:
                         selectinload(Dog.photos),
                         selectinload(Dog.productions),
                         selectinload(Dog.children),
+                        selectinload(Dog.statuses),
                     ),
                     selectinload(WaitlistEntry.dams).options(
                         selectinload(Dog.health_infos),
                         selectinload(Dog.photos),
                         selectinload(Dog.productions),
                         selectinload(Dog.children),
+                        selectinload(Dog.statuses),
                     ),
                     selectinload(WaitlistEntry.breeding),
                 )
@@ -136,14 +157,18 @@ class WaitlistService:
                 raise HTTPException(status_code=404, detail="Waitlist entry not found")
         except SQLAlchemyError as e:
             logger.error(f"Error in get_waitlist_entry_by_id: {e}", exc_info=True)
-            raise HTTPException(status_code=500, detail="Could not fetch waitlist entry")
+            raise HTTPException(
+                status_code=500, detail="Could not fetch waitlist entry"
+            )
 
     # Admin method to update a waitlist entry
     async def update_waitlist_entry(
         self, entry_id: int, waitlist_data: WaitlistUpdate, db: AsyncSession
     ) -> Optional[WaitlistResponse]:
         try:
-            result = await db.execute(select(WaitlistEntry).filter(WaitlistEntry.id == entry_id))
+            result = await db.execute(
+                select(WaitlistEntry).filter(WaitlistEntry.id == entry_id)
+            )
             entry = result.scalars().first()
 
             if entry:
@@ -170,14 +195,16 @@ class WaitlistService:
                             selectinload(Dog.photos),
                             selectinload(Dog.productions),
                             selectinload(Dog.children),
+                            selectinload(Dog.statuses),
                         ),
                         selectinload(WaitlistEntry.dams).options(
                             selectinload(Dog.health_infos),
                             selectinload(Dog.photos),
                             selectinload(Dog.productions),
                             selectinload(Dog.children),
+                            selectinload(Dog.statuses),
                         ),
-                        selectinload(WaitlistEntry.breeding)
+                        selectinload(WaitlistEntry.breeding),
                     )
                 )
                 refreshed_entry = result.scalars().first()
@@ -187,12 +214,16 @@ class WaitlistService:
                 raise HTTPException(status_code=404, detail="Waitlist entry not found")
         except SQLAlchemyError as e:
             logger.error(f"Error in update_waitlist_entry: {e}", exc_info=True)
-            raise HTTPException(status_code=500, detail="Could not update waitlist entry")
+            raise HTTPException(
+                status_code=500, detail="Could not update waitlist entry"
+            )
 
     # Admin method to delete a waitlist entry
     async def delete_waitlist_entry(self, entry_id: int, db: AsyncSession) -> bool:
         try:
-            result = await db.execute(select(WaitlistEntry).filter(WaitlistEntry.id == entry_id))
+            result = await db.execute(
+                select(WaitlistEntry).filter(WaitlistEntry.id == entry_id)
+            )
             entry = result.scalars().first()
 
             if entry:
@@ -203,7 +234,9 @@ class WaitlistService:
                 raise HTTPException(status_code=404, detail="Waitlist entry not found")
         except SQLAlchemyError as e:
             logger.error(f"Error in delete_waitlist_entry: {e}", exc_info=True)
-            raise HTTPException(status_code=500, detail="Could not delete waitlist entry")
+            raise HTTPException(
+                status_code=500, detail="Could not delete waitlist entry"
+            )
 
     # Method to get filtered waitlist entries
     async def get_filtered_waitlist_entries(
@@ -213,27 +246,33 @@ class WaitlistService:
         dam_ids: Optional[List[int]] = None,
         color: Optional[str] = None,
         page: int = 1,
-        page_size: int = 10
+        page_size: int = 10,
     ) -> List[WaitlistResponse]:
         try:
-            query = select(WaitlistEntry).filter(
-                and_(
-                    WaitlistEntry.color_preference == color if color else True,
+            query = (
+                select(WaitlistEntry)
+                .filter(
+                    and_(
+                        WaitlistEntry.color_preference == color if color else True,
+                    )
                 )
-            ).options(
-                selectinload(WaitlistEntry.sires).options(
-                    selectinload(Dog.health_infos),
-                    selectinload(Dog.photos),
-                    selectinload(Dog.productions),
-                    selectinload(Dog.children),
-                ),
-                selectinload(WaitlistEntry.dams).options(
-                    selectinload(Dog.health_infos),
-                    selectinload(Dog.photos),
-                    selectinload(Dog.productions),
-                    selectinload(Dog.children),
-                ),
-                selectinload(WaitlistEntry.breeding),
+                .options(
+                    selectinload(WaitlistEntry.sires).options(
+                        selectinload(Dog.health_infos),
+                        selectinload(Dog.photos),
+                        selectinload(Dog.productions),
+                        selectinload(Dog.children),
+                        selectinload(Dog.statuses),
+                    ),
+                    selectinload(WaitlistEntry.dams).options(
+                        selectinload(Dog.health_infos),
+                        selectinload(Dog.photos),
+                        selectinload(Dog.productions),
+                        selectinload(Dog.children),
+                        selectinload(Dog.statuses),
+                    ),
+                    selectinload(WaitlistEntry.breeding),
+                )
             )
 
             if sire_ids:
@@ -251,9 +290,9 @@ class WaitlistService:
             return [convert_to_waitlist_schema(entry) for entry in entries]
         except SQLAlchemyError as e:
             logger.error(f"Error in get_filtered_waitlist_entries: {e}", exc_info=True)
-            raise HTTPException(status_code=500, detail="Could not fetch waitlist entries")
-        
-
+            raise HTTPException(
+                status_code=500, detail="Could not fetch waitlist entries"
+            )
 
     async def get_waitlist_submissions_count(self, db: AsyncSession) -> int:
         try:
@@ -263,4 +302,6 @@ class WaitlistService:
             return count
         except Exception as e:
             logger.error(f"Error in get_waitlist_submissions_count: {e}", exc_info=True)
-            raise HTTPException(status_code=500, detail="Could not retrieve waitlist submissions count")
+            raise HTTPException(
+                status_code=500, detail="Could not retrieve waitlist submissions count"
+            )

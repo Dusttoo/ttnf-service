@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 interface CheckboxProps {
-    label: string;
+    label?: string;
     checked: boolean;
     onChange: (checked: boolean) => void;
 }
@@ -63,7 +63,7 @@ const Checkbox: React.FC<CheckboxProps> = ({ label, checked, onChange }) => (
                 <polyline points="20 6 9 17 4 12" />
             </svg>
         </StyledCheckbox>
-        <Label>{label}</Label>
+        {label &&<Label>{label}</Label>}
     </CheckboxContainer>
 );
 

@@ -33,6 +33,7 @@ export const updateDog = async (
     id: number,
     dogData: DogUpdate,
 ): Promise<Dog> => {
+    console.log('updateDog', id, dogData);
     const response = await axiosWithTimeout.put<Dog>(`/dogs/${id}`, dogData);
     return response.data;
 };
