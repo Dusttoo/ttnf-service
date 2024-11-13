@@ -82,21 +82,21 @@ const UploadLabel = styled.label`
 `;
 
 interface ImageUploadProps {
+  id: string;
   maxImages: number;
   onImagesChange: (urls: string[]) => void;
   initialImages?: string[];
   singleImageMode?: boolean;
-  handleDropToProfilePhoto?: (url: string) => void;
-  handleDropToGallery?: (url: string) => void;
+  onDropToOther?: (url: string, targetId: string) => void;
 }
 
 const ImageUpload: React.FC<ImageUploadProps> = ({
+  id,
   maxImages,
   onImagesChange,
   initialImages = [],
   singleImageMode = false,
-  handleDropToProfilePhoto,
-  handleDropToGallery,
+  onDropToOther,
 }) => {
   const [imageUrls, setImageUrls] = useState<string[]>(initialImages);
   const [draggedImage, setDraggedImage] = useState<string | null>(null);
@@ -139,10 +139,9 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 
   const handleRemoveImage = (index: number) => {
     const updatedUrls = [...imageUrls];
-    const removedUrl = updatedUrls.splice(index, 1)[0];
+    updatedUrls.splice(index, 1);
     setImageUrls(updatedUrls);
     onImagesChange(updatedUrls);
-    if (singleImageMode && handleDropToGallery) handleDropToGallery(removedUrl);
   };
 
   const handleDragStart = (image: string) => {
@@ -152,10 +151,8 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     if (draggedImage) {
-      if (singleImageMode && handleDropToGallery) {
-        handleDropToGallery(draggedImage);
-      } else if (!singleImageMode && handleDropToProfilePhoto) {
-        handleDropToProfilePhoto(draggedImage);
+      if (onDropToOther) {
+        onDropToOther(draggedImage, id);
       }
       setDraggedImage(null);
     }
@@ -262,6 +259,7 @@ export const SortableImage: React.FC<SortableImageProps> = ({
       {...attributes}
       {...listeners}
       onDragStart={onDragStart}
+      draggable // Make the image draggable
     >
       <PreviewImage src={image} alt="Preview" />
       <RemoveButton onClick={(event) => { event.stopPropagation(); onRemove(); }}>

@@ -1,6 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import logo from '../../../images/logo.png'
 
 const SidebarContainer = styled.div`
   width: 150px;
@@ -20,12 +22,47 @@ const NavItem = styled.div`
     background-color: ${(props) => props.theme.colors.accent};
   }
 `;
+const NavLinkStyled = styled(Link)`
+  color: ${(props) => props.theme.colors.white};
+  text-decoration: none;
+  margin-left: 2rem;
+  font-size: 1rem;
+  transition: color 0.3s, text-decoration 0.3s;
+
+  &:link,
+  &:visited {
+    color: ${(props) => props.theme.colors.white};
+  }
+
+  &:hover {
+    text-decoration: underline;
+    text-underline-offset: 6px;
+  }
+
+  &:focus {
+    color: ${(props) => props.theme.colors.accent};
+    outline: none;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  &:active {
+    color: ${(props) => props.theme.colors.secondary};
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+`;
+
+const Logo = styled.img`
+  width: 80px;
+`;
 
 const Sidebar: React.FC = () => {
   const navigate = useNavigate();
 
   return (
     <SidebarContainer>
+      <NavLinkStyled to="/"><Logo src={logo} alt="Logo" /></NavLinkStyled>
       <h2>Admin</h2>
       <NavItem onClick={() => navigate('/admin/dashboard')}>Dashboard</NavItem>
       <NavItem onClick={() => navigate('/admin/dashboard/pages')}>
