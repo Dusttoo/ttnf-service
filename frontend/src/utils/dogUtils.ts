@@ -1,7 +1,7 @@
 export const getStatusColor = (status: string): string => {
     switch (status) {
         case 'Available For Stud':
-            return '#E76F00'; // Primary theme color
+            return '#28a745'; // Primary theme color
         case 'Sold':
             return '#6c757d'; // Neutral/dim color to indicate sold
         case 'Stud':
@@ -13,9 +13,9 @@ export const getStatusColor = (status: string): string => {
         case 'Active':
             return '#28a745'; // Green for active status
         case 'ABKC Champion':
-            return '#FFD700'; // Gold to signify an award or achievement
+            return '#013593'; // Gold to signify an award or achievement
         case 'Production':
-            return '#2D2D2D'; // Secondary theme color to indicate standard status
+            return '#E76F00'; // Secondary theme color to indicate standard status
         default:
             return '#E0E0E0'; // Default neutral background
     }

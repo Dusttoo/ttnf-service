@@ -25,8 +25,8 @@ const SidebarContainer = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  overflow-y: auto;
-  max-height: 100vh;
+  overflow-y: scroll;
+  max-height: 100%;
   border-right: 1px solid ${(props) => props.theme.colors.border};
   box-sizing: border-box;
 `;

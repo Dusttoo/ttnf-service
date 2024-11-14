@@ -189,6 +189,7 @@ const DogForm: React.FC<DogFormProps> = ({
 
   const handleProfilePhotoChange = (url: string) => {
     setFormState({ ...formState, profilePhoto: url });
+    console.log('handleProfilePhotoChange', url);
   };
 
   const handleGalleryPhotosChange = (urls: string[]) => {

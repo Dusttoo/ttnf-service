@@ -107,6 +107,7 @@ const ViewProfileLink = styled(Link)`
 
 const StatusContainer = styled.div`
   display: flex;
+  margin-top: 1rem;
   padding-top: 5px;
   justify-content: flex-end;
   gap: 0.5rem;
@@ -123,53 +124,61 @@ const Description = styled(Detail)`
 `;
 
 const DogTile: React.FC<{ dog: Dog }> = ({ dog }) => {
+  const slug = dog.gender === GenderEnum.Male ? 'males' : 'females';
 
-    const slug = dog.gender === GenderEnum.Male ? 'males' : 'females';
-
-    return (
-        <Tile>
-            <ImageContainer>
-                <LinkComponent
-                    to={`/dogs/${dog.name.split(' ').join('-')}?id=${dog.id}`}
-                >
-                    <Image
-                        src={dog.profilePhoto ? dog.profilePhoto : 'https://ttnfas.blob.core.windows.net/ttnf/dogs/logo.af08c321461d0f484883.png'}
-                        alt={dog.name} />
-                </LinkComponent>
-            </ImageContainer>
-            <Info>
-                <div>
-                    <Name>{dog.name}</Name>
-                    {dog.dob && <Detail>DOB: {dog.dob}</Detail>}
-                    {dog.color && <Detail>Color: {dog.color}</Detail>}
-                    {dog.studFee && <Detail>Stud Fee: ${dog.studFee}</Detail>}
-                    {dog.saleFee && <Detail>Sale Fee: ${dog.saleFee}</Detail>}
-                    {dog.description && <Description>{dog.description}</Description>}
-                    {dog.pedigreeLink && (
-                        <Detail>
-                            <LinkComponent
-                                to={dog.pedigreeLink}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                            >
-                                Pedigree Link
-                            </LinkComponent>
-                        </Detail>
-                    )}
-                    <ViewProfileLink
-                        to={`/${slug}/${dog.name.split(' ').join('-')}?id=${dog.id}`}
-                    >
-                        View Profile
-                    </ViewProfileLink>
-                    {dog?.statuses ? dog.statuses.map((status) => (
+  return (
+    <Tile>
+      <ImageContainer>
+        <LinkComponent
+          to={`/dogs/${dog.name.split(' ').join('-')}?id=${dog.id}`}
+        >
+          <Image
+            src={
+              dog.profilePhoto
+                ? dog.profilePhoto
+                : 'https://ttnfas.blob.core.windows.net/ttnf/dogs/logo.af08c321461d0f484883.png'
+            }
+            alt={dog.name}
+          />
+        </LinkComponent>
+      </ImageContainer>
+      <Info>
+        <div>
+          <Name>{dog.name}</Name>
+          {dog.dob && <Detail>DOB: {dog.dob}</Detail>}
+          {dog.color && <Detail>Color: {dog.color}</Detail>}
+          {dog.studFee && <Detail>Stud Fee: ${dog.studFee}</Detail>}
+          {dog.saleFee && <Detail>Sale Fee: ${dog.saleFee}</Detail>}
+          {dog.description && <Description>{dog.description}</Description>}
+          {dog.pedigreeLink && (
+            <Detail>
+              <LinkComponent
+                to={dog.pedigreeLink}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Pedigree Link
+              </LinkComponent>
+            </Detail>
+          )}
+          <ViewProfileLink
+            to={`/${slug}/${dog.name.split(' ').join('-')}?id=${dog.id}`}
+          >
+            View Profile
+          </ViewProfileLink>
+          <StatusContainer>
+            {dog?.statuses
+              ? dog.statuses.filter((status) => status !== 'Active').map((status) => (
                   <StatusBadge key={status} color={getStatusColor(status)}>
                     {status}
                   </StatusBadge>
-                )) : "No active status"}
-                </div>
-            </Info>
-        </Tile>
-    );
+                ))
+              : 'No active status'}
+          </StatusContainer>
+        </div>
+      </Info>
+    </Tile>
+  );
 };
 
 export default DogTile;

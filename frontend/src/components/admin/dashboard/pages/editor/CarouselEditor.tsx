@@ -182,7 +182,7 @@ const CarouselEdit: React.FC<CarouselEditProps> = ({
     />
     <ImageUpload
       id="carousel-upload"
-      maxImages={10 - images.length}
+      maxImages={20 - images.length}
       onImagesChange={handleImageUpload}
       initialImages={images.map((img) => img.src)}
       singleImageMode={false}

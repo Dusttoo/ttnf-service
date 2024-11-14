@@ -81,6 +81,20 @@ const UploadLabel = styled.label`
   color: ${theme.colors.primary};
 `;
 
+const AddMoreButton = styled.button`
+  margin-top: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: ${theme.colors.primary};
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: ${theme.colors.secondaryBackground};
+  }
+`;
+
 interface ImageUploadProps {
   id: string;
   maxImages: number;
@@ -103,10 +117,8 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (!imageUrls.length && initialImages.length) {
-      setImageUrls(initialImages);
-    }
-  }, [initialImages.length, imageUrls.length]);
+    setImageUrls(initialImages);
+  }, [initialImages]);
 
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -144,15 +156,23 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     onImagesChange(updatedUrls);
   };
 
+  const handleOpenFilePicker = () => {
+    fileInputRef.current?.click();
+  };
+
   const handleDragStart = (image: string) => {
+    console.log('handleDragStart', image);
     setDraggedImage(image);
   };
 
   const handleDrop = (e: React.DragEvent) => {
+    console.log('handleDrop', e);
     e.preventDefault();
     if (draggedImage) {
       if (onDropToOther) {
+        console.log('handleDrop', draggedImage, id);
         onDropToOther(draggedImage, id);
+        console.log('handleDrop', imageUrls);
       }
       setDraggedImage(null);
     }
@@ -167,49 +187,48 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   );
 
   const handleDragEnd = (event: DragEndEvent) => {
+    console.log('handleDragEnd', event);
     const { active, over } = event;
 
-    if (active.id !== over?.id) {
+    if (!over) return;
+
+    if (over.id !== id) {
+      // Convert `over.id` to a string to ensure compatibility with the `onDropToOther` function
+      if (over?.id && draggedImage && onDropToOther) {
+        onDropToOther(draggedImage, id as string); // Call the cross-component drop handler with string `id`
+      }
+    } else if (active.id !== over.id) {
+      // Handle reordering within the same component
       const oldIndex = imageUrls.findIndex((url) => url === active.id);
-      const newIndex = imageUrls.findIndex((url) => url === over?.id);
+      const newIndex = imageUrls.findIndex((url) => url === over.id);
       const newImageUrls = arrayMove(imageUrls, oldIndex, newIndex);
       setImageUrls(newImageUrls);
       onImagesChange(newImageUrls);
     }
-  };
 
-  const handleOpenFilePicker = () => {
-    console.log("handleOpenFilePicker");
-    if (fileInputRef.current) {
-      console.log("fileInputRef.current");
-      fileInputRef.current.click();
-    }
-  };
+    setDraggedImage(null); // Reset dragged image
+};
 
   return (
     <UploadContainer
       onDrop={handleDrop}
       onDragOver={(e) => e.preventDefault()}
-      ref={fileInputRef}
-      onClick={handleOpenFilePicker}
-      onChange={handleFileChange}
+      onClick={imageUrls.length < maxImages ? handleOpenFilePicker : undefined}
     >
-      <UploadLabel htmlFor="file-upload">
-        {imageUrls.length < maxImages ? (
-          <>
-            <HiddenInput
-              ref={fileInputRef}
-              id="file-upload"
-              type="file"
-              multiple={!singleImageMode}
-              accept="image/*"
-              onChange={handleFileChange}
-            />
-            Drag and Drop images here or <strong>Choose files</strong>
-          </>
-        ) : null}
+      <HiddenInput
+        ref={fileInputRef}
+        id="file-upload"
+        type="file"
+        multiple={!singleImageMode}
+        accept="image/*"
+        onChange={handleFileChange}
+      />
+      <UploadLabel>
+        {imageUrls.length < maxImages
+          ? "Drag and Drop images here or Choose files"
+          : "Max images reached"}
       </UploadLabel>
-
+      
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
@@ -270,7 +289,7 @@ export const SortableImage: React.FC<SortableImageProps> = ({
       {...attributes}
       {...listeners}
       onDragStart={onDragStart}
-      draggable // Make the image draggable
+      draggable
     >
       <PreviewImage src={image} alt="Preview" />
       <RemoveButton onClick={(event) => { event.stopPropagation(); onRemove(); }}>

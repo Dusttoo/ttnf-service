@@ -16,14 +16,15 @@ const ImageUploadContainer: React.FC<ImageUploadContainerProps> = ({
 }) => {
 
   const handleDropToOther = (url: string, targetId: string) => {
-    if (targetId === 'profile') {
-      // Moving from gallery to profile
+    console.log('handleDropToOther triggered with:', { url, targetId });
+
+    if (targetId === 'gallery') {
       onProfilePhotoChange(url);
-      onGalleryPhotosChange(galleryPhotos.filter((photo) => photo !== url));
-    } else if (targetId === 'gallery') {
-      // Moving from profile to gallery
+    } else if (targetId === 'profile') {
       if (profilePhoto === url) {
         onProfilePhotoChange('');
+      }
+      if (!galleryPhotos.includes(url)) {
         onGalleryPhotosChange([...galleryPhotos, url]);
       }
     }
