@@ -131,6 +131,10 @@ class DogService:
             logger.error(f"Error in get_dog_by_id: {e}", exc_info=True)
             raise HTTPException(status_code=500, detail=f"Internal Server Error: {e}")
 
+        except Exception as e:
+            logger.error(f"Error in get_dog_by_id: {e}", exc_info=True)
+            raise HTTPException(status_code=500, detail=f"Internal Server Error: {e}")
+
     from app.models.dog import StatusEnum as ModelStatusEnum
 
     async def create_dog(self, dog_data: DogCreate, db: AsyncSession) -> DogSchema:
@@ -397,7 +401,7 @@ class DogService:
                 # Invalidate cache for this dog
                 redis_client = await self.get_redis_client()
                 cache_key = f"dog:{dog_id}:{settings.env}"
-                await redis_client.delete(cache_key)
+                await redis_client.flushall()
                 logger.info(f"Invalidated cache for dog ID: {dog_id}")
 
                 # Refresh dog with updated relations
