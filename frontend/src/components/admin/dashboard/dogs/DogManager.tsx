@@ -113,14 +113,39 @@ const PaginationWrapper = styled.div`
   margin-top: 2rem;
 `;
 
+const TabsContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+`;
+
+const Tab = styled.button<{ active: boolean }>`
+  background-color: ${(props) =>
+    props.active ? props.theme.colors.primary : 'transparent'};
+  color: ${(props) =>
+    props.active ? '#fff' : props.theme.colors.primary};
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: ${(props) => (props.active ? 'bold' : 'normal')};
+  &:hover {
+    background-color: ${(props) =>
+      props.active ? props.theme.colors.primaryDark : props.theme.colors.secondaryBackground};
+  }
+`;
+
+
 const AdminDogList: React.FC<{
   defaultGender?: GenderEnum;
   owned?: boolean;
 }> = ({ defaultGender, owned }) => {
-  const [gender, setGender] = useState<GenderEnum | undefined>(defaultGender);
+  const [gender, setGender] = useState<GenderEnum | undefined>(GenderEnum.Male);
   const [status, setStatus] = useState<StatusEnum[]>([]);
   const [sire, setSire] = useState<Dog | undefined>(undefined);
   const [dam, setDam] = useState<Dog | undefined>(undefined);
+  const [activeTab, setActiveTab] = useState('Males');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const { openModal, closeModal } = useModal();
@@ -133,10 +158,24 @@ const AdminDogList: React.FC<{
   );
   const { data: dogsData } = useDogs(filters, page, pageSize);
 
-  const dogs = dogsData?.items ?? [];
+  let dogs = dogsData?.items ?? [];
   const totalCount = dogsData?.total ?? 0;
 
   const deleteDogMutation = useDeleteDog();
+
+  const handleTabClick = (tab: string) => {
+    setActiveTab(tab);
+    if (tab === 'Males') {
+      setGender(GenderEnum.Male);
+      setStatus([]);
+    } else if (tab === 'Females') {
+      setGender(GenderEnum.Female);
+      setStatus([]);
+    } else if (tab === 'Retired') {
+      setGender(undefined);
+      setStatus([StatusEnum.Retired]);
+    }
+  };
 
   const handlePageChange = (newPage: number, newItemsPerPage: number) => {
     setPage(newPage);
@@ -186,6 +225,7 @@ const AdminDogList: React.FC<{
 
   return (
     <ListWrapper>
+
       <FilterComponent
         onGenderChange={setGender}
         onStatusChange={setStatus}
@@ -197,6 +237,17 @@ const AdminDogList: React.FC<{
         isSireDisabled={false}
         isDamDisabled={false}
       />
+      <TabsContainer>
+        {['Males', 'Females', 'Retired'].map((tab) => (
+          <Tab
+            key={tab}
+            active={activeTab === tab}
+            onClick={() => handleTabClick(tab)}
+          >
+            {tab}
+          </Tab>
+        ))}
+      </TabsContainer>
       <AddNewDogButton onClick={handleAddNewDog}>Add New Dog</AddNewDogButton>
       <>
         {dogs.length > 0 ? (
