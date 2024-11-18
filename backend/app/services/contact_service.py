@@ -33,10 +33,10 @@ class ContactService:
     @staticmethod
     async def send_email(contact_data: ContactForm):
         subject = "New Contact Form Submission"
-        body_text = f"Name: {contact_data.name}\nMessage: {contact_data.message}"
+        body_text = f"Name: {contact_data.name}\nEmail: {contact_data.email}\nMessage: {contact_data.message}"
 
         try:
-            await ContactService.email_service.send_email(subject, body_text)
+            await ContactService.email_service.send_email(subject, body_text, contact_data.name, contact_data.email)
             logger.info("Email sent successfully")
         except HttpResponseError as e:
             logger.error(f"HttpResponseError while sending email: {e}")

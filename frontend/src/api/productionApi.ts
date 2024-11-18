@@ -10,9 +10,10 @@ export const getProductionsFiltered = async (
     filters: SelectedFilters,
     page: number,
     pageSize: number,
+    orderBy?: string
 ) => {
     const { gender, sire, dam } = filters;
-
+    console.log('getProductionsFiltered',pageSize);
     const response = await axiosWithTimeout.get(`/productions`, {
         params: {
             page,
@@ -20,9 +21,10 @@ export const getProductionsFiltered = async (
             gender,
             sireId: sire?.id,
             damId: dam?.id,
+            orderBy
         },
         headers: {
-            isBackgroundRequest: 'true', // Set as background request
+            isBackgroundRequest: 'true', 
         },
     });
 
@@ -32,7 +34,7 @@ export const getProductionsFiltered = async (
 export const getProductionById = async (id: number): Promise<Production> => {
     const response = await axiosWithTimeout.get(`/productions/${id}`, {
         headers: {
-            isBackgroundRequest: 'true', // Set as background request
+            isBackgroundRequest: 'true', 
         },
     });
     return response.data;

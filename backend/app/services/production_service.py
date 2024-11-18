@@ -24,14 +24,15 @@ class ProductionService:
         page: int,
         page_size: int,
         db: AsyncSession,
-        gender: Optional[GenderEnumSchema] = None,  # Accept gender as an optional string
+        gender: Optional[GenderEnumSchema] = None,
         sire: Optional[int] = None,
         dam: Optional[int] = None,
+        order_by: Optional[str] = "name",
     ) -> Dict[str, any]:
         try:
             if gender:
                 try:
-                    gender = GenderEnum[gender.lower()]
+                    gender = GenderEnum[gender.upper()]
                 except KeyError:
                     raise HTTPException(status_code=400, detail="Invalid gender value")
 
@@ -43,42 +44,64 @@ class ProductionService:
                 return json.loads(cached_data)
 
             offset = (page - 1) * page_size
-            query = select(Production).offset(offset).limit(page_size).options(selectinload(Production.dogs))
 
-            # Apply filters dynamically if provided
+            # Map order_by parameter to columns
+            order_by_mapping = {
+                "name": Production.name,
+                "gender": Production.gender,
+                "sire_id": Production.sire_id,
+                "dam_id": Production.dam_id,
+            }
+
+            order_by_column = order_by_mapping.get(order_by, Production.name)
+
+            # Build the base query
+            query = select(Production)
+
+            # Apply filters if present
             if gender:
-                query = query.filter(Production.gender == gender)
+                query = query.where(Production.gender == gender)
             if sire:
-                query = query.filter(Production.sire_id == sire)
+                query = query.where(Production.sire_id == sire)
             if dam:
-                query = query.filter(Production.dam_id == dam)
+                query = query.where(Production.dam_id == dam)
 
-            result = await db.execute(query)
-            productions = result.scalars().all()
+            # Add ordering, limit, and offset
+            query = query.order_by(order_by_column).offset(offset).limit(page_size)
 
-            # Count with filters applied
-            total_count_query = select(func.count(Production.id))
+            # Execute the query and fetch the results
+            results = await db.execute(query)
+            productions = results.scalars().all()
+
+            # Fetch the total count for pagination metadata
+            count_query = select(func.count(Production.id))
             if gender:
-                total_count_query = total_count_query.filter(Production.gender == gender)
+                count_query = count_query.where(Production.gender == gender)
             if sire:
-                total_count_query = total_count_query.filter(Production.sire_id == sire)
+                count_query = count_query.where(Production.sire_id == sire)
             if dam:
-                total_count_query = total_count_query.filter(Production.dam_id == dam)
+                count_query = count_query.where(Production.dam_id == dam)
 
-            total_count_result = await db.execute(total_count_query)
-            total_count = total_count_result.scalar_one()
+            total_count = (await db.execute(count_query)).scalar_one()
 
             data = {
                 "items": [convert_to_production_schema(production).dict() for production in productions],
-                "total_count": total_count,
+                "total_count": total_count
             }
-            # Cache the result with filters included
+
             await redis_client.set(cache_key, json.dumps(data, cls=DateTimeEncoder), ex=3600)
-            return data
+            # Return results with metadata
+            return {
+                "items": productions,
+                "total_count": total_count,
+                "page": page,
+                "page_size": page_size,
+            }
+            
 
         except SQLAlchemyError as e:
-            logger.error(f"Error in get_all_productions: {e}", exc_info=True)
-            raise HTTPException(status_code=500, detail="Internal Server Error")
+            logging.error(f"Error in get_all_productions: {e}")
+            raise HTTPException(status_code=500, detail="Internal server error")
 
 
     async def get_production_by_id(

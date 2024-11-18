@@ -62,7 +62,7 @@ const ProductionList: React.FC<{ defaultGender?: GenderEnum | undefined }> = ({
   defaultGender,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [itemsPerPage, setItemsPerPage] = useState(100);
 
   const [filters, setFilters] = useState<SelectedFilters>({
     gender: defaultGender,
@@ -77,6 +77,8 @@ const ProductionList: React.FC<{ defaultGender?: GenderEnum | undefined }> = ({
     currentPage,
     itemsPerPage
   );
+
+  console.log(productionsData);
 
   const productions = productionsData?.items || [];
   const totalItems = productionsData?.totalCount || 0;

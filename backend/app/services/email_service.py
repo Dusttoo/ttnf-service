@@ -24,7 +24,7 @@ class AzureEmailService:
             logger.error(f"Failed to initialize EmailClient: {e}")
             raise HTTPException(status_code=500, detail="Email service initialization failed")
 
-    async def send_email(self, subject: str, body_text: str):
+    async def send_email(self, subject: str, body_text: str, name: str, reply_to: str = SENDER_EMAIL): 
         email_message = {
             "senderAddress": SENDER_EMAIL,
             "content": {
@@ -36,7 +36,13 @@ class AzureEmailService:
                     {"address": "dusty.mumphrey@gmail.com"},
                     {"address": RECIPIENT_EMAIL}
                 ]
-            }
+            },
+            "replyTo": [
+        {
+            "address": reply_to,  
+            "displayName": name
+        }
+    ]
         }
 
         try:
