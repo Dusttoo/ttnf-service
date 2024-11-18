@@ -11,6 +11,7 @@ import Input from '../../../common/Input';
 import Dropdown from '../../../common/form/Dropdown';
 import ContentArea from '../pages/editor/ContentArea';
 import { Page } from '../../../../api/types/page';
+import { DeleteButton, EditButton } from '../../../common/Buttons';
 
 const AnnouncementManagerContainer = styled.div`
   background-color: ${(props) => props.theme.colors.neutralBackground};
@@ -184,8 +185,8 @@ const AnnouncementManager = () => {
                 </Attributes>
               </div>
               <div>
-                <Button onClick={() => handleEditAnnouncement(announcement)}>Edit</Button>
-                <Button onClick={() => handleDeleteAnnouncement(announcement.id)}>Delete</Button>
+                <EditButton onClick={() => handleEditAnnouncement(announcement)} />
+                <DeleteButton onClick={() => handleDeleteAnnouncement(announcement.id)} />
               </div>
             </AnnouncementItem>
           ))}

@@ -138,6 +138,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
           console.error('Error uploading image:', error);
         }
       }
+      console.log('uploadedUrls', uploadedUrls);
       const newImageUrls = singleImageMode ? [uploadedUrls[0]] : [...imageUrls, ...uploadedUrls];
       setImageUrls(newImageUrls);
       onImagesChange(newImageUrls);

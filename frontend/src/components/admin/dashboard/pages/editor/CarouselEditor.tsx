@@ -113,13 +113,15 @@ const CarouselEdit: React.FC<CarouselEditProps> = ({
   );
 
   const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    if (active.id !== over?.id) {
-      const oldIndex = images.findIndex((image) => image.id === active.id);
-      const newIndex = images.findIndex((image) => image.id === over?.id);
-      const reorderedImages = arrayMove(images, oldIndex, newIndex);
-      setImages(reorderedImages);
-      onSaveCarousel(speed, reorderedImages);
+      const { active, over } = event;
+
+  if (over && active.id !== over.id) {
+    setImages((prevImages) => {
+      console.log('prevImages', prevImages, active.id, over.id);
+      const oldIndex = prevImages.findIndex((img) => img.src === active.id);
+      const newIndex = prevImages.findIndex((img) => img.src === over.id);
+      return arrayMove(prevImages, oldIndex, newIndex);
+    });
     }
   };
 
@@ -129,7 +131,8 @@ const CarouselEdit: React.FC<CarouselEditProps> = ({
       src: url,
       alt: `Uploaded Image ${index + 1}`,
     }));
-    const updatedImages = [...images, ...newImages].slice(0, 10);
+    console.log('handleImageUpload', newImages);
+    const updatedImages = [...newImages];
     setImages(updatedImages);
     onSaveCarousel(speed, updatedImages); 
   };
@@ -199,7 +202,7 @@ const CarouselEdit: React.FC<CarouselEditProps> = ({
         <CarouselImagesContainer>
           {images.map((image) => (
             <SortableCarouselImage
-              key={image.id}
+            key={`preview-${image.id}`}
               id={image.id}
               image={image}
               handleRemoveImage={handleRemoveImage}
@@ -258,7 +261,7 @@ const SortableCarouselImage: React.FC<SortableCarouselImageProps> = ({
         icon={faGripVertical}
         style={{ cursor: 'grab', marginRight: '1rem' }}
       />
-      <ImageThumbnail src={image.src} alt={image.alt} />
+      <ImageThumbnail key={`thumbnail-${image.id}`} src={image.src} alt={image.alt} />
       <Input
         type="text"
         value={image.alt}
