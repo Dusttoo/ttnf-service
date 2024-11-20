@@ -42,6 +42,5 @@ export const updateAnnouncement = async (id: number, announcementData: Announcem
 };
 
 export const deleteAnnouncement = async (id: number): Promise<void> => {
-  console.log(id)
   await axiosWithTimeout.delete(`/announcements/${id}`);
 };

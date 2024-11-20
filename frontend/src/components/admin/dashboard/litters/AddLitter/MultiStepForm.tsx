@@ -98,21 +98,15 @@ const MultiStepForm: React.FC<MultiStepFormProps> = ({
   }, [isEditing, litter, litterLoading, parentMaleId, parentFemaleId]);
 
   const handleNextStep = async () => {
-    console.log(`Handling step: ${currentStep}`);
     switch (currentStep) {
       case 0: {
-            console.log('submitting step 0');
           setCurrentStep(1);
         break;
       }
       case 1: {
-        console.log('submitting step 1, puppyIndex:', puppyIndex);
           if (puppyIndex < (litterData.numberOfPuppies ?? 0)) {
-            console.log('updating puppy index');
             setPuppyIndex((prevIndex) => prevIndex + 1); 
-            console.log('handling next puppy');
           } else {
-            console.log('handling final submit');
             setCurrentStep(2); 
             setPuppyIndex(0); 
           }
@@ -139,7 +133,6 @@ const MultiStepForm: React.FC<MultiStepFormProps> = ({
     data: LitterCreate | LitterUpdate,
     pedigreeUrl: string
   ) => {
-    console.log('submitting step 1');
     setPedigreeUrl(pedigreeUrl);
 
     try {

@@ -42,7 +42,6 @@ const DogDetail: React.FC = () => {
   const deleteDog = useDeleteDog();
   const navigate = useNavigate();
 
-  console.log('statuses', dog?.statuses);
   const handleDelete = async () => {
     await deleteDog.mutateAsync(Number(dogId));
     navigate('/admin/dogs');

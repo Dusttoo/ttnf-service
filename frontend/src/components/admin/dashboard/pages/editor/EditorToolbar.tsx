@@ -62,7 +62,6 @@ const Toolbar: React.FC<ToolbarProps> = ({
     const now = new Date();
     const nowUTC = new Date(now.getTime() + now.getTimezoneOffset() * 60000);
 
-    console.log('lastSaved', lastSaved, 'now: ', nowUTC);
 
     const diffInMinutes = Math.floor(
       (nowUTC.getTime() - savedDate.getTime()) / 60000

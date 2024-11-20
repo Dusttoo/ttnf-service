@@ -78,7 +78,6 @@ const ProductionList: React.FC<{ defaultGender?: GenderEnum | undefined }> = ({
     itemsPerPage
   );
 
-  console.log(productionsData);
 
   const productions = productionsData?.items || [];
   const totalItems = productionsData?.totalCount || 0;

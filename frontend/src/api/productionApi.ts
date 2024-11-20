@@ -13,7 +13,6 @@ export const getProductionsFiltered = async (
     orderBy?: string
 ) => {
     const { gender, sire, dam } = filters;
-    console.log('getProductionsFiltered',pageSize);
     const response = await axiosWithTimeout.get(`/productions`, {
         params: {
             page,

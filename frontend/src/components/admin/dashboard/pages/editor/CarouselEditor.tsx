@@ -117,7 +117,6 @@ const CarouselEdit: React.FC<CarouselEditProps> = ({
 
   if (over && active.id !== over.id) {
     setImages((prevImages) => {
-      console.log('prevImages', prevImages, active.id, over.id);
       const oldIndex = prevImages.findIndex((img) => img.src === active.id);
       const newIndex = prevImages.findIndex((img) => img.src === over.id);
       return arrayMove(prevImages, oldIndex, newIndex);
@@ -131,7 +130,6 @@ const CarouselEdit: React.FC<CarouselEditProps> = ({
       src: url,
       alt: `Uploaded Image ${index + 1}`,
     }));
-    console.log('handleImageUpload', newImages);
     const updatedImages = [...newImages];
     setImages(updatedImages);
     onSaveCarousel(speed, updatedImages); 

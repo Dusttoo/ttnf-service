@@ -153,7 +153,6 @@ const PageEditor: React.FC = () => {
   // Handle debounced content save
   const handleContentChange = () => {
     setHasChanges(true);
-    console.log('handleContentChange');
 
     if (debounceTimeout.current) {
       clearTimeout(debounceTimeout.current);
@@ -247,7 +246,6 @@ const PageEditor: React.FC = () => {
   if (error) return <ErrorComponent message={error} />;
   if (!page) return <ErrorComponent message="Could not find page." />;
 
-  console.log(hasChanges)
   return (
     <EditorContainer>
       <Toolbar
