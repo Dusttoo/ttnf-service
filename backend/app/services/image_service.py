@@ -11,10 +11,10 @@ container_name = settings.azure_storage_container_name
 blob_service_client = BlobServiceClient.from_connection_string(connect_str)
 container_client = blob_service_client.get_container_client(container_name)
 
-
 class MediaService:
     @staticmethod
     async def upload_media(file: UploadFile, context: dict) -> Tuple[str, str]:
+
         path_structure = "/".join(
             [str(context.get(key, '')).replace(" ", "-").lower() for key in context.keys() if context[key]])
 

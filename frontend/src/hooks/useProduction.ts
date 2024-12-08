@@ -41,6 +41,10 @@ export const useCreateProduction = () => {
       onSuccess: () => {
         queryClient.invalidateQueries('productions');
       },
+      onError: (error) => {
+        console.error('Error creating production:', error); 
+        throw error; 
+      },
     }
   );
 };
@@ -59,6 +63,10 @@ export const useUpdateProduction = () => {
       onSuccess: (_data, variables) => {
         queryClient.invalidateQueries('productions');
         queryClient.invalidateQueries(['production', variables.productionId]);
+      },
+      onError: (error) => {
+        console.error('Error updating production:', error); 
+        throw error; 
       },
     }
   );

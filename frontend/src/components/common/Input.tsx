@@ -4,6 +4,7 @@ import styled from 'styled-components';
 interface InputProps {
     type: string;
     value: string;
+    name?: string;
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     placeholder?: string;
     label?: string;
@@ -51,6 +52,7 @@ const ErrorMessage = styled.span`
 const Input: React.FC<InputProps> = ({
                                          type,
                                          value,
+                                         name,
                                          onChange,
                                          placeholder,
                                          label,
@@ -72,6 +74,7 @@ const Input: React.FC<InputProps> = ({
                 id={id}
                 type={type}
                 value={value}
+                name={name}
                 onChange={onChange}
                 placeholder={placeholder}
                 width={width}

@@ -7,6 +7,7 @@ import Button from '../../../common/form/Button';
 import ImageUpload from '../../../common/ImageUpload';
 import ParentSelector from '../../../common/form/ParentSelector';
 import { GenderEnum } from '../../../../api/types/core';
+import Input from '../../../common/Input';
 
 const FormContainer = styled.div`
   display: flex;
@@ -15,15 +16,6 @@ const FormContainer = styled.div`
   padding: 2rem;
   background-color: ${(props) => props.theme.colors.secondaryBackground};
   border-radius: 8px;
-  color: ${(props) => props.theme.colors.white};
-`;
-
-const Input = styled.input`
-  padding: 0.75rem;
-  background-color: ${(props) => props.theme.colors.neutralBackground};
-  border: 1px solid ${(props) => props.theme.colors.primary};
-  border-radius: 4px;
-  font-size: 1rem;
   color: ${(props) => props.theme.colors.white};
 `;
 
@@ -100,19 +92,28 @@ const ProductionForm: React.FC<ProductionFormProps> = ({ onClose, productionId }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
 
-    const updatedFormState = { ...formState };
-
-    if (productionId) {
-      await updateProduction.mutateAsync({
-        productionId: Number(productionId),
-        productionData: updatedFormState as ProductionUpdate,
-      });
-    } else {
-      await createProduction.mutateAsync(updatedFormState as ProductionCreate);
+    const updatedFormState = { ...formState, dob: formState.dob ? new Date(formState.dob).toISOString() : null };
+  
+    try {
+      if (productionId) {
+        await updateProduction.mutateAsync({
+          productionId: Number(productionId),
+          productionData: updatedFormState as ProductionUpdate,
+        });
+      } else {
+        await createProduction.mutateAsync(updatedFormState as ProductionCreate);
+      }
+      onClose();
+      navigate('/admin/dashboard/productions');
+    } catch (error: any) {
+      if (error.response?.data?.detail) {
+        console.error(error.response.data.detail);
+      } else {
+        console.error("an unexpected error occurred");
+      }
     }
-    onClose();
-    navigate('/admin/dashboard/productions');
   };
 
   return (
@@ -122,14 +123,15 @@ const ProductionForm: React.FC<ProductionFormProps> = ({ onClose, productionId }
         <Input
           type="text"
           name="name"
-          value={formState.name}
+          value={formState.name ? formState.name : ''}
           onChange={handleChange}
           placeholder="Name"
+          required
         />
         <Input
           type="date"
           name="dob"
-          value={formState.dob}
+          value={formState.dob ? formState.dob : ''}
           onChange={handleChange}
           placeholder="Date of Birth"
         />
@@ -145,16 +147,18 @@ const ProductionForm: React.FC<ProductionFormProps> = ({ onClose, productionId }
         <Input
           type="text"
           name="owner"
-          value={formState.owner}
+          value={formState.owner ? formState.owner : ''}
           onChange={handleChange}
           placeholder="Owner"
+          required
         />
         <Input
           type="text"
           name="description"
-          value={formState.description}
+          value={formState.description ? formState.description : ''}
           onChange={handleChange}
           placeholder="Description"
+          required
         />
         <ParentSelector
           sireId={formState.parentMaleId}
@@ -178,6 +182,7 @@ const ProductionForm: React.FC<ProductionFormProps> = ({ onClose, productionId }
             id="profile"
             maxImages={1}
             onImagesChange={handleProfilePhotoChange}
+            singleImageMode
             initialImages={formState.profilePhoto ? [formState.profilePhoto] : []}
           />
         </InputGroup>

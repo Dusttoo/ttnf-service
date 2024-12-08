@@ -3,18 +3,18 @@ import styled from 'styled-components';
 import { uploadImage } from '../../api/imageApi';
 import { theme } from '../../theme/theme';
 import {
-    DndContext,
-    useSensor,
-    useSensors,
-    PointerSensor,
-    closestCenter,
-    DragEndEvent,
+  DndContext,
+  useSensor,
+  useSensors,
+  PointerSensor,
+  closestCenter,
+  DragEndEvent,
 } from '@dnd-kit/core';
 import {
-    SortableContext,
-    arrayMove,
-    useSortable,
-    horizontalListSortingStrategy,
+  SortableContext,
+  arrayMove,
+  useSortable,
+  horizontalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
@@ -30,7 +30,6 @@ const UploadContainer = styled.div`
   border-radius: 8px;
   background-color: ${theme.colors.secondaryBackground};
   cursor: pointer;
-  box-sizing: border-box;
   &:hover {
     background-color: ${theme.colors.neutralBackground};
   }
@@ -49,7 +48,6 @@ const ImagePreview = styled.div`
 
 const PreviewContainer = styled.div`
   position: relative;
-  display: inline-block;
 `;
 
 const PreviewImage = styled.img`
@@ -58,7 +56,6 @@ const PreviewImage = styled.img`
   object-fit: cover;
   border-radius: 4px;
   border: 2px solid ${theme.colors.primary};
-  cursor: pointer;
 `;
 
 const RemoveButton = styled.button`
@@ -73,26 +70,6 @@ const RemoveButton = styled.button`
   width: 20px;
   height: 20px;
   font-size: 12px;
-`;
-
-const UploadLabel = styled.label`
-  font-family: ${theme.fonts.primary};
-  font-size: 1rem;
-  color: ${theme.colors.primary};
-`;
-
-const AddMoreButton = styled.button`
-  margin-top: 0.5rem;
-  padding: 0.5rem 1rem;
-  background-color: ${theme.colors.primary};
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-
-  &:hover {
-    background-color: ${theme.colors.secondaryBackground};
-  }
 `;
 
 interface ImageUploadProps {
@@ -120,121 +97,98 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     setImageUrls(initialImages);
   }, [initialImages]);
 
-  const handleFileChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    event.stopPropagation();
-    event.preventDefault();
-
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
-    if (files && files.length > 0) {
-      const uploadedUrls: string[] = [];
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        try {
-          const response = await uploadImage(file, 'dogs', file.name, 'image');
-          uploadedUrls.push(response.url);
-        } catch (error) {
-          console.error('Error uploading image:', error);
-        }
+    if (!files || files.length === 0) return;
+
+    const uploadedUrls: string[] = [];
+    for (const file of files) {
+      try {
+        const response = await uploadImage(file, 'dogs', file.name, 'image');
+        uploadedUrls.push(response.url);
+      } catch (error) {
+        console.error('Error uploading image:', error);
       }
-      console.log('uploadedUrls', uploadedUrls);
-      const newImageUrls = singleImageMode ? [uploadedUrls[0]] : [...imageUrls, ...uploadedUrls];
-      setImageUrls(newImageUrls);
-      onImagesChange(newImageUrls);
-      event.target.value = '';
     }
-  };
 
-  const handleReplaceImage = () => {
-    fileInputRef.current?.click();
-  };
+    const newImageUrls = singleImageMode
+      ? [uploadedUrls[0]]
+      : [...imageUrls, ...uploadedUrls].slice(0, maxImages);
 
-  const handleRemoveImage = (index: number) => {
-    const updatedUrls = [...imageUrls];
-    updatedUrls.splice(index, 1);
-    setImageUrls(updatedUrls);
-    onImagesChange(updatedUrls);
+    setImageUrls(newImageUrls);
+    onImagesChange(newImageUrls);
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleOpenFilePicker = () => {
-    fileInputRef.current?.click();
+    if (imageUrls.length < maxImages || singleImageMode) {
+      fileInputRef.current?.click();
+    }
   };
 
   const handleDragStart = (image: string) => {
-    console.log('handleDragStart', image);
     setDraggedImage(image);
   };
 
-  const handleDrop = (e: React.DragEvent) => {
-    console.log('handleDrop', e);
-    e.preventDefault();
-    if (draggedImage) {
-      if (onDropToOther) {
-        console.log('handleDrop', draggedImage, id);
-        onDropToOther(draggedImage, id);
-        console.log('handleDrop', imageUrls);
-      }
+  const handleDrop = (event: React.DragEvent) => {
+    event.preventDefault();
+    if (draggedImage && onDropToOther) {
+      onDropToOther(draggedImage, id);
       setDraggedImage(null);
     }
   };
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 5,
-      },
-    })
-  );
+  const handleRemoveImage = (index: number) => {
+    const updatedUrls = imageUrls.filter((_, i) => i !== index);
+    setImageUrls(updatedUrls);
+    onImagesChange(updatedUrls);
+  };
 
   const handleDragEnd = (event: DragEndEvent) => {
-    console.log('handleDragEnd', event);
     const { active, over } = event;
 
     if (!over) return;
 
-    if (over.id !== id) {
-      // Convert `over.id` to a string to ensure compatibility with the `onDropToOther` function
-      if (over?.id && draggedImage && onDropToOther) {
-        onDropToOther(draggedImage, id as string); // Call the cross-component drop handler with string `id`
+    const activeId = active.id as string;
+    const overId = over.id as string;
+
+    if (activeId !== overId) {
+      const activeIndex = imageUrls.findIndex((url) => url === activeId);
+      const overIndex = imageUrls.findIndex((url) => url === overId);
+
+      if (activeIndex !== -1 && overIndex !== -1) {
+        const updatedUrls = arrayMove(imageUrls, activeIndex, overIndex);
+        setImageUrls(updatedUrls);
+        onImagesChange(updatedUrls);
       }
-    } else if (active.id !== over.id) {
-      // Handle reordering within the same component
-      const oldIndex = imageUrls.findIndex((url) => url === active.id);
-      const newIndex = imageUrls.findIndex((url) => url === over.id);
-      const newImageUrls = arrayMove(imageUrls, oldIndex, newIndex);
-      setImageUrls(newImageUrls);
-      onImagesChange(newImageUrls);
     }
 
-    setDraggedImage(null); // Reset dragged image
-};
+    if (onDropToOther && over.id !== id) {
+      // Cross-container drag
+      onDropToOther(activeId, over.id as string);
+    }
+
+    setDraggedImage(null);
+  };
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+  );
 
   return (
     <UploadContainer
+      onClick={handleOpenFilePicker}
       onDrop={handleDrop}
       onDragOver={(e) => e.preventDefault()}
-      onClick={imageUrls.length < maxImages ? handleOpenFilePicker : undefined}
     >
       <HiddenInput
         ref={fileInputRef}
-        id="file-upload"
         type="file"
         multiple={!singleImageMode}
         accept="image/*"
         onChange={handleFileChange}
       />
-      <UploadLabel>
-        {imageUrls.length < maxImages
-          ? "Drag and Drop images here or Choose files"
-          : "Max images reached"}
-      </UploadLabel>
-      
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext items={imageUrls} strategy={horizontalListSortingStrategy}>
           <ImagePreview>
             {imageUrls.map((image, index) => (
@@ -242,7 +196,6 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
                 key={image}
                 id={image}
                 image={image}
-                index={index}
                 onRemove={() => handleRemoveImage(index)}
                 onDragStart={() => handleDragStart(image)}
               />
@@ -259,24 +212,12 @@ export default ImageUpload;
 interface SortableImageProps {
   id: string;
   image: string;
-  index: number;
   onRemove: () => void;
   onDragStart: () => void;
 }
 
-export const SortableImage: React.FC<SortableImageProps> = ({
-  id,
-  image,
-  onRemove,
-  onDragStart,
-}) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-  } = useSortable({ id });
+const SortableImage: React.FC<SortableImageProps> = ({ id, image, onRemove, onDragStart }) => {
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -289,11 +230,16 @@ export const SortableImage: React.FC<SortableImageProps> = ({
       style={style}
       {...attributes}
       {...listeners}
-      onDragStart={onDragStart}
+      onDragStart={() => onDragStart()}
       draggable
     >
       <PreviewImage src={image} alt="Preview" />
-      <RemoveButton onClick={(event) => { event.stopPropagation(); onRemove(); }}>
+      <RemoveButton
+        onClick={(event) => {
+          event.stopPropagation();
+          onRemove();
+        }}
+      >
         ×
       </RemoveButton>
     </PreviewContainer>
