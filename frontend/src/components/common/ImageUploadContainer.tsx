@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   DndContext,
   DragEndEvent,
@@ -40,6 +40,14 @@ const ImageUploadContainer: React.FC<ImageUploadContainerProps> = ({
 
   const [activeId, setActiveId] = useState<string | null>(null);
 
+  // Sync with props when profilePhoto or galleryPhotos change
+  useEffect(() => {
+    setContainers({
+      profile: profilePhoto ? [profilePhoto] : [],
+      gallery: [...galleryPhotos],
+    });
+  }, [profilePhoto, galleryPhotos]);
+
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
   );
@@ -67,7 +75,11 @@ const ImageUploadContainer: React.FC<ImageUploadContainerProps> = ({
 
       if (oldIndex !== -1 && newIndex !== -1) {
         const updatedItems = arrayMove(items, oldIndex, newIndex);
-        setContainers((prev) => ({ ...prev, [activeContainer]: updatedItems }));
+        setContainers((prev) => ({
+          ...prev,
+          [activeContainer]: updatedItems,
+        }));
+        if (activeContainer === 'gallery') onGalleryPhotosChange(updatedItems);
       }
     } else {
       // Moving between containers

@@ -366,9 +366,11 @@ const DogForm: React.FC<DogFormProps> = ({
         <SectionTitle>Photos</SectionTitle>
         <ImageUploadContainer
           profilePhoto={formState.profilePhoto}
-          onProfilePhotoChange={handleProfilePhotoChange}
+          onProfilePhotoChange={(url) =>
+            setFormState({ ...formState, profilePhoto: url })
+          }
           galleryPhotos={galleryPhotos}
-          onGalleryPhotosChange={handleGalleryPhotosChange}
+          onGalleryPhotosChange={(urls) => setGalleryPhotos(urls)}
         />
 
         {/* Form Buttons */}
