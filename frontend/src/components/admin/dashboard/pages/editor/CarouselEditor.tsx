@@ -20,6 +20,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGripVertical, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import ImageUpload from '../../../../common/ImageUpload';
 import Input from '../../../../common/Input';
+import Button from '../../../../common/form/Button';
 
 const CarouselEditContainer = styled.div`
   padding: 0.5rem;
@@ -98,6 +99,7 @@ const CarouselEdit: React.FC<CarouselEditProps> = ({
   const [images, setImages] = useState<CarouselImageType[]>(carouselImages);
   const [speed, setSpeed] = useState<number>(carouselSpeed);
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
+  const [openAltText, setOpenAltText] = useState<boolean>(false);
 
   useEffect(() => {
     setImages(carouselImages);
@@ -188,7 +190,9 @@ const CarouselEdit: React.FC<CarouselEditProps> = ({
       initialImages={images.map((img) => img.src)}
       singleImageMode={false}
     />
-    <DndContext
+    <Button onClick={() => setOpenAltText(() => !openAltText)}>{openAltText ? 'Close Alt Text Editor' : 'Open Alt Text Editor'}</Button>
+    {openAltText && (
+      <DndContext
       sensors={sensors}
       collisionDetection={closestCenter}
       onDragEnd={handleDragEnd}
@@ -209,7 +213,10 @@ const CarouselEdit: React.FC<CarouselEditProps> = ({
           ))}
         </CarouselImagesContainer>
       </SortableContext>
-    </DndContext>
+    </DndContext>)
+    
+    }
+    
   </CarouselEditContainer>
   );
 };
