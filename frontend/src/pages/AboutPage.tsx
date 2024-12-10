@@ -55,9 +55,6 @@ const AboutPage: React.FC<{ slug?: string }> = ({ slug }) => {
     return (
         <AboutContainer>
             <SectionHeader>About Us</SectionHeader>
-            <ImageContainer>
-                <AboutImage src="https://via.placeholder.com/800x400" alt="Kennel Image" />
-            </ImageContainer>
             <AboutContent dangerouslySetInnerHTML={{ __html: sanitizedContent }} />
         </AboutContainer>
     );
