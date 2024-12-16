@@ -53,6 +53,11 @@ export const updateProduction = async (
     const response = await axiosWithTimeout.put(
         `/productions/${productionId}`,
         productionData,
+        {
+            headers: {
+                isBackgroundRequest: 'true', 
+            },
+        }
     );
     return response.data;
 };

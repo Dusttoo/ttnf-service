@@ -51,7 +51,6 @@ interface ProductionFormProps {
 }
 
 const ProductionForm: React.FC<ProductionFormProps> = ({ onClose, productionId }) => {
-  const navigate = useNavigate();
   const { data: production } = useProduction(productionId || 0);
   const createProduction = useCreateProduction();
   const updateProduction = useUpdateProduction();
@@ -106,7 +105,6 @@ const ProductionForm: React.FC<ProductionFormProps> = ({ onClose, productionId }
         await createProduction.mutateAsync(updatedFormState as ProductionCreate);
       }
       onClose();
-      navigate('/admin/dashboard/productions');
     } catch (error: any) {
       if (error.response?.data?.detail) {
         console.error(error.response.data.detail);
