@@ -72,6 +72,9 @@ const Sidebar: React.FC = () => {
       <NavItem onClick={() => navigate('/admin/dashboard/productions')}>
         Productions
       </NavItem>
+      <NavItem onClick={() => navigate('/admin/dashboard/available')}>
+        Available
+      </NavItem>
       <NavItem onClick={() => navigate('/admin/dashboard/breedings')}>
         Breedings
       </NavItem>

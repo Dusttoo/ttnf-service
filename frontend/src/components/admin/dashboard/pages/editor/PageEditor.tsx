@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import usePage from '../../../../../hooks/usePage';
-import { HeroContent } from '../../../../../api/types/page';
+import { HeroContent, Page, SEOSettings, LayoutSettings } from '../../../../../api/types/page';
 import { CarouselImage as CarouselImageType } from '../../../../../api/types/core';
 import Sidebar from './Sidebar';
 import ContentArea from './ContentArea';
@@ -85,6 +85,10 @@ const ToggleButton = styled.button<{ isSidebarOpen: boolean }>`
   &:hover {
     background-color: ${(props) => props.theme.colors.primaryDark};
   }
+
+  @media (max-width: 768px) {
+    right: 0; 
+  }
 `;
 
 const PageEditor: React.FC = () => {
@@ -94,22 +98,14 @@ const PageEditor: React.FC = () => {
   const [isEditMode, setIsEditMode] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [content, setContent] = useState<string>('');
-  const [seoSettings, setSEOSettings] = useState(page?.settings?.seo || {});
-  const [layoutSettings, setLayoutSettings] = useState(
-    page?.settings?.layout || {}
-  );
-  const [aboutContent, setAboutContent] = useState<string>(
-    page?.customValues?.aboutContent || ''
-  );
-  const [heroContent, setHeroContent] = useState<HeroContent | null>(
-    page?.customValues?.heroContent || null
-  );
+  const [seoSettings, setSEOSettings] = useState<SEOSettings>({});
+  const [layoutSettings, setLayoutSettings] = useState<LayoutSettings>({});
+  const [aboutContent, setAboutContent] = useState<string>('');
+  const [heroContent, setHeroContent] = useState<HeroContent | null>(null);
   const [standaloneCarouselImages, setStandaloneCarouselImages] = useState<
     CarouselImageType[]
-  >(page?.carousel || page?.customValues?.heroContent?.carouselImages || []);
-  const [carouselSpeed, setCarouselSpeed] = useState<number>(
-    page?.customValues?.heroContent?.carouselSpeed || 5000
-  );
+  >([]);
+  const [carouselSpeed, setCarouselSpeed] = useState<number>(3000);
   const [lastUpdated, setLastUpdated] = useState<string | undefined>(undefined);
   const [activeComponent, setActiveComponent] = useState<string | undefined>(
     undefined
@@ -118,7 +114,6 @@ const PageEditor: React.FC = () => {
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
   const [previewMode, setPreviewMode] = useState(false);
 
-  // Sync with page data
   useEffect(() => {
     if (page) {
       setContent(page.content);
@@ -129,10 +124,10 @@ const PageEditor: React.FC = () => {
       setStandaloneCarouselImages(
         page.carousel || page.customValues?.heroContent?.carouselImages || []
       );
+      setCarouselSpeed(page.customValues?.heroContent?.carouselSpeed || 5000);
     }
   }, [page]);
 
-  // Fetch last updated settings
   useEffect(() => {
     const fetchSettings = async () => {
       try {
@@ -150,7 +145,6 @@ const PageEditor: React.FC = () => {
     setPreviewMode((prev) => !prev);
   };
 
-  // Handle debounced content save
   const handleContentChange = () => {
     setHasChanges(true);
 
@@ -200,11 +194,10 @@ const PageEditor: React.FC = () => {
       clearTimeout(debounceTimeout.current); // Clear debounce on manual save
     }
     if (hasChanges) {
-      handleSaveContent();
+      saveChanges();
     }
   };
 
-  // Handle active component click
   const handleComponentClick = (componentName: string) => {
     setActiveComponent(componentName);
     if (!isSidebarOpen) {
@@ -256,10 +249,13 @@ const PageEditor: React.FC = () => {
         togglePreviewMode={togglePreviewMode}
       />
 
-      <ContentContainer isSidebarOpen={isSidebarOpen}>
-        {isEditMode ? (
-          <>
-            {heroContent && (
+      <ContentWrapper>
+        <ContentContainer isSidebarOpen={isSidebarOpen}>
+          {previewMode ? (
+            <PreviewMode content={content} />
+          ) : (
+            <>
+              {heroContent && (
                 <HeroSection
                   page={page}
                   heroContent={heroContent}
@@ -269,7 +265,7 @@ const PageEditor: React.FC = () => {
                   onChange={(updatedHeroContent) => {
                     setHeroContent(updatedHeroContent);
                     setHasChanges(true);
-                    handleContentChange()
+                    handleContentChange();
                   }}
                   editMode={true}
                   onSaveCarousel={(
@@ -281,67 +277,69 @@ const PageEditor: React.FC = () => {
                       carouselImages: updatedCarouselImages,
                       carouselSpeed,
                     });
+                    setStandaloneCarouselImages(updatedCarouselImages);
+                    setCarouselSpeed(carouselSpeed);
                     setHasChanges(true);
                     handleContentChange();
                   }}
                   handleComponentClick={handleComponentClick}
                   previewMode={previewMode}
                 />
-            )}
-            {page.customValues?.aboutContent && (
-              <div onClick={() => handleComponentClick('about')}>
+              )}
+              {page.customValues?.aboutContent && (
+                <div onClick={() => handleComponentClick('carousel')}>
+                  <ContentArea
+                    content={aboutContent}
+                    setContent={(newContent) => {
+                      setAboutContent(newContent);
+                      setHasChanges(true);
+                      handleContentChange();
+                    }}
+                    height={300}
+                    toolbarOptions="bold italic | bullist numlist"
+                    placeholder="Enter content for the About section..."
+                  />
+                </div>
+              )}
+              <div onClick={() => handleComponentClick('carousel')}>
                 <ContentArea
-                  content={aboutContent}
+                  content={content}
                   setContent={(newContent) => {
-                    setAboutContent(newContent);
+                    setContent(newContent);
                     setHasChanges(true);
                     handleContentChange();
                   }}
-                  height={300}
-                  toolbarOptions="bold italic | bullist numlist"
-                  placeholder="Enter content for the About section..."
                 />
               </div>
-            )}
-            <div onClick={() => handleComponentClick('content')}>
-              <ContentArea
-                content={content}
-                setContent={(newContent) => {
-                  setContent(newContent);
-                  setHasChanges(true);
-                  handleContentChange();
+            </>
+          )}
+        </ContentContainer>
 
-                }}
-              />
-            </div>
-          </>
-        ) : (
-          <PreviewMode content={content} />
-        )}
-      </ContentContainer>
+        <SidebarContainer isSidebarOpen={isSidebarOpen}>
+          <Sidebar
+            seoSettings={seoSettings}
+            setSEOSettings={setSEOSettings}
+            layoutSettings={layoutSettings}
+            setLayoutSettings={setLayoutSettings}
+            carouselImages={standaloneCarouselImages}
+            carouselSpeed={carouselSpeed}
+            onSaveCarousel={(carouselSpeed, updatedCarouselImages) => {
+              setStandaloneCarouselImages(updatedCarouselImages);
+              setCarouselSpeed(carouselSpeed);
+              setHasChanges(true);
+              handleContentChange();
+            }}
+            activeComponent={activeComponent}
+            page={page}
+          />
+        </SidebarContainer>
 
-      <SidebarContainer isSidebarOpen={isSidebarOpen}>
-        <Sidebar
-          seoSettings={seoSettings}
-          setSEOSettings={setSEOSettings}
-          layoutSettings={layoutSettings}
-          setLayoutSettings={setLayoutSettings}
-          carouselImages={standaloneCarouselImages}
-          carouselSpeed={carouselSpeed}
-          onSaveCarousel={(carouselSpeed, updatedCarouselImages) => {
-            setStandaloneCarouselImages(updatedCarouselImages);
-            setCarouselSpeed(carouselSpeed);
-            setHasChanges(true);
-          }}
-          activeComponent={activeComponent}
-        />
-      </SidebarContainer>
-
-      <ToggleButton isSidebarOpen={isSidebarOpen} onClick={handleToggleSidebar}>
-        <FontAwesomeIcon
-          icon={isSidebarOpen ? faChevronRight : faChevronLeft}
-        />
-      </ToggleButton>
+        <ToggleButton isSidebarOpen={isSidebarOpen} onClick={handleToggleSidebar}>
+          <FontAwesomeIcon
+            icon={isSidebarOpen ? faChevronRight : faChevronLeft}
+          />
+        </ToggleButton>
+      </ContentWrapper>
     </EditorContainer>
   );
 };

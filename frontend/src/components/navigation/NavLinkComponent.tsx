@@ -9,7 +9,6 @@ interface NavLinkProps {
 
 const NavLinkComponent: React.FC<NavLinkProps> = ({ link }) => {
     const [isOpen, setIsOpen] = useState(false); 
-
     const handleMouseEnter = () => {
         if (window.innerWidth > 768) {
             setIsOpen(true);

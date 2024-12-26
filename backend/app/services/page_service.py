@@ -170,7 +170,6 @@ class PageService:
                         else:
                             new_announcement = Announcement(
                                 title=announcement["title"],
-                                date=announcement_date,
                                 message=announcement["message"],
                                 category=announcement_category,
                                 page_id=page_id
@@ -179,7 +178,6 @@ class PageService:
                     else:
                         new_announcement = Announcement(
                             title=announcement["title"],
-                            date=announcement_date,
                             message=announcement["message"],
                             category=announcement_category,
                             page_id=page_id
@@ -222,7 +220,7 @@ class PageService:
         return None
 
     async def get_pages(
-        self, db: AsyncSession, skip: int = 0, limit: int = 10
+        self, db: AsyncSession, skip: int = 0, limit: int = 100
     ) -> List[PageSchema]:
         cache_key = f"pages:{skip}:{limit}:{settings.env}"
         redis_client = await self.get_redis_client()
@@ -243,6 +241,7 @@ class PageService:
             .limit(limit)
         )
         db_pages = result.scalars().all()
+        print(db_pages)
         page_schemas = [convert_to_page_schema(page) for page in db_pages]
 
         try:

@@ -98,7 +98,8 @@ const TabButton = styled.button<{ active?: boolean }>`
 const DogList: React.FC<{
   defaultGender?: GenderEnum | undefined;
   owned?: boolean;
-}> = ({ defaultGender, owned }) => {
+  availablePage?: boolean;
+}> = ({ defaultGender, owned, availablePage = false }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(100);
   const [selectedTab, setSelectedTab] = useState<'active' | 'retired'>(
@@ -112,7 +113,7 @@ const DogList: React.FC<{
     dam: undefined,
   });
 
-  const effectiveStatus =
+  let effectiveStatus =
     selectedTab === 'active'
       ? [
           ...(filters.status ?? []).filter(
@@ -126,6 +127,13 @@ const DogList: React.FC<{
           ),
           StatusEnum.Retired,
         ];
+
+  if (availablePage) {
+    filters.status = [StatusEnum.Available];
+    effectiveStatus = [StatusEnum.Available];
+  }
+
+  console.log(filters);
 
   const { data: dogsData, isLoading } = useDogs(
     {
@@ -182,20 +190,22 @@ const DogList: React.FC<{
           sire={filters.sire}
           dam={filters.dam}
         />
-        <TabContainer>
-          <TabButton
-            active={selectedTab === 'active'}
-            onClick={() => setSelectedTab('active')}
-          >
-            Active Dogs
-          </TabButton>
-          <TabButton
-            active={selectedTab === 'retired'}
-            onClick={() => setSelectedTab('retired')}
-          >
-            Retired Dogs
-          </TabButton>
-        </TabContainer>
+        {!availablePage && (
+          <TabContainer>
+            <TabButton
+              active={selectedTab === 'active'}
+              onClick={() => setSelectedTab('active')}
+            >
+              Active Dogs
+            </TabButton>
+            <TabButton
+              active={selectedTab === 'retired'}
+              onClick={() => setSelectedTab('retired')}
+            >
+              Retired Dogs
+            </TabButton>
+          </TabContainer>
+        )}
       </ListHeader>
 
       <Section>

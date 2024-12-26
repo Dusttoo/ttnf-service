@@ -70,7 +70,7 @@ const ProductionForm: React.FC<ProductionFormProps> = ({ onClose, productionId }
     if (production) {
       setFormState({
         ...production,
-        dob: production.dob ? new Date(production.dob).toISOString().split('T')[0] : '',
+        dob: production.dob,
         parentMaleId: production.parentMaleId,
         parentFemaleId: production.parentFemaleId,
         gender: production.gender,

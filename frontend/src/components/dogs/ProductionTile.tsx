@@ -66,7 +66,7 @@ const ProductionTile: React.FC<{ production: Production }> = ({
             )}
             {production.dob && (
                 <ProductionDetails>
-                    DOB: {new Date(production.dob).toLocaleDateString()}
+                    DOB: {production.dob.toString()}
                 </ProductionDetails>
             )}
         </TileContainer>

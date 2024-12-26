@@ -115,7 +115,7 @@ async def log_requests(request: Request, call_next):
                 logger.info(f"[{request_id}] Response Body: [binary data skipped]")
             else:
                 try:
-                    logger.info(f"[{request_id}] Response Body: {response_body.decode('utf-8')}")
+                    logger.info(f"[{request_id}] Response Body: ")
                 except UnicodeDecodeError:
                     logger.warning(f"[{request_id}] Could not decode response body, possibly binary data.")
 

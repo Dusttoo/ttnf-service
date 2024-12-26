@@ -50,6 +50,8 @@ export interface DogCreate {
     galleryPhotos?: string[];
     isRetired?: boolean;
     isProduction?: boolean;
+    kennelOwn?: boolean;
+
 
 }
 
@@ -71,7 +73,7 @@ export interface DogUpdate {
     galleryPhotos?: string[];
     isRetired?: boolean;
     isProduction?: boolean;
-
+    kennelOwn?: boolean;
 
 }
 

@@ -19,6 +19,7 @@ import AdminSettings from '../components/admin/dashboard/settings/AdminSettings'
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import ContactSubmissionsPage from '../pages/admin/ContactSubmissionsPage';
 import WaitlistSubmissionsPage from '../pages/admin/WaitlistSubmissionsPage';
+import AdminAvailableList from '../components/admin/dashboard/available/AdminAvailableList';
 
 interface PrivateRouteProps {
     element: React.ReactElement;
@@ -58,6 +59,7 @@ const PrivateRoutes: React.FC = () => (
             <Route path="settings" element={<AdminSettings />} />
             <Route path="contact" element={<ContactSubmissionsPage />} />
             <Route path="waitlist" element={<WaitlistSubmissionsPage />} />
+            <Route path="available" element={<AdminAvailableList />} />
 
 
             <Route path="*" element={<NotFoundPage />} />

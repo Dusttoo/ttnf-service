@@ -16,7 +16,7 @@ page_service = PageService()
 
 @page_router.get("/", response_model=List[Page])
 async def read_pages(
-    skip: int = 0, limit: int = 10, db: AsyncSession = Depends(get_database_session)
+    skip: int = 0, limit: int = 100, db: AsyncSession = Depends(get_database_session)
 ):
     return await page_service.get_pages(db, skip=skip, limit=limit)
 
@@ -25,7 +25,7 @@ async def read_pages(
 async def get_page_by_id(
     page_id: UUID, db: AsyncSession = Depends(get_database_session)
 ):
-    db_page = await page_service.get_page(db, page_id)
+    db_page = await page_service.get_page(db, str(page_id))
     if not db_page:
         raise HTTPException(status_code=404, detail="Page not found")
     return db_page
@@ -60,7 +60,7 @@ async def update_existing_page(
     current_user: UserSchema = Depends(get_current_user),
     update_timestamp: None = Depends(update_global_updated_at),
 ):
-    db_page = await page_service.update_page(db, page_id, page)
+    db_page = await page_service.update_page(db, str(page_id), page)
     if not db_page:
         raise HTTPException(status_code=404, detail="Page not found")
     return db_page
@@ -73,7 +73,7 @@ async def delete_existing_page(
     current_user: UserSchema = Depends(get_current_user),
     update_timestamp: None = Depends(update_global_updated_at),
 ):
-    db_page = await page_service.delete_page(db, page_id)
+    db_page = await page_service.delete_page(db, str(page_id))
     if not db_page:
         raise HTTPException(status_code=404, detail="Page not found")
     return db_page

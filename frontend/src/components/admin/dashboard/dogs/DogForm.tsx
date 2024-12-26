@@ -86,6 +86,7 @@ interface DogFormProps {
   defaultValues?: Partial<DogCreate>;
   onDogCreated?: (dog: DogCreate) => void;
   onDogUpdated?: (dog: DogUpdate) => void;
+  showStatus?: boolean;
 }
 
 // Import statements remain the same...
@@ -98,10 +99,11 @@ const DogForm: React.FC<DogFormProps> = ({
   defaultValues = {},
   onDogCreated,
   onDogUpdated,
+  showStatus = true,
 }) => {
   const navigate = useNavigate();
   const { data: dog } = useDog(Number(dogId));
-
+  console.log(defaultValues)
   const [formState, setFormState] = useState<DogCreate | DogUpdate>({
     name: '',
     dob: '',
@@ -121,7 +123,6 @@ const DogForm: React.FC<DogFormProps> = ({
     galleryPhotos: [],
     ...defaultValues,
   });
-
   const [galleryPhotos, setGalleryPhotos] = useState<string[]>([]);
   const [errors, setErrors] = useState<{ name?: string; gender?: string }>({});
 
@@ -260,24 +261,26 @@ const DogForm: React.FC<DogFormProps> = ({
         {errors.gender && <FieldFeedback message={errors.gender} />}
 
         {/* Status Dropdown */}
-        <Section>
-          <SectionTitle>Status</SectionTitle>
-          <CheckboxContainer>
-            {Object.values(StatusEnum).map((status) => (
-              <SelectContainer key={status}>
-                <Label>{status}</Label>
-                <Checkbox
-                  checked={
-                    formState.statuses
-                      ? formState.statuses.includes(status)
-                      : false
-                  }
-                  onChange={() => handleStatusChange(status)}
-                />
-              </SelectContainer>
-            ))}
-          </CheckboxContainer>
-        </Section>
+        {showStatus && (
+          <Section>
+            <SectionTitle>Status</SectionTitle>
+            <CheckboxContainer>
+              {Object.values(StatusEnum).map((status) => (
+                <SelectContainer key={status}>
+                  <Label>{status}</Label>
+                  <Checkbox
+                    checked={
+                      formState.statuses
+                        ? formState.statuses.includes(status)
+                        : false
+                    }
+                    onChange={() => handleStatusChange(status)}
+                  />
+                </SelectContainer>
+              ))}
+            </CheckboxContainer>
+          </Section>
+        )}
 
         {/* Color Field */}
         <Input

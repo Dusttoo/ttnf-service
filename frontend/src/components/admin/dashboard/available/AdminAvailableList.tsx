@@ -1,10 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import styled from 'styled-components';
-import { Dog, SelectedFilters } from '../../../../api/types/dog';
+import { Dog, DogCreate, SelectedFilters } from '../../../../api/types/dog';
 import FilterComponent from '../../../common/Filter';
 import Pagination from '../../../common/Pagination';
 import GlobalModal from '../../../common/Modal';
-import DogForm from './DogForm';
+import DogForm from '../dogs/DogForm';
 import {
   useDogs,
   useDeleteDog,
@@ -137,57 +137,26 @@ const Tab = styled.button<{ active: boolean }>`
 `;
 
 
-const AdminDogList: React.FC<{
-  defaultGender?: GenderEnum;
-  owned?: boolean;
-}> = ({ defaultGender, owned }) => {
-  const [gender, setGender] = useState<GenderEnum | undefined>(GenderEnum.Male);
-  const [status, setStatus] = useState<StatusEnum[]>([]);
-  const [sire, setSire] = useState<Dog | undefined>(undefined);
-  const [dam, setDam] = useState<Dog | undefined>(undefined);
-  const [activeTab, setActiveTab] = useState('Males');
+const AdminAvailableList: React.FC = () => {
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(100);
   const { openModal, closeModal } = useModal();
   const updateDogMutation = useUpdateDog();
   const createDogMutation = useCreateDog();
 
-  const filters: SelectedFilters = useMemo(
-    () => ({ gender, status, owned, sire, dam }),
-    [gender, status, owned, sire, dam]
-  );
-  const { data: dogsData } = useDogs(filters, page, pageSize);
 
-  let dogs = dogsData?.items ?? [];
-  const totalCount = dogsData?.total ?? 0;
+  const { data: dogsData } = useDogs({}, page, pageSize);
+
+  console.log(dogsData)
+  let dogs: Dog[] = dogsData?.items.filter((dog: Dog) => dog.statuses?.includes(StatusEnum.Available)) ?? [];
+  const totalCount = dogs.length ?? 0;
 
   const deleteDogMutation = useDeleteDog();
 
-  const handleTabClick = (tab: string) => {
-    setActiveTab(tab);
-    if (tab === 'Males') {
-      setGender(GenderEnum.Male);
-      setStatus([]);
-    } else if (tab === 'Females') {
-      setGender(GenderEnum.Female);
-      setStatus([]);
-    } else if (tab === 'Retired') {
-      setGender(undefined);
-      setStatus([StatusEnum.Retired]);
-    }
-  };
 
   const handlePageChange = (newPage: number, newItemsPerPage: number) => {
     setPage(newPage);
     setPageSize(newItemsPerPage);
-  };
-
-  const handleSireChange = (sire?: Dog) => {
-    setSire(sire);
-  };
-
-  const handleDamChange = (dam?: Dog) => {
-    setDam(dam);
   };
 
   const handleEdit = (dogId: number) => {
@@ -196,9 +165,11 @@ const AdminDogList: React.FC<{
         onClose={closeModal}
         dogId={dogId}
         title="Edit Dog"
+        defaultValues={{statuses: [StatusEnum.Available], kennelOwn: false} as Partial<DogCreate>}
         onDogUpdated={(updatedDog) => {
           updateDogMutation.mutate({ dogId, dogData: updatedDog });
         }}
+        showStatus={false}
       />
     );
   };
@@ -214,39 +185,18 @@ const AdminDogList: React.FC<{
       <DogForm
         onClose={closeModal}
         title="Add New Dog"
-        redirect="/admin/dashboard/dogs"
+        defaultValues={{statuses: [StatusEnum.Available], kennelOwn: false} as Partial<DogCreate>}
+        redirect="/admin/dashboard/available"
         onDogCreated={(newDog) => {
           createDogMutation.mutate(newDog);
         }}
+        showStatus={false}
       />
     );
   };
 
   return (
     <ListWrapper>
-
-      <FilterComponent
-        onGenderChange={setGender}
-        onStatusChange={setStatus}
-        onSireChange={handleSireChange}
-        onDamChange={handleDamChange}
-        gender={gender}
-        status={status}
-        isGenderDisabled={!!defaultGender}
-        isSireDisabled={false}
-        isDamDisabled={false}
-      />
-      <TabsContainer>
-        {['Males', 'Females', 'Retired'].map((tab) => (
-          <Tab
-            key={tab}
-            active={activeTab === tab}
-            onClick={() => handleTabClick(tab)}
-          >
-            {tab}
-          </Tab>
-        ))}
-      </TabsContainer>
       <AddNewDogButton onClick={handleAddNewDog}>Add New Dog</AddNewDogButton>
       <>
         {dogs.length > 0 ? (
@@ -287,4 +237,4 @@ const AdminDogList: React.FC<{
   );
 };
 
-export default AdminDogList;
+export default AdminAvailableList;

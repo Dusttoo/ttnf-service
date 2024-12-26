@@ -12,6 +12,7 @@ import FemalesPage from '../pages/dogs/FemalesPage';
 import BreedingsPage from '../pages/dogs/BreedingPage';
 import DogDetailPage from '../components/dogs/DogDetail';
 import ProductionsPage from '../pages/dogs/ProductionsPage';
+import AvailablePage from '../pages/dogs/AvailablePage';
 import LitterPage from '../pages/dogs/LittersPage';
 import NotFoundPage from '../pages/404';
 import AboutPage from '../pages/AboutPage';
@@ -51,7 +52,10 @@ const PublicRoutes = () => {
         about: AboutPage,
         contact: ContactPage,
         services: ServicesPage,
+        available: AvailablePage
     };
+
+    console.log(pages, currentPage)
 
     return (
         <Routes>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   DndContext,
   DragEndEvent,
@@ -12,6 +12,7 @@ import { arrayMove } from '@dnd-kit/sortable';
 import DroppableContainer from './DroppableContainer';
 import SortableImage from './SortableImage';
 import styled from 'styled-components';
+import { uploadImage } from '../../api/imageApi';
 
 const ContainerWrapper = styled.div`
   display: flex;
@@ -44,6 +45,8 @@ const ImageUploadContainer: React.FC<ImageUploadContainerProps> = ({
   });
 
   const [activeId, setActiveId] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
 
   useEffect(() => {
     setContainers({
@@ -121,6 +124,37 @@ const ImageUploadContainer: React.FC<ImageUploadContainerProps> = ({
     }
   };
 
+  const handleOpenFilePicker = () => {
+      fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => async () => {
+    console.log("target id", event.target);
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+    const uploadedUrls: string[] = [];
+    
+    for (const file of files) {
+      try {
+        const response = await uploadImage(file, 'dogs', file.name, 'image');
+        uploadedUrls.push(response.url);
+
+      } catch (error) {
+        console.error('Error uploading image:', error);
+      }
+    }
+    const newImageUrls = event.target.id === 'profile'
+    ? [uploadedUrls[0]]
+    : [...galleryPhotos, ...uploadedUrls].slice(0, 50);
+
+    if (event.target.id === 'profile') {
+      onProfilePhotoChange(newImageUrls[0]);
+    } else {
+      onGalleryPhotosChange(newImageUrls);
+    }
+
+  if (fileInputRef.current) fileInputRef.current.value = '';}
+
   return (
     <DndContext
       sensors={sensors}
@@ -134,6 +168,9 @@ const ImageUploadContainer: React.FC<ImageUploadContainerProps> = ({
             key={containerId}
             id={containerId}
             items={containers[containerId as keyof ContainersState]}
+            inputFileRef={fileInputRef}
+            onImageUpload={handleFileChange}
+            handleOpenFilePicker={handleOpenFilePicker}
           />
         ))}
       </ContainerWrapper>
@@ -158,6 +195,7 @@ const ImageUploadContainer: React.FC<ImageUploadContainerProps> = ({
           </div>
         )}
       </DragOverlay>
+
     </DndContext>
   );
 };

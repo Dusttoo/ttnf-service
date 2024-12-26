@@ -1,6 +1,9 @@
 import React from 'react';
 import { useDroppable } from '@dnd-kit/core';
-import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable';
+import {
+  SortableContext,
+  horizontalListSortingStrategy,
+} from '@dnd-kit/sortable';
 import SortableImage from './SortableImage';
 import styled from 'styled-components';
 
@@ -24,16 +27,36 @@ const Title = styled.h4`
   margin-bottom: 1rem;
 `;
 
+const HiddenInput = styled.input`
+  display: none;
+`;
+
 interface DroppableContainerProps {
   id: string;
   items: string[];
+  inputFileRef: React.RefObject<HTMLInputElement>;
+  onImageUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  handleOpenFilePicker: () => void;
 }
 
-const DroppableContainer: React.FC<DroppableContainerProps> = ({ id, items }) => {
+const DroppableContainer: React.FC<DroppableContainerProps> = ({
+  id,
+  items,
+  inputFileRef,
+  onImageUpload,
+  handleOpenFilePicker
+}) => {
   const { isOver, setNodeRef } = useDroppable({ id });
 
   return (
-    <Container ref={setNodeRef} isOver={isOver}>
+    <Container ref={setNodeRef} isOver={isOver} onClick={handleOpenFilePicker}>
+      <HiddenInput
+            ref={inputFileRef}
+            type="file"
+            multiple={id === 'profile' ? false : true}
+            accept="image/*"
+            onChange={onImageUpload}
+          />
       <Title>{id === 'profile' ? 'Profile Photo' : 'Gallery'}</Title>
       <SortableContext items={items} strategy={horizontalListSortingStrategy}>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
