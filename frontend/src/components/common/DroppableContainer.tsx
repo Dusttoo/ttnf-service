@@ -44,19 +44,27 @@ const DroppableContainer: React.FC<DroppableContainerProps> = ({
   items,
   inputFileRef,
   onImageUpload,
-  handleOpenFilePicker
+  handleOpenFilePicker,
 }) => {
   const { isOver, setNodeRef } = useDroppable({ id });
 
   return (
-    <Container ref={setNodeRef} isOver={isOver} onClick={handleOpenFilePicker}>
+    <Container
+      ref={setNodeRef}
+      isOver={isOver}
+      onClick={handleOpenFilePicker}
+      style={{
+        outline: isOver ? '2px solid #FF4C4C' : 'none', 
+      }}
+    >
       <HiddenInput
-            ref={inputFileRef}
-            type="file"
-            multiple={id === 'profile' ? false : true}
-            accept="image/*"
-            onChange={onImageUpload}
-          />
+        ref={inputFileRef}
+        type="file"
+        multiple={id === 'profile' ? false : true}
+        accept="image/*"
+        data-container-id={id}
+        onChange={onImageUpload}
+      />
       <Title>{id === 'profile' ? 'Profile Photo' : 'Gallery'}</Title>
       <SortableContext items={items} strategy={horizontalListSortingStrategy}>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
@@ -69,4 +77,4 @@ const DroppableContainer: React.FC<DroppableContainerProps> = ({
   );
 };
 
-export default DroppableContainer;
+export default React.memo(DroppableContainer);

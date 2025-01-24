@@ -29,8 +29,8 @@ interface ImageUploadContainerProps {
 }
 
 interface ContainersState {
-  profile: string[]; 
-  gallery: string[]; 
+  profile: string[];
+  gallery: string[];
 }
 
 const ImageUploadContainer: React.FC<ImageUploadContainerProps> = ({
@@ -46,7 +46,6 @@ const ImageUploadContainer: React.FC<ImageUploadContainerProps> = ({
 
   const [activeId, setActiveId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
 
   useEffect(() => {
     setContainers({
@@ -78,7 +77,6 @@ const ImageUploadContainer: React.FC<ImageUploadContainerProps> = ({
     if (!activeContainer || !overContainer) return;
 
     if (activeContainer === overContainer) {
-      // Reordering within the same container
       const items = [...containers[activeContainer as keyof ContainersState]];
       const oldIndex = items.indexOf(activeId);
       const newIndex = items.indexOf(overId);
@@ -92,68 +90,94 @@ const ImageUploadContainer: React.FC<ImageUploadContainerProps> = ({
         if (activeContainer === 'gallery') onGalleryPhotosChange(updatedItems);
       }
     } else {
-      // Moving between containers
-      const activeItems = containers[activeContainer as keyof ContainersState].filter(
-        (item) => item !== activeId
-      );
-      const overItems = [
+      const updatedActiveItems = [
+        ...containers[activeContainer as keyof ContainersState],
+      ];
+      const updatedOverItems = [
         ...containers[overContainer as keyof ContainersState],
         activeId,
       ];
 
       setContainers((prev) => ({
         ...prev,
-        [activeContainer]: activeItems,
-        [overContainer]: overItems,
+        [activeContainer]: updatedActiveItems,
+        [overContainer]: updatedOverItems,
       }));
 
-      // Update callbacks
-      if (activeContainer === 'profile') {
-        onProfilePhotoChange('');
-      }
       if (overContainer === 'profile') {
         onProfilePhotoChange(activeId);
       }
 
-      if (activeContainer === 'gallery') {
-        onGalleryPhotosChange(activeItems);
-      }
       if (overContainer === 'gallery') {
-        onGalleryPhotosChange(overItems);
+        onGalleryPhotosChange(updatedOverItems);
       }
     }
   };
 
-  const handleOpenFilePicker = () => {
-      fileInputRef.current?.click();
+  const handleDelete = (id: string, containerId: string): void => {
+    setContainers((prev) => {
+      const updatedItems = prev[containerId as keyof ContainersState].filter(
+        (item) => item !== id
+      );
+
+      if (containerId === 'profile') {
+        onProfilePhotoChange('');
+      }
+      if (containerId === 'gallery') {
+        onGalleryPhotosChange(updatedItems);
+      }
+
+      return {
+        ...prev,
+        [containerId]: updatedItems,
+      };
+    });
   };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => async () => {
-    console.log("target id", event.target);
-    const files = event.target.files;
-    if (!files || files.length === 0) return;
+  const handleOpenFilePicker = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const { files } = event.target;
+    const containerId = event.target.getAttribute('data-container-id');
+    if (!files || !containerId) return;
+
     const uploadedUrls: string[] = [];
-    
+
     for (const file of files) {
       try {
         const response = await uploadImage(file, 'dogs', file.name, 'image');
-        uploadedUrls.push(response.url);
-
+        if (
+          !containers[containerId as keyof ContainersState].includes(
+            response.url
+          )
+        ) {
+          uploadedUrls.push(response.url);
+        }
       } catch (error) {
         console.error('Error uploading image:', error);
       }
     }
-    const newImageUrls = event.target.id === 'profile'
-    ? [uploadedUrls[0]]
-    : [...galleryPhotos, ...uploadedUrls].slice(0, 50);
 
-    if (event.target.id === 'profile') {
-      onProfilePhotoChange(newImageUrls[0]);
-    } else {
-      onGalleryPhotosChange(newImageUrls);
-    }
+    setContainers((prev) => {
+      const updatedItems = [
+        ...prev[containerId as keyof ContainersState],
+        ...uploadedUrls,
+      ];
+      if (containerId === 'profile') {
+        onProfilePhotoChange(uploadedUrls[0]);
+        return { ...prev, profile: [uploadedUrls[0]] };
+      } else {
+        onGalleryPhotosChange(updatedItems);
+        return { ...prev, gallery: updatedItems.slice(0, 50) };
+      }
+    });
 
-  if (fileInputRef.current) fileInputRef.current.value = '';}
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
 
   return (
     <DndContext
@@ -176,26 +200,22 @@ const ImageUploadContainer: React.FC<ImageUploadContainerProps> = ({
       </ContainerWrapper>
       <DragOverlay>
         {activeId && (
-          <div
-            style={{
-              width: '100px',
-              height: '100px',
-              borderRadius: '8px',
-              overflow: 'hidden',
-              border: '2px solid #E76F00',
-              boxShadow: '0 4px 10px rgba(0, 0, 0, 0.2)',
-              backgroundColor: '#4A4A4A',
-            }}
-          >
+          <div style={{ width: '100px', height: '100px' }}>
             <img
               src={activeId}
               alt="Drag Preview"
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                borderRadius: '8px',
+                border: '2px solid #E76F00',
+                boxShadow: '0 4px 10px rgba(0, 0, 0, 0.2)',
+              }}
             />
           </div>
         )}
       </DragOverlay>
-
     </DndContext>
   );
 };

@@ -31,4 +31,4 @@ const SortableImage: React.FC<{ id: string; image: string }> = ({ id, image }) =
   );
 };
 
-export default SortableImage;
+export default React.memo(SortableImage);
