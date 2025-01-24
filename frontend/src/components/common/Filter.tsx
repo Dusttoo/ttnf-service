@@ -12,7 +12,7 @@ const FilterContainer = styled.div`
   flex-direction: column;
   margin: 1rem;
   width: 100%;
-  max-width: 600px;
+  max-width: 400px;
   @media (max-width: 768px) {
     justify-content: center;
   }
@@ -22,19 +22,25 @@ const DropdownButton = styled.button`
   background-color: ${(props) => props.theme.colors.secondaryBackground};
   color: ${(props) => props.theme.colors.text};
   border: 1px solid ${(props) => props.theme.colors.primary};
-  border-radius: 4px;
-  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  padding: 0.8rem 1.2rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: background-color 0.3s;
+  font-weight: 600;
+  font-size: 1rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transition: background-color 0.3s, color 0.3s;
 
   &:hover {
     background-color: ${(props) => props.theme.colors.primary};
     color: ${(props) => props.theme.colors.white};
+  }
+
+  span {
+    font-size: 1.2rem;
   }
 `;
 
@@ -43,41 +49,46 @@ const DropdownContent = styled.div<{ show: boolean }>`
   position: absolute;
   background-color: ${(props) => props.theme.colors.neutralBackground};
   border-radius: 12px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-  padding: 1rem;
-  z-index: 1;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  padding: 1.5rem;
+  z-index: 10;
   width: 100%;
+  max-width: 300px; /* Set a maximum width */
+  min-width: 250px; /* Set a minimum width */
+  overflow-y: auto;
+  top: 3.5rem;
 `;
 
 const Section = styled.div`
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.75rem;
 `;
 
 const SectionTitle = styled.h3`
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 1rem;
+  font-weight: 700;
   color: ${(props) => props.theme.colors.primary};
+  margin-bottom: 0.5rem;
 `;
 
 const CheckboxContainer = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
 `;
 
 const CheckboxLabel = styled.label`
-  font-size: 1rem;
+  font-size: 0.95rem;
   color: ${(props) => props.theme.colors.textSecondary};
   font-weight: 500;
 `;
 
 const StyledCheckbox = styled.input`
   appearance: none;
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   background-color: ${(props) => props.theme.colors.neutralBackground};
   border: 2px solid ${(props) => props.theme.colors.primary};
   border-radius: 4px;
@@ -95,7 +106,7 @@ const StyledCheckbox = styled.input`
   &:checked::after {
     content: '✔';
     color: ${(props) => props.theme.colors.white};
-    font-size: 12px;
+    font-size: 0.9rem;
     position: absolute;
   }
 
@@ -129,10 +140,16 @@ const ButtonContainer = styled.div`
 const ClearAll = styled.button`
   background-color: transparent;
   color: ${(props) => props.theme.colors.error};
-  font-size: 14px;
+  font-size: 0.9rem;
+  font-weight: 600;
   border: none;
   cursor: pointer;
   text-align: left;
+  transition: color 0.3s;
+
+  &:hover {
+    color: ${(props) => props.theme.colors.errorDark};
+  }
 `;
 
 const ApplyButton = styled.button`
@@ -140,9 +157,10 @@ const ApplyButton = styled.button`
   background-color: ${(props) => props.theme.colors.primary};
   color: ${(props) => props.theme.colors.white};
   font-weight: 600;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   border: none;
+  font-size: 0.9rem;
   transition: background-color 0.3s;
 
   &:hover {
@@ -196,24 +214,36 @@ const FilterComponent: React.FC<FilterProps> = ({
   }, [dropdownRef]);
 
   const handleCheckboxChange = (value: StatusEnum) => {
-    const newStatus: StatusEnum[] = selectedFilters.status!.includes(value)
-      ? selectedFilters.status!.filter((status) => status !== value)
-      : [...selectedFilters.status!, value];
+    let newStatus: StatusEnum[];
+  
+    if (selectedFilters.status!.includes(value)) {
+      newStatus = selectedFilters.status!.filter((status) => status !== value);
+    } else {
+      newStatus = [...selectedFilters.status!, value];
+    }
+  
+    if (newStatus.length === 0) {
+      newStatus = [StatusEnum.Active];
+    }
+  
     setSelectedFilters((prevFilters) => ({
       ...prevFilters,
       status: newStatus,
     }));
+  
     onStatusChange && onStatusChange(newStatus);
   };
 
   const handleClearAll = () => {
+    const defaultStatus = [StatusEnum.Active];
     setSelectedFilters({
-      status: [],
+      status: defaultStatus,
       sire: undefined,
       dam: undefined,
       color: '',
     });
-    onStatusChange && onStatusChange([]);
+  
+    onStatusChange && onStatusChange(defaultStatus);
     onSireChange && onSireChange(undefined);
     onDamChange && onDamChange(undefined);
     onColorChange && onColorChange('');
@@ -259,6 +289,15 @@ const FilterComponent: React.FC<FilterProps> = ({
   };
 
   const handleApplyFilters = () => {
+    if (selectedFilters.status!.length === 0) {
+      setSelectedFilters((prevFilters) => ({
+        ...prevFilters,
+        status: [StatusEnum.Active],
+      }));
+  
+      onStatusChange && onStatusChange([StatusEnum.Active]);
+    }
+  
     setShowDropdown(false);
   };
 

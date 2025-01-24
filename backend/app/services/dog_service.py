@@ -38,6 +38,7 @@ STATUS_MAPPING = {
     "active": ModelStatusEnum.active,
     "abkc_champion": ModelStatusEnum.abkc_champion,
     "production": ModelStatusEnum.production,
+    "available_for_stud": ModelStatusEnum.stud,
 }
 
 
@@ -232,7 +233,7 @@ class DogService:
                 cached_data = await redis_client.get(cache_key)
                 if cached_data:
                     dogs_data = json.loads(cached_data)
-                    dogs_data["items"].append(new_dog_schema.dict())  
+                    dogs_data["items"].append(new_dog_schema.dict())
                     await redis_client.set(
                         cache_key,
                         json.dumps(dogs_data, cls=DateTimeEncoder),
@@ -529,7 +530,7 @@ class DogService:
     async def get_dogs_filtered(
         self,
         db: AsyncSession,
-        filters: Dict[str, Optional[Union[str, int]]],
+        filters: Dict[str, Union[str, int, List[str], None]],
         page: Optional[int] = None,
         page_size: Optional[int] = None,
     ) -> Dict[str, any]:
@@ -560,43 +561,61 @@ class DogService:
                 filters_list = []
 
                 if filters.get("gender"):
-                    filters_list.append(Dog.gender == filters["gender"].lower())
+                    gender = filters["gender"]
+                    print("gender", gender)
+                    if isinstance(gender, str): 
+                        filters_list.append(Dog.gender == gender.lower())
 
                 if filters.get("status"):
-                    statuses = [
-                        ModelStatusEnum[status.lower()] for status in filters["status"]
-                    ]
-                    if statuses:
-                        query = query.join(DogStatusAssociation).filter(
-                            DogStatusAssociation.status.in_(statuses)
-                        )
+                    status_list = filters["status"]
+                    if isinstance(status_list, list) and status_list:
+                        try:
+                            # Map user input to database Enum values using STATUS_MAPPING
+                            status_values = [
+                                STATUS_MAPPING[status.replace(" ", "_").lower()]
+                                for status in status_list
+                                if status.replace(" ", "_").lower() in STATUS_MAPPING
+                            ]
+                            if status_values:
+                                query = query.join(DogStatusAssociation).filter(
+                                    DogStatusAssociation.status.in_(status_values)
+                                )
+                        except KeyError as e:
+                            logger.error(f"Invalid status provided: {e}")
+                            raise HTTPException(status_code=400, detail=f"Invalid status: {e}")
 
-                if filters.get("owned"):
-                    filters_list.append(
-                        Dog.kennel_own == (filters["owned"].lower() == "true")
-                    )
+                if filters.get("owned") is not None:
+                    owned = filters["owned"]
+                    print("owned", owned)
+                    if isinstance(owned, str):  
+                        filters_list.append(Dog.kennel_own == (owned.lower() == "true"))
 
                 if filters.get("sire"):
-                    filters_list.append(Dog.parent_male_id == filters["sire"])
+                    sire = filters["sire"]
+                    print("sire", sire)
+                    if isinstance(sire, int):  
+                        filters_list.append(Dog.parent_male_id == sire)
 
                 if filters.get("dam"):
-                    filters_list.append(Dog.parent_female_id == filters["dam"])
+                    dam = filters["dam"]
+                    print("dam", dam)
+                    if isinstance(dam, int):  
+                        filters_list.append(Dog.parent_female_id == dam)
 
                 if "retired" in filters and filters["retired"] is not None:
+                    print("retired", filters["retired"])
                     filters_list.append(Dog.is_retired == filters["retired"])
 
-                # Apply filters to the main query
                 query = query.filter(*filters_list)
 
-                # Pagination
                 if page is not None and page_size is not None:
                     offset = (page - 1) * page_size
                     query = query.offset(offset).limit(page_size)
+                print("query", query)
 
                 result = await db.execute(query)
                 dogs = result.scalars().all()
 
-                # Total count query with the same filters
                 total_query = select(func.count(Dog.id)).filter(*filters_list)
                 total_result = await db.execute(total_query)
                 total_count = total_result.scalar_one()
