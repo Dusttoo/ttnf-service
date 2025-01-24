@@ -37,6 +37,7 @@ interface DroppableContainerProps {
   inputFileRef: React.RefObject<HTMLInputElement>;
   onImageUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleOpenFilePicker: () => void;
+  onDelete: (id: string) => void;
 }
 
 const DroppableContainer: React.FC<DroppableContainerProps> = ({
@@ -45,6 +46,7 @@ const DroppableContainer: React.FC<DroppableContainerProps> = ({
   inputFileRef,
   onImageUpload,
   handleOpenFilePicker,
+  onDelete,
 }) => {
   const { isOver, setNodeRef } = useDroppable({ id });
 
@@ -69,7 +71,12 @@ const DroppableContainer: React.FC<DroppableContainerProps> = ({
       <SortableContext items={items} strategy={horizontalListSortingStrategy}>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
           {items.map((item) => (
-            <SortableImage key={item} id={item} image={item} />
+            <SortableImage
+              key={item}
+              id={item}
+              image={item}
+              onDelete={onDelete} 
+            />
           ))}
         </div>
       </SortableContext>

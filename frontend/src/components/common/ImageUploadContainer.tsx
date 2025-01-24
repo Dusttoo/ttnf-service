@@ -60,26 +60,30 @@ const ImageUploadContainer: React.FC<ImageUploadContainerProps> = ({
 
   const handleDragEnd = (event: DragEndEvent): void => {
     const { active, over } = event;
+    console.log('handleDragEnd', active, over);
     setActiveId(null);
 
-    if (!over || !active.id || !over.id) return;
+    if (!over || !active.id) return;
 
     const activeId = active.id as string;
-    const overId = over.id as string;
 
     const activeContainer = Object.keys(containers).find((key) =>
       containers[key as keyof ContainersState].includes(activeId)
     );
-    const overContainer = Object.keys(containers).find((key) =>
-      containers[key as keyof ContainersState].includes(overId)
-    );
+
+    const overContainer =
+      over.id === 'profile' || over.id === 'gallery'
+        ? over.id 
+        : Object.keys(containers).find((key) =>
+            containers[key as keyof ContainersState].includes(over.id as string)
+          ); 
 
     if (!activeContainer || !overContainer) return;
 
     if (activeContainer === overContainer) {
       const items = [...containers[activeContainer as keyof ContainersState]];
       const oldIndex = items.indexOf(activeId);
-      const newIndex = items.indexOf(overId);
+      const newIndex = items.indexOf(over.id as string);
 
       if (oldIndex !== -1 && newIndex !== -1) {
         const updatedItems = arrayMove(items, oldIndex, newIndex);
@@ -87,29 +91,31 @@ const ImageUploadContainer: React.FC<ImageUploadContainerProps> = ({
           ...prev,
           [activeContainer]: updatedItems,
         }));
-        if (activeContainer === 'gallery') onGalleryPhotosChange(updatedItems);
+
+        if (activeContainer === 'gallery') {
+          onGalleryPhotosChange(updatedItems);
+        }
       }
     } else {
-      const updatedActiveItems = [
-        ...containers[activeContainer as keyof ContainersState],
-      ];
-      const updatedOverItems = [
+      const activeItems = containers[
+        activeContainer as keyof ContainersState
+      ].filter((item) => item !== activeId);
+      const overItems = [
         ...containers[overContainer as keyof ContainersState],
         activeId,
       ];
 
       setContainers((prev) => ({
         ...prev,
-        [activeContainer]: updatedActiveItems,
-        [overContainer]: updatedOverItems,
+        [activeContainer]: activeItems,
+        [overContainer]: overItems,
       }));
 
       if (overContainer === 'profile') {
         onProfilePhotoChange(activeId);
       }
-
       if (overContainer === 'gallery') {
-        onGalleryPhotosChange(updatedOverItems);
+        onGalleryPhotosChange(overItems);
       }
     }
   };
@@ -195,6 +201,7 @@ const ImageUploadContainer: React.FC<ImageUploadContainerProps> = ({
             inputFileRef={fileInputRef}
             onImageUpload={handleFileChange}
             handleOpenFilePicker={handleOpenFilePicker}
+            onDelete={(id) => handleDelete(id, containerId)} // Pass delete logic
           />
         ))}
       </ContainerWrapper>
