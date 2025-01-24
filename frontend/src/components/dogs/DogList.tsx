@@ -210,7 +210,11 @@ const DogList: React.FC<{
 
       <Section>
         <SectionTitle>
-          {selectedTab === 'active' ? 'Active Dogs' : 'Retired Dogs'}
+          {availablePage
+            ? 'Available Dogs'
+            : selectedTab === 'active'
+              ? 'Active Dogs'
+              : 'Retired Dogs'}
         </SectionTitle>
         {!isLoading ? (
           <ListContainer>

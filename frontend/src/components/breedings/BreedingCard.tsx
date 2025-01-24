@@ -38,15 +38,24 @@ const ImageContainer = styled.div`
   width: 100%;
   overflow: hidden;
   position: relative;
+  aspect-ratio: 16 / 9; /* Maintain a 16:9 aspect ratio */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  @media (min-width: 1000px) {
+    aspect-ratio: 4 / 3; /* Adjust aspect ratio for larger screens */
+  }
 `;
 
 const Image = styled.img`
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain; /* Ensure the whole image fits within the container */
   object-position: center;
+
   @media (min-width: 1000px) {
-    max-height: 500px;
+    max-height: 500px; /* Prevent images from becoming too large */
   }
 `;
 
