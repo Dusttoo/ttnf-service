@@ -134,9 +134,9 @@ const BreedingCard: React.FC<{ breeding: Breeding }> = ({ breeding }) => {
                 <Detail>Breeding Date: {breeding.breedingDate}</Detail>
                 <Detail>Expected Birth Date: {breeding.expectedBirthDate}</Detail>
                 <Description>Description: {breeding.description}</Description>
-                <ViewProfileLink
+                {/* <ViewProfileLink
                     to={`/breedings/${breeding.maleDog ? breeding.maleDog.id : 'manual'}-${breeding.femaleDog.id}`}>View
-                    Breeding</ViewProfileLink>
+                    Breeding</ViewProfileLink> */}
             </Info>
         </Tile>
     );
