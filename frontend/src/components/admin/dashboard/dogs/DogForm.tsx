@@ -1,15 +1,21 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { GenderEnum, StatusEnum } from '../../../../api/types/core';
 import { DogCreate, DogUpdate } from '../../../../api/types/dog';
-import Button from '../../../common/form/Button';
-import ParentSelector from '../../../common/form/ParentSelector';
-import ImageUpload from '../../../common/ImageUpload';
-import FieldFeedback from '../../../common/form/FieldFeedback';
 import { useDog } from '../../../../hooks/useDog';
+import Button from '../../../common/form/Button';
+import CharacterCounter from '../../../common/form/CharacterCounter';
 import Checkbox from '../../../common/form/Checkbox';
+import FieldFeedback from '../../../common/form/FieldFeedback';
+import ParentSelector from '../../../common/form/ParentSelector';
 import ImageUploadContainer from '../../../common/ImageUploadContainer';
+
+const MAX_DESCRIPTION_LENGTH = 2500;
+
+interface errorInputs {
+  [key: string]: string;
+}
 
 const FormContainer = styled.div`
   display: flex;
@@ -103,12 +109,13 @@ const DogForm: React.FC<DogFormProps> = ({
 }) => {
   const navigate = useNavigate();
   const { data: dog } = useDog(Number(dogId));
-  console.log(defaultValues)
-  const [formState, setFormState] = useState<DogCreate | DogUpdate>({
+  const isFormInitialized = useRef(false);
+
+  const [formState, setFormState] = useState({
     name: '',
     dob: '',
     gender: '' as GenderEnum,
-    statuses: [] as StatusEnum[],
+    statuses: [],
     color: '',
     description: '',
     profilePhoto: '',
@@ -124,7 +131,7 @@ const DogForm: React.FC<DogFormProps> = ({
     ...defaultValues,
   });
   const [galleryPhotos, setGalleryPhotos] = useState<string[]>([]);
-  const [errors, setErrors] = useState<{ name?: string; gender?: string }>({});
+  const [errors, setErrors] = useState<errorInputs>({});
 
   const handleStatusChange = (status: StatusEnum) => {
     setFormState((prevState) => {
@@ -152,31 +159,14 @@ const DogForm: React.FC<DogFormProps> = ({
     });
   };
 
-  const isFormInitialized = useRef(false);
   useEffect(() => {
     if (dog && !isFormInitialized.current) {
-      setFormState({
-        ...formState,
-        name: dog.name,
-        dob: dog.dob,
-        gender: dog.gender as GenderEnum,
-        statuses: Array.isArray(dog.statuses)
-          ? dog.statuses.filter(
-              (status): status is StatusEnum => status !== undefined
-            )
-          : [],
-        color: dog.color,
-        description: dog.description,
-        profilePhoto: dog.profilePhoto || '',
-        parentMaleId: dog.parentMaleId,
-        parentFemaleId: dog.parentFemaleId,
-        healthInfos: dog.healthInfos,
-        studFee: dog.studFee,
-        saleFee: dog.saleFee,
-        pedigreeLink: dog.pedigreeLink,
-        isRetired: dog.isRetired,
-        isProduction: dog.isProduction,
-      });
+      setFormState((prev) => ({
+        ...prev,
+        ...dog,
+        statuses: dog.statuses ?? [],
+        pedigreeLink: prev.pedigreeLink || dog.pedigreeLink || '',
+      }));
       const sortedGalleryPhotos = dog.photos
         .filter((photo) => photo.photoUrl !== dog.profilePhoto)
         .sort((a, b) => (a.position || 0) - (b.position || 0))
@@ -197,9 +187,14 @@ const DogForm: React.FC<DogFormProps> = ({
   };
 
   const validate = () => {
-    const newErrors: { name?: string; gender?: string } = {};
+    const newErrors: errorInputs = {};
     if (!formState.name) newErrors.name = 'Name is required.';
     if (!formState.gender) newErrors.gender = 'Gender is required.';
+    if (!formState.dob) newErrors.dob = 'Date of Birth is required.';
+    if (formState.studFee !== undefined && formState.studFee < 0) newErrors.studFee = 'Stud fee must be positive.';
+    if (formState.saleFee !== undefined && formState.saleFee < 0) newErrors.saleFee = 'Sale fee must be positive.';
+    if (formState.pedigreeLink && !/^https?:\/\/.+$/.test(formState.pedigreeLink)) newErrors.pedigreeLink = 'Invalid URL';
+    if (formState.description.length > 2500) newErrors.description = 'Description cannot exceed 2500 characters.';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -245,6 +240,8 @@ const DogForm: React.FC<DogFormProps> = ({
           value={formState.dob}
           onChange={(e) => setFormState({ ...formState, dob: e.target.value })}
         />
+        {errors.dob && <FieldFeedback message={errors.dob} />}
+
 
         {/* Gender Dropdown */}
         <Dropdown
@@ -292,6 +289,8 @@ const DogForm: React.FC<DogFormProps> = ({
             setFormState({ ...formState, color: e.target.value })
           }
         />
+        {errors.color && <FieldFeedback message={errors.color} />}
+
 
         {/* Description Field */}
         <Input
@@ -303,6 +302,9 @@ const DogForm: React.FC<DogFormProps> = ({
             setFormState({ ...formState, description: e.target.value })
           }
         />
+        <CharacterCounter currentLength={formState.description.length} maxLength={MAX_DESCRIPTION_LENGTH} />
+        {errors.description && <FieldFeedback message={errors.description} />}
+
 
         {/* Stud Fee Field */}
         <Input
@@ -317,6 +319,8 @@ const DogForm: React.FC<DogFormProps> = ({
             })
           }
         />
+        {errors.studFee && <FieldFeedback message={errors.studFee} />}
+
 
         {/* Sale Fee Field */}
         <Input
@@ -331,6 +335,8 @@ const DogForm: React.FC<DogFormProps> = ({
             })
           }
         />
+        {errors.saleFee && <FieldFeedback message={errors.saleFee} />}
+
 
         {/* Pedigree Link Field */}
         <Input
@@ -344,6 +350,8 @@ const DogForm: React.FC<DogFormProps> = ({
             setFormState({ ...formState, pedigreeLink: e.target.value })
           }
         />
+        {errors.pedigreeLink && <FieldFeedback message={errors.pedigreeLink} />}
+
 
         {/* Retired Checkbox */}
 

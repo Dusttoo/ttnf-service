@@ -1,13 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { useBreedingById, useCreateBreeding, useUpdateBreeding } from '../../../../hooks/useBreeding';
 import { BreedingCreate, BreedingUpdate } from '../../../../api/types/breeding';
+import { useBreedingById, useCreateBreeding, useUpdateBreeding } from '../../../../hooks/useBreeding';
 import Button from '../../../common/form/Button';
-import FieldFeedback from '../../../common/form/FieldFeedback';
+import CharacterCounter from '../../../common/form/CharacterCounter';
 import DateInput from '../../../common/form/DateInput';
+import FieldFeedback from '../../../common/form/FieldFeedback';
 import ParentSelector from '../../../common/form/ParentSelector';
-import LoadingSpinner from '../../../common/LoadingSpinner';
+
+const MAX_DESCRIPTION_LENGTH = 2500;
 
 const FormContainer = styled.div`
   display: flex;
@@ -62,6 +64,7 @@ const BreedingForm: React.FC<{ onClose: () => void; breedingId?: number }> = ({ 
         breedingDate?: string;
         expectedBirthDate?: string;
         manualSireName?: string
+        description?: string
     }>({});
 
     useEffect(() => {
@@ -96,17 +99,20 @@ const BreedingForm: React.FC<{ onClose: () => void; breedingId?: number }> = ({ 
     };
 
     const validate = () => {
-        const newErrors: { breedingDate?: string; expectedBirthDate?: string; manualSireName?: string } = {};
-        // Validate manual sire fields if `useManualSire` is true
-        if (useManualSire && !formState.manualSireName) newErrors.manualSireName = 'Manual sire name is required.';
-
+        const newErrors: { description?: string; femaleDogId?: string; maleDogId?: string; breedingDate?: string; expectedBirthDate?: string } = {};
+        if (!formState.femaleDogId) newErrors.femaleDogId = 'Female dog is required.';
+        if (!formState.maleDogId) newErrors.maleDogId = 'Male dog is required.';
+        if (!formState.breedingDate) newErrors.breedingDate = 'Breeding date is required.';
+        if (!formState.expectedBirthDate) newErrors.expectedBirthDate = 'Expected birth date is required.';
+        if (!formState.description) newErrors.description = 'Description is required.';
+        if (formState.description && formState.description.length > 2500) newErrors.description = 'Description cannot exceed 2500 characters.';
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-    
+        if (!validate()) return;
         const breedingData = {
             ...formState,
             breedingDate: formState.breedingDate ? formState.breedingDate : null,
@@ -195,6 +201,8 @@ const BreedingForm: React.FC<{ onClose: () => void; breedingId?: number }> = ({ 
                         selectedDate={formState.breedingDate ? new Date(formState.breedingDate) : null}
                         onChange={(date) => handleDateChange('breedingDate', date)}
                     />
+                        {errors.breedingDate && <FieldFeedback message={errors.breedingDate} />}
+
                 </div>
                 <div>
                     <DateInput
@@ -210,7 +218,11 @@ const BreedingForm: React.FC<{ onClose: () => void; breedingId?: number }> = ({ 
                     value={formState.description}
                     onChange={handleChange}
                     placeholder="Description"
+                    maxLength={MAX_DESCRIPTION_LENGTH}
                 />
+                <CharacterCounter currentLength={formState.description ? formState.description.length : 0} maxLength={MAX_DESCRIPTION_LENGTH} />
+                        {errors.description && <FieldFeedback message={errors.description} />}
+
                 <ButtonContainer>
                     <Button $variant="primary" type="submit">Save</Button>
                     <Button $variant="error" onClick={onClose}>Cancel</Button>
