@@ -311,7 +311,7 @@ const DogForm: React.FC<DogFormProps> = ({
           type="number"
           name="studFee"
           placeholder="Stud Fee"
-          value={dog?.studFee ? dog.studFee : formState.studFee || ''}
+          value={formState.studFee || ''}
           onChange={(e) =>
             setFormState({
               ...formState,
@@ -327,7 +327,7 @@ const DogForm: React.FC<DogFormProps> = ({
           type="number"
           name="saleFee"
           placeholder="Sale Fee"
-          value={dog?.saleFee ? dog.saleFee : formState.saleFee || ''}
+          value={formState.saleFee || ''}
           onChange={(e) =>
             setFormState({
               ...formState,
@@ -343,9 +343,7 @@ const DogForm: React.FC<DogFormProps> = ({
           type="url"
           name="pedigreeLink"
           placeholder="Pedigree Link"
-          value={
-            dog?.pedigreeLink ? dog.pedigreeLink : formState.pedigreeLink || ''
-          }
+          value={formState.pedigreeLink}
           onChange={(e) =>
             setFormState({ ...formState, pedigreeLink: e.target.value })
           }
