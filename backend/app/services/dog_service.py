@@ -2,31 +2,30 @@ import json
 import logging
 from typing import Dict, List, Optional, Tuple, Union
 
-from fastapi import HTTPException
-from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
-from sqlalchemy.orm import selectinload
-from sqlalchemy.sql import func
-from sqlalchemy import delete
-
+from app.core.config import settings
 from app.core.redis import get_redis_client
 from app.models import (
     Dog,
+    DogStatusAssociation,
     GenderEnum,
     HealthInfo,
     Photo,
     Production,
-    StatusEnum as ModelStatusEnum,
-    DogStatusAssociation,
 )
+from app.models import StatusEnum as ModelStatusEnum
 from app.schemas import Dog as DogSchema
 from app.schemas import DogCreate, DogUpdate
 from app.schemas import Production as ProductionSchema
 from app.schemas import ProductionCreate
 from app.utils import DateTimeEncoder
 from app.utils.schema_converters import convert_to_dog_schema
-from app.core.config import settings
+from fastapi import HTTPException
+from sqlalchemy import delete
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+from sqlalchemy.orm import selectinload
+from sqlalchemy.sql import func
 
 logger = logging.getLogger(__name__)
 
@@ -321,13 +320,13 @@ class DogService:
                     ]
                     updated_gallery_photos = [
                         {
-                            "photo_url": normalize_url(url),
+                            "photo_url": url,
                             "position": idx + 1,
                         }
                         for idx, url in enumerate(gallery_photos)
                     ]
                     existing_photos = {
-                        normalize_url(photo.photo_url): photo
+                        photo.photo_url: photo
                         for photo in dog.photos
                         if photo.photo_url != dog.profile_photo
                     }
@@ -563,7 +562,7 @@ class DogService:
                 if filters.get("gender"):
                     gender = filters["gender"]
                     print("gender", gender)
-                    if isinstance(gender, str): 
+                    if isinstance(gender, str):
                         filters_list.append(Dog.gender == gender.lower())
 
                 if filters.get("status"):
@@ -582,24 +581,26 @@ class DogService:
                                 )
                         except KeyError as e:
                             logger.error(f"Invalid status provided: {e}")
-                            raise HTTPException(status_code=400, detail=f"Invalid status: {e}")
+                            raise HTTPException(
+                                status_code=400, detail=f"Invalid status: {e}"
+                            )
 
                 if filters.get("owned") is not None:
                     owned = filters["owned"]
                     print("owned", owned)
-                    if isinstance(owned, str):  
+                    if isinstance(owned, str):
                         filters_list.append(Dog.kennel_own == (owned.lower() == "true"))
 
                 if filters.get("sire"):
                     sire = filters["sire"]
                     print("sire", sire)
-                    if isinstance(sire, int):  
+                    if isinstance(sire, int):
                         filters_list.append(Dog.parent_male_id == sire)
 
                 if filters.get("dam"):
                     dam = filters["dam"]
                     print("dam", dam)
-                    if isinstance(dam, int):  
+                    if isinstance(dam, int):
                         filters_list.append(Dog.parent_female_id == dam)
 
                 if "retired" in filters and filters["retired"] is not None:

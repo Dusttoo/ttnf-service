@@ -1,9 +1,10 @@
-from azure.storage.blob import BlobServiceClient
-from fastapi import UploadFile
-from app.core.config import settings
-from typing import Tuple
 import os
 import uuid
+from typing import Tuple
+
+from app.core.config import settings
+from azure.storage.blob import BlobServiceClient
+from fastapi import UploadFile
 
 connect_str = settings.azure_storage_connection_string
 container_name = settings.azure_storage_container_name
@@ -11,12 +12,12 @@ container_name = settings.azure_storage_container_name
 blob_service_client = BlobServiceClient.from_connection_string(connect_str)
 container_client = blob_service_client.get_container_client(container_name)
 
+
 class MediaService:
     @staticmethod
     async def upload_media(file: UploadFile, context: dict) -> Tuple[str, str]:
 
-        path_structure = "/".join(
-            [str(context.get(key, '')).replace(" ", "-").lower() for key in context.keys() if context[key]])
+        path_structure = f"{context.get('entity', '')}"
 
         unique_filename = f"{context.get('name', 'file')}-{uuid.uuid4()}{os.path.splitext(file.filename)[1]}"
         blob_path = f"{path_structure}/{unique_filename}"
