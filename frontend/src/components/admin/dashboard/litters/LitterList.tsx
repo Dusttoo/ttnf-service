@@ -1,17 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
-import { useLitters, useDeleteLitter, useCreateLitter, useUpdateLitter } from '../../../../hooks/useLitter';
-import Pagination from '../../../common/Pagination';
-import LitterForm from './AddLitter/LitterForm';
-import { Litter, LitterCreate, LitterUpdate } from '../../../../api/types/breeding';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { EditButton, ViewButton, DeleteButton } from '../../../common/Buttons';
-import { sortByKey } from '../../../../utils/sort';
-import LoadingSpinner from '../../../common/LoadingSpinner';
-import ErrorComponent from '../../../common/Error';
-import NoResults from '../../../common/NoResults';
+import styled from 'styled-components';
+import { Litter, LitterCreate, LitterUpdate } from '../../../../api/types/breeding';
 import { useModal } from '../../../../context/ModalContext';
+import { useCreateLitter, useDeleteLitter, useLitters, useUpdateLitter } from '../../../../hooks/useLitter';
+import { sortByKey } from '../../../../utils/sort';
+import { DeleteButton, EditButton, ViewButton } from '../../../common/Buttons';
+import ErrorComponent from '../../../common/Error';
+import LoadingSpinner from '../../../common/LoadingSpinner';
 import GlobalModal from '../../../common/Modal';
+import NoResults from '../../../common/NoResults';
+import Pagination from '../../../common/Pagination';
+import MultiStepForm from './AddLitter/MultiStepForm';
 
 const ListWrapper = styled.div`
   display: flex;
@@ -134,23 +134,11 @@ const AdminLitterList: React.FC = () => {
                 breedingId: litterToEdit.breeding.id,
             };
             openModal(
-                <LitterForm
-                    initialValues={initialValues}
-                    onSubmit={async (litterData, pedigreeUrl) => {
-                        await updateLitterMutation.mutateAsync({
-                            litterId: litterId,
-                            litterData: litterData as LitterUpdate,
-                        });
-                        closeModal();
-                        refetch();
-                        return undefined;
-                    }}
-                    onCancel={closeModal}
-                />,
+                <MultiStepForm />
             );
         }
     };
-    
+
 
     const handleDelete = (litterId: number) => {
         if (window.confirm('Are you sure you want to delete this litter?')) {
@@ -169,16 +157,7 @@ const AdminLitterList: React.FC = () => {
             breedingId: 0,
         };
         openModal(
-            <LitterForm
-                initialValues={initialValues}
-                onSubmit={async (litterData, pedigreeUrl) => {
-                    await createLitterMutation.mutateAsync(litterData as LitterCreate);
-                    closeModal();
-                    refetch();
-                    return undefined; 
-                }}
-                onCancel={closeModal}
-            />,
+            <MultiStepForm />
         );
     };
 
@@ -201,7 +180,7 @@ const AdminLitterList: React.FC = () => {
                                 <LitterCard key={litter.id}>
                                     <ImageContainer>
                                         <DogImage src={litter.breeding.femaleDog.profilePhoto}
-                                                  alt={litter.breeding.femaleDog.name} />
+                                            alt={litter.breeding.femaleDog.name} />
                                         <DogImage
                                             src={
                                                 litter.breeding.maleDog?.profilePhoto

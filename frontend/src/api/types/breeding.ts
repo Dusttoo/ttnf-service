@@ -1,4 +1,4 @@
-import { Dog, DogCreate, Description } from './dog';
+import { Description, Dog, DogCreate } from './dog';
 
 // Breeding Interfaces
 export interface Breeding {
@@ -62,7 +62,7 @@ export interface Litter {
 }
 
 export interface LitterCreate {
-    breedingId: number;
+    breedingId?: number;
     birthDate?: string;
     numberOfPuppies: number;
     description?: Description;

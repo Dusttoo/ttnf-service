@@ -1,115 +1,102 @@
+// src/components/admin/dashboard/litters/AddLitter/ReviewForm.tsx
 import React from 'react';
 import styled from 'styled-components';
-import { LitterCreate, PuppyCreate } from '../../../../../api/types/breeding';
-import { StatusBadge } from '../../../../common/StatusBadge';
-import { getStatusColor } from '../../../../../utils/dogUtils';
-
-interface ReviewFormProps {
-    litterData: LitterCreate;
-    puppyList: PuppyCreate[];
-    onSubmit: () => void;
-    onCancel: () => void;
-}
+import { useFormContext } from '../../../../../context/FormContext';
 
 const ReviewContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    padding: 2rem;
-    background-color: ${(props) => props.theme.colors.white};
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+  padding: 1rem;
+  border-radius: 8px;
 `;
 
-const InfoContainer = styled.div`
-    background-color: ${(props) => props.theme.colors.secondaryBackground};
-    padding: 1rem;
-    border-radius: 4px;
-    margin-bottom: 1rem;
+const Section = styled.div`
+  margin-bottom: 1.5rem;
 `;
 
-const Title = styled.h1`
-    font-family: ${(props) => props.theme.fonts.secondary};
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
-    color: ${(props) => props.theme.colors.primary};
+const NavigationButtons = styled.div`
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
 `;
 
-const SubTitle = styled.h2`
-    font-family: ${(props) => props.theme.fonts.secondary};
-    font-size: 1.25rem;
-    margin-bottom: 0.5rem;
-    color: ${(props) => props.theme.colors.primary};
+const Button = styled.button`
+  background-color: ${({ theme }) => theme.ui.button.primary.background};
+  color: ${({ theme }) => theme.ui.button.primary.color};
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  border: none;
+  border-radius: 4px;
+  font-family: ${({ theme }) => theme.fonts.primary};
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 `;
 
-const PuppyInfo = styled.div`
-    background-color: ${(props) => props.theme.colors.neutralBackground};
-    padding: 1rem;
-    border-radius: 4px;
-    margin-bottom: 1rem;
-`;
-
-const ButtonContainer = styled.div`
-    display: flex;
-    justify-content: space-between;
-`;
-
-interface ButtonProps {
-    $variant?: 'primary' | 'secondary';
+interface ReviewFormProps {
+  prevStep: () => void;
 }
 
-const Button = styled.button<ButtonProps>`
-    padding: 0.75rem 1.5rem;
-    background-color: ${(props) => (props.$variant === 'secondary' ? props.theme.ui.button.secondary.background : props.theme.ui.button.primary.background)};
-    color: ${(props) => (props.$variant === 'secondary' ? props.theme.ui.button.secondary.color : props.theme.ui.button.primary.color)};
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
+const ReviewForm: React.FC<ReviewFormProps> = ({ prevStep }) => {
+  const { litterData, puppyData } = useFormContext();
 
-    &:hover {
-        background-color: ${(props) => (props.$variant === 'secondary' ? props.theme.colors.accent : props.theme.colors.primary)};
-    }
+  const handleSubmit = () => {
+    console.log('Final submission:', { litterData, puppyData });
+    alert('Submission successful!');
+  };
 
-    &:disabled {
-        background-color: ${(props) => props.theme.colors.secondaryBackground};
-        cursor: not-allowed;
-    }
-`;
+  return (
+    <ReviewContainer>
+      <h2>Review Your Submission</h2>
+      <Section>
+        <h3>Litter Details</h3>
+        <p>
+          <strong>Breeding ID:</strong> {litterData.breedingId}
+        </p>
+        <p>
+          <strong>Birth Date:</strong>{' '}
+          {litterData.birthDate
+            ? new Date(litterData.birthDate + "T00:00:00").toLocaleDateString()
+            : 'N/A'}
+        </p>
+        <p>
+          <strong>Number of Puppies:</strong> {litterData.numberOfPuppies}
+        </p>
+        <p>
+          <strong>Pedigree URL:</strong> {litterData.pedigreeUrl}
+        </p>
+      </Section>
 
-const ReviewForm: React.FC<ReviewFormProps> = ({ litterData, puppyList, onSubmit, onCancel }) => {
-    return (
-        <ReviewContainer>
-            <Title>Review Litter and Puppies</Title>
-            <InfoContainer>
-                <SubTitle>Litter Information</SubTitle>
-                <p>Breeding ID: {litterData.breedingId}</p>
-                <p>Birth Date: {litterData.birthDate}</p>
-                <p>Number of Puppies: {litterData.numberOfPuppies}</p>
-            </InfoContainer>
-            <InfoContainer>
-                <SubTitle>Puppy Information</SubTitle>
-                {puppyList.map((puppy, index) => (
-                    <PuppyInfo key={index}>
-                        <h3>Puppy {index + 1}</h3>
-                        <p>Name: {puppy.name}</p>
-                        <p>Date of Birth: {puppy.dob}</p>
-                        <p>Gender: {puppy.gender}</p>
-                        <p>Status: {puppy?.statuses ? puppy.statuses.map((status) => (
-                  <StatusBadge key={status} color={getStatusColor(status)}>
-                    {status}
-                  </StatusBadge>
-                )) : "No active status"}</p>
-                        <p>Color: {puppy.color}</p>
-                        <p>Description: {puppy.description}</p>
-                    </PuppyInfo>
-                ))}
-            </InfoContainer>
-            <ButtonContainer>
-                <Button onClick={onSubmit}>Submit</Button>
-                <Button onClick={onCancel} $variant="secondary">Cancel</Button> {/* Add cancel button */}
-            </ButtonContainer>
-        </ReviewContainer>
-    );
+      <Section>
+        <h3>Puppy Details</h3>
+        {puppyData.length > 0 ? (
+          puppyData.map((puppy, index) => (
+            <div key={index}>
+              <p>
+                <strong>Puppy {index + 1}:</strong>
+              </p>
+              <p>Name: {puppy.name || '-'}</p>
+              <p>Gender: {puppy.gender || '-'}</p>
+              <p>Date of Birth: {puppy.dob || '-'}</p>
+              <p>Profile Photo URL: {puppy.profilePhoto || '-'}</p>
+            </div>
+          ))
+        ) : (
+          <p>No puppy data available.</p>
+        )}
+      </Section>
+
+      <NavigationButtons>
+        <Button type="button" onClick={prevStep}>
+          Previous
+        </Button>
+        <Button type="button" onClick={handleSubmit}>
+          Submit All
+        </Button>
+      </NavigationButtons>
+    </ReviewContainer>
+  );
 };
 
 export default ReviewForm;

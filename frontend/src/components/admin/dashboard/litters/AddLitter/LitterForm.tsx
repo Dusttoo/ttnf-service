@@ -1,161 +1,126 @@
-import React, { useState, useEffect, useCallback, CSSProperties } from 'react';
-import { LitterCreate, LitterUpdate } from '../../../../../api/types/breeding';
+// src/components/admin/dashboard/litters/AddLitter/LitterForm.tsx
+import React, { useEffect } from 'react';
+import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import styled from 'styled-components';
-import Button from '../../../../common/form/Button';
-import FieldFeedback from '../../../../common/form/FieldFeedback';
-import NumberInput from '../../../../common/form/NumberInput';
-import DateInput from '../../../../common/form/DateInput';
+import { LitterCreate } from '../../../../../api/types/breeding';
+import { useFormContext } from '../../../../../context/FormContext';
+import BreedingSelection from '../../../../common/form/BreedingSelection';
+import { Button, NavigationButtons } from './MultiStepForm';
 
-interface LitterFormProps {
-  initialValues: LitterCreate | LitterUpdate;
-  onSubmit: (
-    data: LitterCreate | LitterUpdate,
-    pedigreeUrl: string
-  ) => Promise<boolean | undefined>;
-  onCancel: () => void;
-  setLitterData?: React.Dispatch<
-    React.SetStateAction<LitterCreate | LitterUpdate>
-  >;
-}
-
-const Form = styled.form`
+export const Form = styled.form`
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  background-color: ${(props) =>
-    props.theme.colors.secondaryBackground}; // Dark background for form
-  padding: 1.5rem;
-  border-radius: 8px;
+  background-color: transparent;
 `;
 
-const ButtonContainer = styled.div`
-  display: flex;
-  justify-content: space-between;
+export const Label = styled.label`
+  margin-top: 1rem;
+  color: ${({ theme }) => theme.colors.text};
+  font-family: ${({ theme }) => theme.fonts.primary};
 `;
 
-const Input = styled.input`
-  padding: 0.75rem;
-  border: 1px solid ${(props) => props.theme.colors.primary};
-  background-color: ${(props) => props.theme.colors.secondaryBackground};
-  color: ${(props) => props.theme.colors.white};
+export const Input = styled.input`
+  background-color: ${({ theme }) => theme.ui.input.background};
+  border: 1px solid ${({ theme }) => theme.ui.input.border};
+  color: ${({ theme }) => theme.ui.input.color};
+  padding: 0.5rem;
+  margin-top: 0.5rem;
   border-radius: 4px;
-  font-size: 1rem;
-  width: 100%;
-
-  &::placeholder {
-    color: ${(props) => props.theme.colors.textLight};
-    opacity: 0.8; // Slight opacity to blend it in without being too faint
-  }
+  font-family: ${({ theme }) => theme.fonts.primary};
 `;
 
-const LitterForm: React.FC<LitterFormProps> = ({
-  initialValues,
-  onSubmit,
-  onCancel,
-  setLitterData,
-}) => {
-  const [formState, setFormState] = useState<LitterCreate | LitterUpdate>({
-    ...initialValues,
-    description:
-      typeof initialValues.description === 'string'
-        ? { content: initialValues.description }
-        : initialValues.description || { content: '' },
+export const ErrorText = styled.p`
+  color: ${({ theme }) => theme.colors.error};
+  font-size: 0.8rem;
+`;
+
+interface LitterFormProps {
+  nextStep: () => void;
+}
+
+const LitterForm: React.FC<LitterFormProps> = ({ nextStep }) => {
+  // Access context for shared state and navigation functions.
+  const { litterData, updateLitterData, setCurrentStep } = useFormContext();
+
+  // Initialize the form with context's litter data.
+  const {
+    register,
+    handleSubmit,
+    control,
+    reset,
+    formState: { errors },
+  } = useForm<LitterCreate>({
+    defaultValues: litterData,
   });
-  const [errors, setErrors] = useState<{
-    birthDate?: string;
-    numberOfPuppies?: string;
-  }>({});
-  const [pedigreeUrl, setPedigreeUrl] = useState<string>(
-    initialValues.pedigreeUrl || ''
-  );
 
+  // Reset form when context changes.
   useEffect(() => {
-    if (setLitterData) {
-      setLitterData(formState);
-    }
-  }, [formState, setLitterData]);
+    reset(litterData);
+  }, [litterData, reset]);
 
-  const handleDateChange = (date: Date | null) => {
-    setFormState((prevState) => ({
-      ...prevState,
-      birthDate: date ? date.toISOString().split('T')[0] : '',
-    }));
-  };
-
-  const handleNumberChange = (value: number) => {
-    setFormState((prevState) => ({ ...prevState, numberOfPuppies: value }));
-  };
-
-  const handlePedigreeUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPedigreeUrl(e.target.value);
-  };
-
-  const validate = () => {
-    const newErrors: { birthDate?: string; numberOfPuppies?: string } = {};
-    if (!formState.birthDate) {
-      newErrors.birthDate = 'Birth Date is required.';
-    }
-    if (formState.numberOfPuppies && formState.numberOfPuppies <= 0) {
-      newErrors.numberOfPuppies =
-        'Number of Puppies must be greater than zero.';
-    }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (validate() && !setLitterData) {
-      await onSubmit(formState, pedigreeUrl);
-    }
+  // onSubmit updates context and calls the provided nextStep function.
+  const onFormSubmit: SubmitHandler<LitterCreate> = (data) => {
+    console.log('Submitted Litter Data:', data);
+    updateLitterData(data);
+    nextStep();
   };
 
   return (
-    <Form onSubmit={handleSubmit}>
-      <div>
-        <DateInput
-          label="Birth Date"
-          selectedDate={
-            formState.birthDate ? new Date(formState.birthDate) : null
-          }
-          onChange={handleDateChange}
-        />
-        {errors.birthDate && <FieldFeedback message={errors.birthDate} />}
-      </div>
-      <div>
+    <Form onSubmit={handleSubmit(onFormSubmit)}>
+      <Label>
+        Breeding ID:
+        {litterData.breedingId ? (
+          <Input type="number" {...register('breedingId')} disabled />
+        ) : (
+          <Controller
+            control={control}
+            name="breedingId"
+            render={({ field }) => (
+              <BreedingSelection
+                name={field.name}
+                value={field.value}
+                onChange={field.onChange}
+                filters={{}} // Add filters if needed.
+                label="Breeding"
+              />
+            )}
+          />
+        )}
+        {errors.breedingId && <ErrorText>{errors.breedingId.message}</ErrorText>}
+      </Label>
+
+      <Label>
+        Birth Date:
         <Input
-          type="text"
-          name="pedigreeUrl"
-          value={pedigreeUrl}
-          onChange={handlePedigreeUrlChange}
-          placeholder="Pedigree URL"
+          type="date"
+          {...register('birthDate', { required: 'Birth date is required' })}
         />
-      </div>
-      <div>
-        <NumberInput
-          value={formState.numberOfPuppies ? formState.numberOfPuppies : 0}
-          onChange={handleNumberChange}
-          label="Number of Puppies"
+        {errors.birthDate && <ErrorText>{errors.birthDate.message}</ErrorText>}
+      </Label>
+
+      <Label>
+        Number of Puppies:
+        <Input
+          type="number"
+          {...register('numberOfPuppies', {
+            required: 'Number of puppies is required',
+            min: { value: 1, message: 'At least one puppy is required' },
+            valueAsNumber: true,
+          })}
         />
         {errors.numberOfPuppies && (
-          <FieldFeedback message={errors.numberOfPuppies} />
+          <ErrorText>{errors.numberOfPuppies.message}</ErrorText>
         )}
-      </div>
-      <div>
-        {/* <EditableDescription
-                    description={formState.description || { content: '' }}
-                /> */}
-      </div>
-      {!setLitterData && (
-        <ButtonContainer>
-          <Button $variant="error" onClick={onCancel}>
-            Cancel
-          </Button>
-          <Button $variant="primary" type="submit">
-            Save Litter
-          </Button>
-        </ButtonContainer>
-      )}
+      </Label>
+
+      <Label>
+        Pedigree URL:
+        <Input type="text" {...register('pedigreeUrl')} />
+      </Label>
+
+      <NavigationButtons>
+        <Button type="submit">Next</Button>
+      </NavigationButtons>
     </Form>
   );
 };

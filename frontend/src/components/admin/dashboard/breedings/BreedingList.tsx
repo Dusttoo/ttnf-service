@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
-import styled from 'styled-components';
-import BreedingForm from './BreedingForm';
-import MultiStepForm from '../litters/AddLitter/MultiStepForm';
-import Pagination from '../../../common/Pagination';
-import { Breeding, LitterCreate } from '../../../../api/types/breeding';
-import { useBreedings, useDeleteBreeding } from '../../../../hooks/useBreeding';
 import { useQueryClient } from 'react-query';
-import { EditButton, AddButton, DeleteButton } from '../../../common/Buttons';
-import LoadingSpinner from '../../../common/LoadingSpinner';
-import ErrorComponent from '../../../common/Error';
-import NoResults from '../../../common/NoResults';
+import styled from 'styled-components';
+import { Breeding } from '../../../../api/types/breeding';
 import { useModal } from '../../../../context/ModalContext';
+import { useBreedings, useDeleteBreeding } from '../../../../hooks/useBreeding';
+import { DeleteButton, EditButton } from '../../../common/Buttons';
+import ErrorComponent from '../../../common/Error';
+import LoadingSpinner from '../../../common/LoadingSpinner';
 import GlobalModal from '../../../common/Modal';
+import NoResults from '../../../common/NoResults';
+import Pagination from '../../../common/Pagination';
+import MultiStepForm from '../litters/AddLitter/MultiStepForm';
+import BreedingForm from './BreedingForm';
 
 const ListWrapper = styled.div`
   display: flex;
@@ -155,12 +155,7 @@ const AdminBreedingList: React.FC = () => {
 
     const handleCreateLitter = (breeding: Breeding) => {
         openModal(
-            <MultiStepForm
-                onClose={closeModal}
-                breedingId={breeding.id}
-                parentMaleId={breeding.maleDogId}
-                parentFemaleId={breeding.femaleDogId}
-            />,
+            <MultiStepForm />
         );
     };
 

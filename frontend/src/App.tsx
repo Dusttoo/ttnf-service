@@ -1,13 +1,13 @@
-import React, { useEffect, Suspense } from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import PublicRoutes from './routes/PublicRoutes';
-import PrivateRoutes from './routes/PrivateRoutes';
-import { ThemeProvider } from 'styled-components';
-import { theme } from './theme/theme';
-import LoadingSpinner from './components/common/LoadingSpinner';
+import React, { Suspense, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { validateSession } from './store/authSlice';
+import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+import { ThemeProvider } from 'styled-components';
+import LoadingSpinner from './components/common/LoadingSpinner';
+import PrivateRoutes from './routes/PrivateRoutes';
+import PublicRoutes from './routes/PublicRoutes';
 import { AppDispatch } from './store';
+import { validateSession } from './store/authSlice';
+import { theme } from './theme/theme';
 
 const App: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -26,7 +26,7 @@ const App: React.FC = () => {
                     </Routes>
                 </Router>
             </ThemeProvider>
-            </Suspense>
+        </Suspense>
     );
 };
 
