@@ -1,8 +1,11 @@
-// src/components/admin/dashboard/litters/AddLitter/ReviewForm.tsx
 import React from 'react';
 import styled from 'styled-components';
 import { useFormContext } from '../../../../../context/FormContext';
-
+import { useModal } from '../../../../../context/ModalContext';
+import { useAddPuppiesToLitter, useCreateLitter } from '../../../../../hooks/useLitter';
+import ErrorComponent from '../../../../common/Error';
+import SuccessMessage from '../../../../common/SuccessMessage';
+import Button from '../../../../common/form/Button';
 const ReviewContainer = styled.div`
   background-color: #fff;
   padding: 1rem;
@@ -19,31 +22,31 @@ const NavigationButtons = styled.div`
   margin-top: 1rem;
 `;
 
-const Button = styled.button`
-  background-color: ${({ theme }) => theme.ui.button.primary.background};
-  color: ${({ theme }) => theme.ui.button.primary.color};
-  padding: 0.5rem 1rem;
-  cursor: pointer;
-  border: none;
-  border-radius: 4px;
-  font-family: ${({ theme }) => theme.fonts.primary};
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-`;
-
 interface ReviewFormProps {
   prevStep: () => void;
 }
 
 const ReviewForm: React.FC<ReviewFormProps> = ({ prevStep }) => {
   const { litterData, puppyData } = useFormContext();
+  const { closeModal, openModal } = useModal();
 
-  const handleSubmit = () => {
-    console.log('Final submission:', { litterData, puppyData });
-    alert('Submission successful!');
+  const createLitterMutation = useCreateLitter();
+  const addPuppiesMutation = useAddPuppiesToLitter();
+
+  const handleSubmit = async () => {
+    try {
+      const createdLitter = await createLitterMutation.mutateAsync(litterData);
+      await addPuppiesMutation.mutateAsync({
+        litterId: createdLitter.id,
+        puppies: puppyData,
+      });
+      closeModal();
+      openModal(<SuccessMessage message='Litter submitted successfully' />);
+    } catch (error) {
+      console.error('Error during submission:', error);
+      closeModal();
+      openModal(<ErrorComponent message="Failed to submit litter. Please try again." />);
+    }
   };
 
   return (
@@ -51,9 +54,6 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ prevStep }) => {
       <h2>Review Your Submission</h2>
       <Section>
         <h3>Litter Details</h3>
-        <p>
-          <strong>Breeding ID:</strong> {litterData.breedingId}
-        </p>
         <p>
           <strong>Birth Date:</strong>{' '}
           {litterData.birthDate

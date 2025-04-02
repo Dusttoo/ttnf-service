@@ -2,28 +2,27 @@ import json
 import logging
 from typing import Dict, List, Optional
 
-from fastapi import HTTPException
-from sqlalchemy import func
-from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
-from sqlalchemy.orm import selectinload
-
+from app.core.config import settings
 from app.core.redis import get_redis_client
 from app.models import (
     Breeding,
     Dog,
     GenderEnum,
     Litter,
+    Photo,
     Production,
     StatusEnum,
     litter_puppies,
-    Photo,
 )
 from app.schemas import Litter as LitterSchema
 from app.schemas import LitterCreate, LitterUpdate, PuppyCreate
 from app.utils import DateTimeEncoder, convert_to_litter_schema
-from app.core.config import settings
+from fastapi import HTTPException
+from sqlalchemy import func
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+from sqlalchemy.orm import selectinload
 
 logger = logging.getLogger(__name__)
 
@@ -410,11 +409,72 @@ class LitterService:
         self, db: AsyncSession, breeding_id: int, litter: LitterCreate
     ) -> Litter:
         try:
-            db_litter = Litter(**litter.dict(), breeding_id=breeding_id)
+            db_litter = Litter(
+                breeding_id=breeding_id,
+                birth_date=litter.birth_date,
+                number_of_puppies=litter.number_of_puppies,
+                litter_url=litter.pedigree_url,
+                description=litter.description.dict() if litter.description else None,
+            )
             db.add(db_litter)
             await db.commit()
             await db.refresh(db_litter)
-            return db_litter
+
+            # Generate default puppy objects based on the number_of_puppies
+            default_puppies = []
+            for i in range(litter.number_of_puppies or 0):
+                new_puppy = Dog(
+                    name=f"Default Puppy {i+1}",
+                    dob=litter.birth_date,  # using the litter's birth_date as a placeholder
+                    gender=GenderEnum.male,  # default placeholder; update later as needed
+                    status=StatusEnum.available,  # default status
+                )
+                db.add(new_puppy)
+                await db.commit()
+                await db.refresh(new_puppy)
+                default_puppies.append(new_puppy)
+                # Associate the puppy with the litter
+                await db.execute(
+                    litter_puppies.insert().values(
+                        litter_id=db_litter.id, dog_id=new_puppy.id
+                    )
+                )
+            await db.commit()
+            query = (
+                select(Litter)
+                .options(
+                    # Eager load the breeding relationship and its nested relationships
+                    selectinload(Litter.breeding)
+                    .selectinload(Breeding.female_dog)
+                    .options(
+                        selectinload(Dog.health_infos),
+                        selectinload(Dog.photos),
+                        selectinload(Dog.productions),
+                        selectinload(Dog.children),
+                        selectinload(Dog.statuses),
+                    ),
+                    selectinload(Litter.breeding)
+                    .selectinload(Breeding.male_dog)
+                    .options(
+                        selectinload(Dog.health_infos),
+                        selectinload(Dog.photos),
+                        selectinload(Dog.productions),
+                        selectinload(Dog.children),
+                        selectinload(Dog.statuses),
+                    ),
+                    # Eager load the puppies relationship and its nested relationships
+                    selectinload(Litter.puppies).selectinload(Dog.statuses),
+                    selectinload(Litter.puppies).selectinload(Dog.health_infos),
+                    selectinload(Litter.puppies).selectinload(Dog.photos),
+                    selectinload(Litter.puppies).selectinload(Dog.children),
+                    selectinload(Litter.puppies).selectinload(Dog.productions),
+                )
+                .where(Litter.id == db_litter.id)
+            )
+            result = await db.execute(query)
+            litter_with_relations = result.scalar_one()
+
+            return litter_with_relations
         except SQLAlchemyError as e:
             logger.error(f"Error in populate_litter: {e}", exc_info=True)
             raise HTTPException(status_code=500, detail=f"Internal Server Error: {e}")
@@ -436,13 +496,13 @@ class LitterService:
                     dob=puppy.dob,
                     gender=GenderEnum(puppy.gender),
                     color=puppy.color,
-                    status=StatusEnum(puppy.status),
+                    status=StatusEnum.available,
                     profile_photo=puppy.profile_photo,
-                    is_production=puppy.is_production,
+                    is_production=True,
                     parent_male_id=puppy.parent_male_id,
                     parent_female_id=puppy.parent_female_id,
-                    kennel_own=puppy.kennel_own,
-                    is_retired=puppy.is_retired,
+                    kennel_own=False,
+                    is_retired=False,
                 )
                 db.add(new_puppy)
                 await db.commit()

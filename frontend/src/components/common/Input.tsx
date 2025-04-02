@@ -2,23 +2,24 @@ import React from 'react';
 import styled from 'styled-components';
 
 interface InputProps {
-    type: string;
-    value: string;
-    name?: string;
-    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    placeholder?: string;
-    label?: string;
-    width?: string;
-    id?: string;
-    required?: boolean;
-    error?: string;
-    style?: React.CSSProperties;
+  type: string;
+  value: string;
+  name?: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  placeholder?: string;
+  label?: string;
+  width?: string;
+  id?: string;
+  required?: boolean;
+  error?: string;
+  style?: React.CSSProperties;
 }
 
 const StyledInputWrapper = styled.div`
   display: flex;
   flex-direction: column;
   margin-bottom: 1rem;
+  box-sizing: border-box;
 `;
 
 const StyledLabel = styled.label`
@@ -50,41 +51,41 @@ const ErrorMessage = styled.span`
 `;
 
 const Input: React.FC<InputProps> = ({
-                                         type,
-                                         value,
-                                         name,
-                                         onChange,
-                                         placeholder,
-                                         label,
-                                         width,
-                                         id,
-                                         required = false,
-                                         error,
-                                         style
-                                     }) => {
-    return (
-        <StyledInputWrapper>
-            {label && (
-                <StyledLabel htmlFor={id}>
-                    {label}
-                    {required && <RequiredAsterisk>*</RequiredAsterisk>}
-                </StyledLabel>
-            )}
-            <StyledInput
-                id={id}
-                type={type}
-                value={value}
-                name={name}
-                onChange={onChange}
-                placeholder={placeholder}
-                width={width}
-                required={required}
-                error={error}
-                style={style}
-            />
-            {error && <ErrorMessage>{error}</ErrorMessage>} {/* Displaying the error message */}
-        </StyledInputWrapper>
-    );
+  type,
+  value,
+  name,
+  onChange,
+  placeholder,
+  label,
+  width,
+  id,
+  required = false,
+  error,
+  style
+}) => {
+  return (
+    <StyledInputWrapper>
+      {label && (
+        <StyledLabel htmlFor={id}>
+          {label}
+          {required && <RequiredAsterisk>*</RequiredAsterisk>}
+        </StyledLabel>
+      )}
+      <StyledInput
+        id={id}
+        type={type}
+        value={value}
+        name={name}
+        onChange={onChange}
+        placeholder={placeholder}
+        width={width}
+        required={required}
+        error={error}
+        style={style}
+      />
+      {error && <ErrorMessage>{error}</ErrorMessage>} {/* Displaying the error message */}
+    </StyledInputWrapper>
+  );
 };
 
 export default Input;

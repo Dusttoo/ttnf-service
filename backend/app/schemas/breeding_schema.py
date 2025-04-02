@@ -1,9 +1,8 @@
 from datetime import date
 from typing import Dict, List, Optional, Union
 
-from pydantic import BaseModel
-
 from app.schemas import Dog
+from pydantic import BaseModel
 
 
 class BreedingBase(BaseModel):
@@ -70,7 +69,7 @@ class LitterUpdate(BaseModel):
 
 class Litter(LitterBase):
     id: int
-    breeding: Breeding
+    # breeding: Breeding
     puppies: List[Dog] = []
 
     class Config:

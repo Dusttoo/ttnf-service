@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { FormProvider } from '../../../../../context/FormContext';
+import ProgressIndicator from '../../../../common/form/ProgressIndicator';
 import AllPuppiesForm from './AllPuppiesForm';
 import LitterForm from './LitterForm';
 import ReviewForm from './ReviewForm';
@@ -37,10 +38,8 @@ export const Button = styled.button`
 `;
 
 const MultiStepForm: React.FC = () => {
-  // Local state only to track which step is active.
   const [currentStep, setCurrentStep] = useState<number>(0);
 
-  // A helper to render the active step.
   const renderStep = () => {
     switch (currentStep) {
       case 0:
@@ -70,6 +69,7 @@ const MultiStepForm: React.FC = () => {
   return (
     <FormProvider>
       <FormContainer>
+        <ProgressIndicator steps={['Litter', 'Puppies', 'Review']} currentStep={currentStep} />
         {renderStep()}
       </FormContainer>
     </FormProvider>

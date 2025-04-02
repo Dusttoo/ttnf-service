@@ -1,10 +1,10 @@
-// src/components/admin/dashboard/litters/AddLitter/AllPuppiesForm.tsx
 import React, { useEffect } from 'react';
 import { SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
 import styled from 'styled-components';
 import { GenderEnum } from '../../../../../api/types/core';
 import { PuppyCreate } from '../../../../../api/types/dog';
 import { useFormContext } from '../../../../../context/FormContext';
+import ImageUpload from '../../../../common/ImageUpload';
 
 export interface FormValues {
     puppies: PuppyCreate[];
@@ -67,12 +67,23 @@ const Button = styled.button`
   }
 `;
 
+const Dropdown = styled.select`
+  width: 100%;
+  padding: 0.5rem;
+  background-color: ${(props) => props.theme.colors.neutralBackground};
+  border: 1px solid ${(props) => props.theme.colors.primary};
+  border-radius: 4px;
+  color: ${(props) => props.theme.colors.white};
+  margin-bottom: 1rem;
+`;
+
+
 const AllPuppiesForm: React.FC<AllPuppiesFormProps> = ({ nextStep, prevStep }) => {
     const { litterData, puppyData, setPuppyData } = useFormContext();
     const numberOfPuppies = litterData.numberOfPuppies;
 
     // Initialize default values with the litter's birthDate pre-populated for each puppy.
-    const { register, control, handleSubmit, reset } = useForm<FormValues>({
+    const { register, control, handleSubmit, reset, setValue } = useForm<FormValues>({
         defaultValues: {
             puppies: Array.from({ length: numberOfPuppies }, () => ({
                 name: '',
@@ -82,6 +93,7 @@ const AllPuppiesForm: React.FC<AllPuppiesFormProps> = ({ nextStep, prevStep }) =
             })),
         },
     });
+
 
     // Manage the array of puppy fields.
     const { fields } = useFieldArray({
@@ -112,27 +124,27 @@ const AllPuppiesForm: React.FC<AllPuppiesFormProps> = ({ nextStep, prevStep }) =
         nextStep();
     };
 
+    console.log(puppyData)
+
     return (
         <FormContainer onSubmit={handleSubmit(onSubmit)}>
             {fields.map((item, index) => (
                 <FieldGroup key={item.id}>
                     <h3>Puppy {index + 1} Details</h3>
-                    <Label htmlFor={`puppies.${index}.name`}>Name:</Label>
                     <Input
                         id={`puppies.${index}.name`}
                         {...register(`puppies.${index}.name` as const, { required: 'Name is required' })}
                         placeholder="Enter puppy name"
                     />
 
-                    <Label htmlFor={`puppies.${index}.gender`}>Gender:</Label>
-                    <select
+                    <Dropdown
                         id={`puppies.${index}.gender`}
                         {...register(`puppies.${index}.gender` as const, { required: 'Gender is required' })}
                     >
                         <option value="">Select Gender</option>
                         <option value="Male">Male</option>
                         <option value="Female">Female</option>
-                    </select>
+                    </Dropdown>
 
                     <Label htmlFor={`puppies.${index}.dob`}>Date of Birth:</Label>
                     <Input
@@ -141,11 +153,14 @@ const AllPuppiesForm: React.FC<AllPuppiesFormProps> = ({ nextStep, prevStep }) =
                         {...register(`puppies.${index}.dob` as const, { required: 'Date of birth is required' })}
                     />
 
-                    <Label htmlFor={`puppies.${index}.profilePhoto`}>Profile Photo URL:</Label>
-                    <Input
-                        id={`puppies.${index}.profilePhoto`}
-                        {...register(`puppies.${index}.profilePhoto` as const)}
-                        placeholder="Enter profile photo URL"
+                    <ImageUpload
+                        id="profilePhoto-upload"
+                        maxImages={1}
+                        singleImageMode={true}
+                        onImagesChange={(urls: string[]) => {
+                            setValue(`puppies.${index}.profilePhoto`, urls[0] || '');
+                        }}
+                        initialImages={[]}
                     />
                 </FieldGroup>
             ))}

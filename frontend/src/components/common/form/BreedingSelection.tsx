@@ -1,4 +1,3 @@
-// src/components/common/form/BreedingSelection.tsx
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { Breeding } from '../../../api/types/breeding';
@@ -11,7 +10,7 @@ interface BreedingSelectionProps {
     name: string;
     value: string | number | undefined;
     onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-    filters?: FilterProps; // optional filters if needed
+    filters?: FilterProps;
     label: string;
     disabled?: boolean;
 }
@@ -19,8 +18,8 @@ interface BreedingSelectionProps {
 const DropdownContainer = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: center;
   width: 100%;
+  box-sizing: border-box;
 `;
 
 const ImageContainer = styled.div`
@@ -38,17 +37,17 @@ const BreedingImage = styled.img`
 `;
 
 const LabelStyled = styled.label`
-  font-size: 0.875rem;
-  color: ${({ theme }) => theme.colors.white};
   margin-bottom: 0.5rem;
+  font-weight: bold;
+  color: ${(props) => props.theme.colors.text};
 `;
 
 const Dropdown = styled.select`
   width: 100%;
-  padding: 0.5rem;
+  padding: 0.75rem;
   border: 1px solid ${({ theme }) => theme.colors.primary};
   border-radius: 4px;
-  background-color: ${({ theme }) => theme.colors.secondaryBackground};
+  background-color: ${(props) => props.theme.colors.neutralBackground};
   color: ${({ theme }) => theme.colors.white};
 
   &:focus {

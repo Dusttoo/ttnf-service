@@ -45,7 +45,7 @@ export const FormProvider: React.FC<FormProviderProps> = ({ children }) => {
     const [currentStep, setCurrentStep] = useState(0);
     const [litterData, setLitterData] = useState<LitterData>({
         breedingId: 0,
-        birthDate: '',
+        birthDate: new Date().toISOString().split('T')[0],
         numberOfPuppies: 0,
         pedigreeUrl: '',
     });
@@ -63,7 +63,7 @@ export const FormProvider: React.FC<FormProviderProps> = ({ children }) => {
                         name: '',
                         gender: GenderEnum.Male,
                         dob: '',
-                        profilePhoto: '',
+                        profilePhoto: 'https://via.placeholder.com/150',
                     }))
                 );
             }

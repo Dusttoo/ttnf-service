@@ -1,9 +1,6 @@
 import logging
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.core.auth import get_current_user
 from app.core.database import get_database_session
 from app.core.settings import update_global_updated_at
@@ -18,6 +15,8 @@ from app.schemas import (
 )
 from app.services import LitterService
 from app.utils import convert_to_litter_schema
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = logging.getLogger(__name__)
 
@@ -39,13 +38,12 @@ async def get_all_litters(
 
 @litter_router.post("/{breeding_id}/populate", response_model=Litter)
 async def populate_litter(
-    breeding_id: int,
     litter: LitterCreate,
     db: AsyncSession = Depends(get_database_session),
     update_timestamp: None = Depends(update_global_updated_at),
 ):
     try:
-        return await litter_svc.populate_litter(db, breeding_id, litter)
+        return await litter_svc.populate_litter(db, litter.breeding_id, litter)
     except Exception as e:
         logger.error(f"Error in populate_litter: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Internal Server Error")
