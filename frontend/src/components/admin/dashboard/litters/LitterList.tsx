@@ -5,7 +5,7 @@ import { Litter, LitterCreate, LitterUpdate } from '../../../../api/types/breedi
 import { useModal } from '../../../../context/ModalContext';
 import { useCreateLitter, useDeleteLitter, useLitters, useUpdateLitter } from '../../../../hooks/useLitter';
 import { sortByKey } from '../../../../utils/sort';
-import { DeleteButton, EditButton, ViewButton } from '../../../common/Buttons';
+import { EditButton } from '../../../common/Buttons';
 import ErrorComponent from '../../../common/Error';
 import LoadingSpinner from '../../../common/LoadingSpinner';
 import GlobalModal from '../../../common/Modal';
@@ -196,9 +196,9 @@ const AdminLitterList: React.FC = () => {
                                         <p>Number of Puppies: {litter.numberOfPuppies}</p>
                                     </LitterInfo>
                                     <ButtonContainer>
-                                        <EditButton onClick={() => handleEdit(litter.id)} />
-                                        <ViewButton onClick={() => handleViewPuppies(litter.id)} />
-                                        <DeleteButton onClick={() => handleDelete(litter.id)} />
+                                        {/* <EditButton onClick={() => handleEdit(litter.id)} /> */}
+                                        <EditButton onClick={() => handleViewPuppies(litter.id)} />
+                                        {/* <DeleteButton onClick={() => handleDelete(litter.id)} /> */}
                                     </ButtonContainer>
                                 </LitterCard>
                             ))}

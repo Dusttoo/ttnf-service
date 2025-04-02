@@ -173,8 +173,8 @@ const LitterPuppiesPage: React.FC = () => {
                         )}
                     </ParentContainer>
                     <Detail><strong>Puppies born on </strong> {litter?.birthDate ? new Date(litter.birthDate + "T00:00:00").toLocaleDateString() : 'N/A'}</Detail>
-                    {breeding?.description && (
-                        <Detail>{breeding.description}</Detail>
+                    {litter?.description && (
+                        <Detail>{litter.description.content}</Detail>
                     )}
                 </Section>
                 <Section>

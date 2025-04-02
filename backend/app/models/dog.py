@@ -1,8 +1,8 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Date, Table, Boolean
-from sqlalchemy.orm import relationship, backref
-from app.core.database import Base
 import enum
-from sqlalchemy import Enum
+
+from app.core.database import Base
+from sqlalchemy import Boolean, Column, Date, Enum, ForeignKey, Integer, String, Table
+from sqlalchemy.orm import backref, relationship
 
 
 class GenderEnum(enum.Enum):
@@ -104,6 +104,7 @@ class Dog(Base):
         foreign_keys=[parent_male_id, parent_female_id],
         primaryjoin="or_(Dog.id==Dog.parent_male_id, Dog.id==Dog.parent_female_id)",
         backref=backref("parents", remote_side=[id]),
+        viewonly=True,
     )
     productions = relationship(
         "Production", secondary=dog_production_link, back_populates="dogs"

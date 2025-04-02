@@ -8,8 +8,10 @@ import { useDeleteDog, useUpdateDog } from '../../../../hooks/useDog';
 import { useAddPuppiesToLitter, useDeleteLitter, useLitter, useUpdateLitter } from '../../../../hooks/useLitter';
 import { DeleteButton, EditButton } from '../../../common/Buttons';
 import Button from '../../../common/form/Button';
+import Input from '../../../common/Input';
 import LoadingSpinner from '../../../common/LoadingSpinner';
 import GlobalModal from '../../../common/Modal';
+import SuccessMessage from '../../../common/SuccessMessage';
 import BreedingForm from '../breedings/BreedingForm';
 import DogForm from '../dogs/DogForm';
 
@@ -113,6 +115,8 @@ const LitterPuppyManagement: React.FC = () => {
   const deleteDogMutation = useDeleteDog();
   const updateDogMutation = useUpdateDog();
   const { openModal, closeModal } = useModal();
+  const [descContent, setDescContent] = React.useState(litter?.description?.content || "");
+  console.log(litter)
 
   const handleAddNewPuppy = () => {
     openModal(
@@ -123,6 +127,8 @@ const LitterPuppyManagement: React.FC = () => {
         onDogCreated={(puppy: DogCreate) => {
           addPuppiesToLitterMutation.mutate({ litterId: Number(litterId), puppies: [puppy] });
           closeModal();
+          openModal(<SuccessMessage message='Puppy added successfully' />);
+
         }}
       />
     );
@@ -138,6 +144,8 @@ const LitterPuppyManagement: React.FC = () => {
         onDogUpdated={(puppyData: DogUpdate) => {
           updateDogMutation.mutate({ dogId: puppyId, dogData: puppyData });
           closeModal();
+          openModal(<SuccessMessage message='Puppy updated successfully' />);
+
         }}
       />
     );
@@ -199,7 +207,20 @@ const LitterPuppyManagement: React.FC = () => {
       </Section>
       <Section>
         <h2>Litter Description</h2>
-        {/* Add a description editing component if available */}
+        <Input
+          type="text"
+          name="description"
+          placeholder="Description"
+          value={descContent}
+          onChange={(e) => setDescContent(e.target.value)}
+        />
+        <Button
+          onClick={() =>
+            handleDescriptionSave({ content: descContent, style: litter?.description?.style ?? {} })
+          }
+        >
+          Save Description
+        </Button>
       </Section>
       <Section>
         <h2>Puppies</h2>

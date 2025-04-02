@@ -181,6 +181,7 @@ class LitterService:
             await db.commit()
             await db.refresh(new_litter)
 
+            # Re-fetch the litter with its relationships loaded
             result = await db.execute(
                 select(Litter)
                 .filter(Litter.id == new_litter.id)
@@ -204,7 +205,21 @@ class LitterService:
                     ),
                 )
             )
-            new_litter_with_relations = result.scalars().first()
+            new_litter_with_relations = result.scalar_one()
+
+            # Update the cache:
+            redis_client = await get_redis_client()
+            cache_key = f"litter:{new_litter_with_relations.id}:{settings.env}"
+            # Convert the litter to a dictionary (using .dict() since model_dump() is not available)
+            litter_dict = convert_to_litter_schema(new_litter_with_relations).dict()
+            await redis_client.set(
+                cache_key, json.dumps(litter_dict, cls=DateTimeEncoder), ex=3600
+            )
+
+            # Invalidate any cached lists of litters:
+            all_litters_keys = await redis_client.keys("all_litters:*")
+            for key in all_litters_keys:
+                await redis_client.delete(key)
 
             return convert_to_litter_schema(new_litter_with_relations)
         except SQLAlchemyError as e:
@@ -323,18 +338,14 @@ class LitterService:
                 await db.delete(litter)
                 await db.commit()
 
+                # Remove the cache for this specific litter.
                 cache_key = f"litter:{litter_id}:{settings.env}"
                 await redis_client.delete(cache_key)
 
+                # Invalidate any cached lists of litters.
                 all_litters_keys = await redis_client.keys("all_litters:*")
                 for key in all_litters_keys:
-                    cached_data = await redis_client.get(key)
-                    if cached_data:
-                        data = json.loads(cached_data)
-                        if not data["items"]:
-                            await redis_client.delete(key)
-                    else:
-                        await redis_client.delete(key)
+                    await redis_client.delete(key)
 
                 return True
             return False
@@ -509,6 +520,8 @@ class LitterService:
                     parent_female_id=puppy.parent_female_id,
                     kennel_own=False,
                     is_retired=False,
+                    description=puppy.description,
+                    pedigree_link=puppy.pedigree_link,
                 )
                 db.add(new_puppy)
                 await db.commit()

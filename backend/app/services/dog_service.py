@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import json
 import logging
-from typing import Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
 
 from app.core.config import settings
 from app.core.redis import get_redis_client
@@ -26,6 +28,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.sql import func
+
+if TYPE_CHECKING:
+    from app.models.dog import Dog
+    from app.schemas import Dog as DogSchema
+
 
 logger = logging.getLogger(__name__)
 
@@ -134,8 +141,6 @@ class DogService:
         except Exception as e:
             logger.error(f"Error in get_dog_by_id: {e}", exc_info=True)
             raise HTTPException(status_code=500, detail=f"Internal Server Error: {e}")
-
-    from app.models.dog import StatusEnum as ModelStatusEnum
 
     async def create_dog(self, dog_data: DogCreate, db: AsyncSession) -> DogSchema:
         try:

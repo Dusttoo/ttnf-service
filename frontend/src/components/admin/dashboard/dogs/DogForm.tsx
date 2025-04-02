@@ -194,7 +194,7 @@ const DogForm: React.FC<DogFormProps> = ({
     if (formState.studFee !== undefined && formState.studFee < 0) newErrors.studFee = 'Stud fee must be positive.';
     if (formState.saleFee !== undefined && formState.saleFee < 0) newErrors.saleFee = 'Sale fee must be positive.';
     if (formState.pedigreeLink && !/^https?:\/\/.+$/.test(formState.pedigreeLink)) newErrors.pedigreeLink = 'Invalid URL';
-    if (formState.description.length > 2500) newErrors.description = 'Description cannot exceed 2500 characters.';
+    if (formState.description && formState.description.length > 2500) newErrors.description = 'Description cannot exceed 2500 characters.';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -302,7 +302,7 @@ const DogForm: React.FC<DogFormProps> = ({
             setFormState({ ...formState, description: e.target.value })
           }
         />
-        <CharacterCounter currentLength={formState.description.length} maxLength={MAX_DESCRIPTION_LENGTH} />
+        {formState.description && <CharacterCounter currentLength={formState.description.length} maxLength={MAX_DESCRIPTION_LENGTH} />}
         {errors.description && <FieldFeedback message={errors.description} />}
 
 
