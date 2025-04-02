@@ -473,7 +473,13 @@ class LitterService:
             )
             result = await db.execute(query)
             litter_with_relations = result.scalar_one()
+            redis_client = await get_redis_client()
+            litter_cache_key = f"litter:{litter_with_relations.id}:{settings.env}"
+            await redis_client.delete(litter_cache_key)
 
+            all_litters_keys = await redis_client.keys("all_litters:*")
+            for key in all_litters_keys:
+                await redis_client.delete(key)
             return litter_with_relations
         except SQLAlchemyError as e:
             logger.error(f"Error in populate_litter: {e}", exc_info=True)

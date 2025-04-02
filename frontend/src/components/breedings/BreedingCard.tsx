@@ -108,38 +108,38 @@ const Description = styled(Detail)`
 `;
 
 const BreedingCard: React.FC<{ breeding: Breeding }> = ({ breeding }) => {
-    return (
-        <Tile>
-            <ImagesWrapper>
-                <ImageContainer>
-                    {breeding.maleDog ? (
-                        <Link to={`/dogs/${breeding.maleDog.id}`}>
-                            <Image src={breeding.maleDog.profilePhoto} alt={breeding.maleDog.name} />
-                        </Link>
-                    ) : (
-                        <Image src={breeding.manualSireImageUrl || 'path/to/default-image.jpg'}
-                               alt={breeding.manualSireName || 'Unknown Sire'} />
-                    )}
-                </ImageContainer>
-                <ImageContainer>
-                    <Link to={`/dogs/${breeding.femaleDog.id}`}>
-                        <Image src={breeding.femaleDog.profilePhoto} alt={breeding.femaleDog.name} />
-                    </Link>
-                </ImageContainer>
-            </ImagesWrapper>
-            <Info>
-                <Name>
-                    {(breeding.maleDog?.name || breeding.manualSireName || 'Unknown Sire')} &amp; {breeding.femaleDog.name}
-                </Name>
-                <Detail>Breeding Date: {breeding.breedingDate}</Detail>
-                <Detail>Expected Birth Date: {breeding.expectedBirthDate}</Detail>
-                <Description>Description: {breeding.description}</Description>
-                {/* <ViewProfileLink
+  return (
+    <Tile>
+      <ImagesWrapper>
+        <ImageContainer>
+          {breeding.maleDog ? (
+            <Link to={`/dogs/${breeding.maleDog.name}`}>
+              <Image src={breeding.maleDog.profilePhoto} alt={breeding.maleDog.name} />
+            </Link>
+          ) : (
+            <Image src={breeding.manualSireImageUrl || 'path/to/default-image.jpg'}
+              alt={breeding.manualSireName || 'Unknown Sire'} />
+          )}
+        </ImageContainer>
+        <ImageContainer>
+          <Link to={`/dogs/${breeding.femaleDog.name}`}>
+            <Image src={breeding.femaleDog.profilePhoto} alt={breeding.femaleDog.name} />
+          </Link>
+        </ImageContainer>
+      </ImagesWrapper>
+      <Info>
+        <Name>
+          {(breeding.maleDog?.name || breeding.manualSireName || 'Unknown Sire')} &amp; {breeding.femaleDog.name}
+        </Name>
+        <Detail>Breeding Date: {breeding.breedingDate}</Detail>
+        <Detail>Expected Birth Date: {breeding.expectedBirthDate}</Detail>
+        <Description>Description: {breeding.description}</Description>
+        {/* <ViewProfileLink
                     to={`/breedings/${breeding.maleDog ? breeding.maleDog.id : 'manual'}-${breeding.femaleDog.id}`}>View
                     Breeding</ViewProfileLink> */}
-            </Info>
-        </Tile>
-    );
+      </Info>
+    </Tile>
+  );
 };
 
 export default BreedingCard;

@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { useLitters } from '../../hooks/useLitter';
 import { Litter } from '../../api/types/breeding';
 import LitterCard from '../../components/breedings/LitterCard';
 import Container from '../../components/common/Container';
-import Pagination from '../../components/common/Pagination';
-import NoResults from '../../components/common/NoResults';
-import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorComponent from '../../components/common/Error';
+import LoadingSpinner from '../../components/common/LoadingSpinner';
+import NoResults from '../../components/common/NoResults';
+import Pagination from '../../components/common/Pagination';
+import { useLitters } from '../../hooks/useLitter';
+
 
 const LitterList = styled.div`
   display: flex;
@@ -17,18 +18,20 @@ const LitterList = styled.div`
 
 const LitterPage: React.FC = () => {
     const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage, setItemsPerPage] = useState(10);  // Default items per page
+    const [itemsPerPage, setItemsPerPage] = useState(10);
     const { data, isLoading, isError } = useLitters(currentPage, itemsPerPage);
 
     const totalItems = data?.totalCount || 0;
     const litters = data?.items || [];
+    console.log('litters', litters)
+
 
     const handlePageChange = (page: number, newItemsPerPage: number) => {
         setCurrentPage(page);
         setItemsPerPage(newItemsPerPage);
     };
 
-    if (isLoading) return <LoadingSpinner/>;
+    if (isLoading) return <LoadingSpinner />;
     if (isError) return <ErrorComponent message='Something went wrong' />;
 
     return (

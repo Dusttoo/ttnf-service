@@ -71,6 +71,7 @@ class Litter(LitterBase):
     id: int
     # breeding: Breeding
     puppies: List[Dog] = []
+    breeding: Breeding
 
     class Config:
         from_attributes = True

@@ -1,23 +1,23 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
+import React from 'react';
 import { useParams } from 'react-router-dom';
-import { DogCreate, DogUpdate, Description } from '../../../../api/types/dog';
-import { useLitter, useAddPuppiesToLitter, useUpdateLitter, useDeleteLitter } from '../../../../hooks/useLitter';
-import { useDeleteDog, useUpdateDog } from '../../../../hooks/useDog';
-import { useBreedingById } from '../../../../hooks/useBreeding';
-import Button from '../../../common/form/Button';
-import DogForm from '../dogs/DogForm';
-import BreedingForm from '../breedings/BreedingForm';
-import { EditButton, DeleteButton } from '../../../common/Buttons';
-import LoadingSpinner from '../../../common/LoadingSpinner';
+import styled from 'styled-components';
+import { Description, DogCreate, DogUpdate } from '../../../../api/types/dog';
 import { useModal } from '../../../../context/ModalContext';
+import { useBreedingById } from '../../../../hooks/useBreeding';
+import { useDeleteDog, useUpdateDog } from '../../../../hooks/useDog';
+import { useAddPuppiesToLitter, useDeleteLitter, useLitter, useUpdateLitter } from '../../../../hooks/useLitter';
+import { DeleteButton, EditButton } from '../../../common/Buttons';
+import Button from '../../../common/form/Button';
+import LoadingSpinner from '../../../common/LoadingSpinner';
 import GlobalModal from '../../../common/Modal';
+import BreedingForm from '../breedings/BreedingForm';
+import DogForm from '../dogs/DogForm';
 
 const Container = styled.div`
   display: flex;
   flex-direction: column;
   padding: 2rem;
-  background-color: ${(props) => props.theme.colors.white};
+  background-color: ${(props) => props.theme.colors.neutralBackground};
   border-radius: 8px;
   text-align: center;
   overflow: scroll;
@@ -185,7 +185,7 @@ const LitterPuppyManagement: React.FC = () => {
           <ParentInfo>
             <ParentDetails>
               <ParentImage src={breeding?.maleDog?.profilePhoto ?? breeding?.manualSireImageUrl ?? 'path/to/default-image.jpg'}
-                           alt={breeding?.maleDog?.name ?? breeding?.manualSireName ?? 'Unknown Male Dog'} />
+                alt={breeding?.maleDog?.name ?? breeding?.manualSireName ?? 'Unknown Male Dog'} />
               <Title>{breeding?.maleDog?.name ?? breeding?.manualSireName ?? 'Unknown Sire'}</Title>
             </ParentDetails>
           </ParentInfo>

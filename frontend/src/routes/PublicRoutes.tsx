@@ -1,27 +1,26 @@
 import React, { useEffect } from 'react';
-import { Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import DynamicPage from '../components/public/DynamicPage';
-import { fetchPages } from '../store/pageSlice';
-import { AppDispatch, RootState } from '../store';
-import PublicPage from '../pages/PublicPage';
-import Layout from '../theme/Layout';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import Login from '../components/auth/Login';
-import MalesPage from '../pages/dogs/MalesPage';
-import FemalesPage from '../pages/dogs/FemalesPage';
-import BreedingsPage from '../pages/dogs/BreedingPage';
+import LoadingSpinner from '../components/common/LoadingSpinner';
 import DogDetailPage from '../components/dogs/DogDetail';
-import ProductionsPage from '../pages/dogs/ProductionsPage';
-import AvailablePage from '../pages/dogs/AvailablePage';
-import LitterPage from '../pages/dogs/LittersPage';
+import DynamicPage from '../components/public/DynamicPage';
 import NotFoundPage from '../pages/404';
 import AboutPage from '../pages/AboutPage';
 import ContactPage from '../pages/ContactPage';
-import LoadingSpinner from '../components/common/LoadingSpinner';
-import ErrorComponent from '../components/common/Error';
+import AvailablePage from '../pages/dogs/AvailablePage';
+import BreedingsPage from '../pages/dogs/BreedingPage';
+import FemalesPage from '../pages/dogs/FemalesPage';
+import LitterPuppiesPage from '../pages/dogs/LitterPuppiesPage';
+import LitterPage from '../pages/dogs/LittersPage';
+import MalesPage from '../pages/dogs/MalesPage';
+import ProductionsPage from '../pages/dogs/ProductionsPage';
 import HomePage from '../pages/HomePage';
 import ServicesPage from '../pages/services/ServicesPage';
+import { AppDispatch, RootState } from '../store';
 import { selectIsLoading } from '../store/loadingSlice';
+import { fetchPages } from '../store/pageSlice';
+import Layout from '../theme/Layout';
 
 const PublicRoutes = () => {
     const dispatch: AppDispatch = useDispatch();
@@ -69,6 +68,7 @@ const PublicRoutes = () => {
                 <Route path="/dogs/:name" element={<DogDetailPage />} />
                 <Route path="/males/:name" element={<DogDetailPage />} />
                 <Route path="/females/:name" element={<DogDetailPage />} />
+                <Route path="/litters/:litterId/puppies" element={<LitterPuppiesPage />} />
 
                 {pages.map((page) => {
                     const Component = pageComponentMap[page.slug] || DynamicPage;
